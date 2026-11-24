@@ -119,6 +119,7 @@ res_cfg/             战斗/任务/装备/商城等配置表（XML）
 mirror/assets/       Equip.xml / Item.xml / Mall.xml 等
 work/                一次性探针脚本（直连 socket 验协议，不依赖客户端）
 docs/                全部逆向与修复记录（docs/INDEX.md 是索引；新增请追加，不要新建「XX修复_日期」这类文件）
+legacy/              早期原型 local_server.py / local_server2.py（已被 local_server3.py 取代，仅供对照）
 AGENTS.md            本仓库的约定：文档怎么放、什么不许提交（动手前先读）
 ```
 
