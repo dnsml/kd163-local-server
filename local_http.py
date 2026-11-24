@@ -31,7 +31,14 @@ MIRROR = os.path.join(HERE, "mirror")
 # APK 内置包(8c6ee66e)比服务端更新包(5efc42ed)旧，用它会在进主城时崩。
 RESPKG = os.path.join(HERE, "res_update", "mhsj_res.zip")
 RESPKG_MD5 = "5efc42ed36978e860f135a96bd93c85a"   # 真服当前版本，与抓包数据配套
-META_XML = os.path.join(HERE, "srvres", "meta.xml")
+# meta.xml 两份内容一致（md5 2369522e…），仓库里带的是 mirror/meta.xml；
+# srvres/ 是解包产物、不入库。所以这里按顺序找，clone 下来也能起。
+META_XML_CANDIDATES = [
+    os.path.join(HERE, "srvres", "meta.xml"),
+    os.path.join(MIRROR, "meta.xml"),
+]
+META_XML = next((p for p in META_XML_CANDIDATES if os.path.exists(p)),
+                META_XML_CANDIDATES[0])
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 80
 HOST_IP = sys.argv[2] if len(sys.argv) > 2 else "192.168.0.111"
@@ -195,7 +202,14 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     if not os.path.exists(RESPKG):
-        log("警告：没有 %s，/assets.txt 会退回镜像版本" % RESPKG)
+        log("警告：没有 %s" % RESPKG)
+        log("      → 客户端 /assets.txt 会退回镜像版本，/mhsj_res.zip 会 404。")
+        log("      → 表现：能登录，但进主城/切图时 native abort 或一直卡加载。")
+        log("      → 需要与抓包同版本的资源包（md5 %s），见 README「必须自备」。" % RESPKG_MD5)
+    if not os.path.exists(META_XML):
+        log("警告：找不到 meta.xml（srvres/ 与 mirror/ 都没有）")
+    else:
+        log("meta.xml：%s" % META_XML)
     srv = ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
     srv.daemon_threads = True
     log("本地 HTTP 监听 :%d   host_ip=%s" % (PORT, HOST_IP))

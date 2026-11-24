@@ -14,12 +14,15 @@
 ## 一、跑起来
 
 ```bash
-# 1) 直接启动（证书已随仓库提供：patch/exact.pem + patch/exact.key）
+# 1) 启动游戏服（证书已随仓库提供：patch/exact.pem + patch/exact.key）
 python local_server3.py 9000 patch/exact.pem patch/exact.key
+
+# 2) 启动资源服（端口 80，客户端拉资源/版本清单用；第二个参数是宿主机的局域网 IP）
+python local_http.py 80 192.168.0.111
 ```
 
 ```bash
-# 2) 客户端侧（模拟器 / 真机）
+# 3) 客户端侧（模拟器 / 真机）
 adb reverse tcp:9000 tcp:9000     # 游戏协议（TLS /auth + 明文游戏包，同一个口）
 adb reverse tcp:8080 tcp:80       # 资源 CDN（注意是 8080→80，不是 8080→8080）
 ```
@@ -42,15 +45,15 @@ python admin_server.py            # 默认 8081，读写 logs/gm.cmd
 
 ## 二、仓库里没有、但你必须自备的东西
 
-**客户端 APK 必须和证书配套，三件一起给，少一件都连不上：**
+**下面三样缺一不可，缺哪样就卡在哪一步：**
 
-| 交付物 | 说明 |
-|---|---|
-| **客户端 APK**（`kd163_coexist.apk`，119MB） | 改过包的版本：包名 `com.kdxx.local1`（可与原版共存），`classes.dex` 内嵌信任根 + 用 `exact.pem` 签名。**原版 APK 连不上**——它只信任官方 CA，握手直接失败 |
-| **`patch/exact.pem` + `exact.key`** | 服务端 TLS 证书，**已随仓库提供**（`.gitattributes` 锁了行尾，保证 clone 后字节不变）。必须与 APK 内嵌/签名的那张是**同一张**，md5 `126de9578e43df3c3278583cf09c5504` |
-| 服务端代码 | 本仓库 |
+| 缺什么 | 表现 | 说明 |
+|---|---|---|
+| **客户端 APK** `patch/kd163_coexist.apk`（119MB） | 登录界面一直转圈 / 「网络连接失败」 | 改过包的版本：包名 `com.kdxx.local1`（可与原版共存），`classes.dex` 内嵌信任根 + 用 `exact.pem` 签名。**原版 APK 连不上**——它只信任官方 CA，握手直接失败 |
+| **资源包** `res_update/mhsj_res.zip`（109MB，md5 `5efc42ed36978e860f135a96bd93c85a`） | 能登录，但进主城/切图时 native abort 或一直卡加载 | 必须与抓包同版本。APK 内置资源包比服务端版本旧，拿它顶替会在进主城时崩 |
+| **`exact.pem` + `exact.key`** | TLS 握手被拒 | **已随仓库提供**（`.gitattributes` 锁了行尾，clone 后字节不变），md5 `126de9578e43df3c3278583cf09c5504`，必须与 APK 内嵌/签名的那张是同一张 |
 
-APK 有 119MB，超过 GitHub 单文件 100MB 上限，也要单独传（网盘/直传），不要塞进仓库。
+两个大文件都超过 GitHub 单文件 100MB 上限，只能网盘/直传，不要塞进仓库。
 
 如果对方想用**自己生成**的证书，就必须同时重打包 APK：
 
@@ -65,10 +68,12 @@ python patch_coexist.py           # 把新公钥内嵌进 APK 并重新签名（
 
 | 文件 | 说明 | 怎么拿 |
 |---|---|---|
-| `mirror/`、`res_x/`、`srvres/` | 游戏资源包与解包产物（仓库只带 `mirror/assets/configure/*.xml`） | 从自己的客户端 APK / CDN 提取 |
-| `tools/` | adb、rizin、scrcpy 等 | 自行安装 |
+| `tools/` | adb、scrcpy 等（820MB） | 自行安装；只需要 adb，能 `adb reverse` 就行 |
+| `res_x/`、`srvres/` | 资源解包产物（126MB×2） | 只有想自己重新打资源包/查 UI 布局时才需要；**平时跑服不需要** |
 
-**`res_cfg/` 与 `mirror/assets/configure/` 是随仓库提供的**（约 8MB），服务端启动时直接读。
+**随仓库提供的**：`res_cfg/`（4.3MB 配置表）、`mirror/`（3.9MB，含 `assets/configure/*.xml`、
+`meta.xml`、`server-list.xml`、`assets.txt`）、`logs/`（14.6MB 真服/他服抓包，分析用）。
+服务端和资源服启动时直接读这些，不需要额外解包。
 
 ---
 
@@ -82,6 +87,7 @@ bag_proto.py         背包 177/178、物品 150 掉落
 equip_attr.py        面板属性：装备/强化/套装/妖灵合成 cmd=29
 pet_proto.py         宠物妖灵：946/947/961~965/1409~1414
 wing_proto.py        翅膀形象 1922/1931/1932
+local_http.py        资源服（:80）：server-list / version / meta / assets.txt / mhsj_res.zip
 admin_server.py      网页后台（写 logs/gm.cmd）
 capture_proxy.py     抓包中转（真服/他服镜像到本地日志，默认 :19000）
 res_cfg/             战斗/任务/装备/商城等配置表（XML）
@@ -125,7 +131,7 @@ work/                一次性探针脚本（直连 socket 验协议，不依赖
 
 ### 干净 clone 验收（2026-11-24 实测）
 
-在一份全新 `git clone` 上跑过完整链路，结论是**拉下来能直接跑**：
+在一份全新 `git clone` 上跑过完整链路，结论是**服务端侧零配置可跑**：
 
 | 步骤 | 结果 |
 |---|---|
@@ -138,6 +144,11 @@ work/                一次性探针脚本（直连 socket 验协议，不依赖
 | 接任务 | `211` → 7B 应答，任务直接置「可交」 |
 | 交任务 | `214` → 升级 Lv1→Lv4、推 29/28/88/210，自动接下一环 400201 |
 | 战斗 | `145` → 145 ACK + 151 → `146` → 148 → `149` → 150，攻/防两端都验过 |
+
+**这次验收的边界（别误读）**：客户端用的仍是本机已配好的改包 APK 和资源包，
+`adb reverse tcp:8080 tcp:80` 指向的是**主目录**的 `local_http.py`。
+也就是说——**服务端和配置表 clone 下来就能跑；客户端和资源包仍要单独拿**（见第二节）。
+换一台完全空的机器，按第二节把三样补齐后是同一套流程。
 
 ---
 
