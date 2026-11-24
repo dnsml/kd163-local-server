@@ -257,6 +257,36 @@ SCENE_113_REAL = {
     1021: bytes.fromhex("cd03fd03ce0001d9d60f0000ce0001d9d71f0100ce0001e0dd2f000001ce00018e75180a"),
 }
 
+# 锁妖塔：客户端点「进入副本」发 cmd=130，塔 id → 首层场景。
+# 真服实证只有一条（2026-11-24 23:43:27 C->S 130 ccdd）：221 = 紫精魂塔一层(普通) 21201。
+# 其余塔按 Scene.xml 的连号规律推断（紫精魂塔 21201~21204、神器之魄塔 21205~21208 ...），
+# **未在真服验证**，日志里会标 "推断"。若某层进错图，先看这条日志再改表，别改判定逻辑。
+TOWER_SCENE = {
+    221: 21201,  # 实证：151 系带的塔，普通难度第 1 层
+    222: 21202,
+    223: 21203,
+    224: 21204,
+    225: 21205,
+    226: 21206,
+    227: 21207,
+    228: 21208,
+    229: 21209,
+    230: 21210,
+    231: 21211,
+    232: 21212,
+    233: 21213,
+    234: 21214,
+    235: 21215,
+    236: 21216,
+    237: 21217,
+    238: 21218,
+    239: 21219,
+    240: 21220,
+}
+# 真服 131/659 里除场景 id 外还有两个常量，样本各只出现一次，按原样回放。
+TOWER_131_TAIL = bytes.fromhex("0408")
+TOWER_659 = bytes.fromhex("ce0003313f01")
+
 
 def enc_scene(sid):
     """场景 ID 编码：< 0xCD 单字节；否则 0xCD + u16BE（129 的 cd03fd = 1021 实证）。"""
@@ -1461,6 +1491,21 @@ def load_state(pl=None):
         pl.wardrobe.update(int(x) for x in wd)
     pl.quest_active = int(d.get("quest_active", 0) or 0)
     pl.quest_ready = bool(d.get("quest_ready", False))
+    # ★ 场景 + 坐标（老号回到最后一次下线的地点）。老存档没有 scene/pos_* 字段，
+    #   走默认 101 / 21,7 —— 与这轮改动之前的表现完全一致，不会把老号扔到别处。
+    #   场景 id 必须校验存在：配置表删过地图或者手改坏存档时，宁可回蓬莱也别进虚空。
+    try:
+        _sc = int(d.get("scene", pl.scene) or pl.scene)
+    except (TypeError, ValueError):
+        _sc = DEFAULT_SCENE
+    pl.scene = _sc if _sc in SCENES else DEFAULT_SCENE
+    if pl.scene != _sc:
+        log("[spawn] 存档场景 %s 不在 Scene.xml，回退蓬莱仙境(%d)" % (_sc, pl.scene))
+    try:
+        pl.pos_x = int(d.get("pos_x", pl.pos_x)) & 0xFF
+        pl.pos_y = int(d.get("pos_y", pl.pos_y)) & 0xFF
+    except (TypeError, ValueError):
+        pl.pos_x, pl.pos_y = 21, 7
     dq = d.get("quest_done")
     if isinstance(dq, list):
         pl.done_quests.clear()
@@ -1587,6 +1632,11 @@ def state_dict():
             "quest_active": cur().quest_active,
             "quest_ready": cur().quest_ready,
             "quest_done": sorted(cur().done_quests),
+            # ★ 场景 + 坐标：老号登录要回到最后一次下线的地点（用户 2026-11-24 要求）。
+            #   以前只存了 scene，坐标每次都是 17 模板里的 21,7，落点永远一样。
+            "scene": int(cur().scene or DEFAULT_SCENE),
+            "pos_x": int(getattr(cur(), "pos_x", 21) or 0),
+            "pos_y": int(getattr(cur(), "pos_y", 7) or 0),
             "equip": {str(k): v for k, v in cur().equip.items()},
             "enhance": {str(k): v for k, v in cur().enhance.items()},
             "bag": {str(k): v for k, v in cur().bag.items()},
@@ -1933,6 +1983,16 @@ def build_17(scene=None):
     _sc = int(scene if scene is not None else (cur().scene or DEFAULT_SCENE)) & 0xFFFF
     b[at(25)] = 0xCD
     b[at(26):at(28)] = _sc.to_bytes(2, "big")
+    # ★ 落点坐标（off28/29，各 1 字节）：与场景同源 —— 场景对得上才用存档坐标，
+    #   否则用本场景默认落点(5,7)。这样「老号回下线地点」和「新号在蓬莱出生」
+    #   是同一条规则的两个分支，不会出现「场景是塔、坐标却是城外」的错位。
+    if _sc == int(cur().scene or DEFAULT_SCENE):
+        _px = int(getattr(cur(), "pos_x", 21) or 0) & 0xFF
+        _py = int(getattr(cur(), "pos_y", 7) or 0) & 0xFF
+    else:
+        _px, _py = 5, 7
+    b[at(28)] = _px
+    b[at(29)] = _py
     return bytes(b)
 
 def build_306(cls=None):
@@ -3146,6 +3206,41 @@ def handle_game(conn, cid):
                             set_quest(qid_of(active_qid), True)
                     continue
 
+                if cmd == 130:
+                    # 130 = 锁妖塔「进入副本」。真服 23:43:27 完整链（relay.log）：
+                    #   C->S 130 ccdd              → S->C 131 ccdd cd52d1 04 08
+                    #                               → 113(13B) / 117(00) / 659(ce0003313f01)
+                    #   C->S 32513 cd52d1 ccdd 00  → 进场景
+                    # 以前没实现 130，客户端收不到 131 就一直转圈（用户报的「锁妖塔进不去」）。
+                    # 塔 id 用 cc+1B 编码（221 → ccdd），和 enc_val 的 0x80..0xFF 档一致。
+                    tid = None
+                    if len(payload) >= 2 and payload[0] == 0xCC:
+                        tid = payload[1]
+                    elif len(payload) >= 3 and payload[0] == 0xCD:
+                        tid = int.from_bytes(payload[1:3], "big")
+                    elif payload:
+                        tid = payload[0]
+                    tsc = TOWER_SCENE.get(tid)
+                    if not tsc or tsc not in SCENES:
+                        log("c%03d !! 未知锁妖塔 id=%s(hex=%s)，保持 %s(%d)"
+                            % (cid, tid, payload.hex(), scene_name(cur_map), cur_map))
+                        continue
+                    cur_map = tsc
+                    cur().scene = tsc
+                    # 进塔落点：真服紧接着就是 115 0305，所以记 (3,5)，重登也落在塔门口
+                    cur().pos_x, cur().pos_y = 3, 5
+                    last_113 = tsc
+                    body131 = payload + enc_scene(tsc) + TOWER_131_TAIL
+                    conn.sendall(pack(131, seq, body131))
+                    log("c%03d -> cmd=131 seq=%d len=%d [进塔 id=%s → %s(%d) %s]"
+                        % (cid, seq, len(body131), tid, scene_name(tsc), tsc,
+                           "实证" if tid == 221 else "推断"))
+                    conn.sendall(pack(113, 0, build_113(tsc)))
+                    conn.sendall(pack(117, 0, b"\x00"))
+                    conn.sendall(pack(659, 0, TOWER_659))
+                    log("c%03d .. push cmd=113/117/659 [进塔后场景对象表]" % cid)
+                    continue
+
                 if cmd == 128:
                     # 真服实证：128 = 点传送点（过图），payload = CD + u16BE 跳点ID
                     #   cd03e9(1001) 蓬莱->天音谷  129=66 05 07
@@ -3159,13 +3254,17 @@ def handle_game(conn, cid):
                     if len(payload) >= 3 and payload[0] == 0xCD:
                         jid = int.from_bytes(payload[1:3], "big")
                     tgt = JUMPS.get(jid)
-                    # ★ 锁妖塔/神塔这类 scene_type=3 的塔层：真服 128 的 payload 直接
-                    #   就是目标层场景 id，不是 Jumppoint 里的前后门 id。
-                    #   实测 23:44:57 128 cd52d2 -> 129 cd52d2 03 05（二层）
-                    #        23:45:00 128 cd52d3 -> 129 cd52d3 03 05（三层）
-                    #   Jumppoint.xml 里 21202 却写着 scene=21201（回一层），
-                    #   照表走会导致「上一层/下一层」走反。
-                    if jid in SCENES and SCENES[jid].get("scene_type") == "3":
+                    # ★ 塔层（scene_type=3）同样走 Jumppoint 表，payload 是**跳点 id**，
+                    #   而塔里「跳点 id」和「场景 id」是两套编号、数值会撞车：
+                    #     Scene 21201 jump_points="21201,35,5"  → Jump 21201 → scene 21202
+                    #     Scene 21202 jump_points="21202,1,5;21203,35,5"
+                    #                                  21202 → 回一层 / 21203 → 去三层
+                    #   真服实证（relay.log 23:44:06）：C->S 128 cd52d1 → S->C 129 cd52d2 03 05。
+                    #   ⚠️ 上一版写的是「scene_type=3 就直接拿 jid 当目标场景」，21201
+                    #   既是跳点又是场景 → 被覆盖成 21201，点「下一层」原地重进一层。
+                    #   这就是用户反馈的「锁妖塔进不了下一层」。
+                    #   只有 Jumppoint 里查不到、客户端直接发目标场景 id 时才退回 jid。
+                    if tgt is None and jid in SCENES and SCENES[jid].get("scene_type") == "3":
                         tgt = jid
                     if tgt is None:
                         log("c%03d !! 未知跳点 %s，留在场景 %s(%d)"
@@ -3175,8 +3274,11 @@ def handle_game(conn, cid):
                     cur().scene = tgt      # ★ 存进角色档：下次登录 17 用同一个场景
                     last_113 = tgt
                     body113 = build_113(tgt)
-                    _is_tower = (SCENES.get(tgt, {}).get("scene_type") == "3")
-                    _pos = (3, 5) if _is_tower else arrival_pos(tgt, prev)
+                    # 落点一律由 Jumppoint 反推（目标场景里「回上一个场景」的那个跳点 + 2 格）。
+                    # 塔层也一样：21201→21202 得 (3,5)，与真服 129 cd52d2 03 05 逐字节一致；
+                    # 以前塔内写死 (3,5)，往上走是对的、往下走却会落到墙上。
+                    _pos = arrival_pos(tgt, prev)
+                    cur().pos_x, cur().pos_y = _pos
                     conn.sendall(pack(129, 0, enc_scene(tgt) + bytes(_pos)))
                     conn.sendall(pack(113, 0, body113))
                     conn.sendall(pack(117, 0, b"\x00"))
@@ -4227,6 +4329,13 @@ def handle_game(conn, cid):
                         # ——「点怪打不了怪」的真正断点就在这，不是 116。
                         _p = payload or b""
                         if _p:
+                            # ★ 记下最后坐标：115 就是 [x][y]（一格 1 字节），
+                            #   与 17 的 off28/29 同一坐标系。只改内存，不写盘 ——
+                            #   115 每秒一条，逐条落盘会把磁盘打满；
+                            #   断连时 finally 里那次 save_state() 自然会带上它。
+                            if len(_p) >= 2:
+                                cur().pos_x = _p[0]
+                                cur().pos_y = _p[1]
                             conn.sendall(pack(118, 0, b"\x06" + _p))
                             conn.sendall(pack(118, 0, b"\x10" + _p))
                             log("c%03d .. 118 x2 [移动同步 %s]" % (cid, _p.hex()))

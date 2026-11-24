@@ -53,6 +53,9 @@ logs/relay_19001.log
 # server.log 是追加写的，这些快照被它完整包含（md5/包含关系已核）。
 logs/server_before*.log
 logs/server_prev*.log
+# 服务端启动时的 stdout/stderr（Windows 控制台是 GBK，而 log() 写 server.log 是 UTF-8，
+# 两者混进同一个文件会出半行乱码 —— 所以进程输出单独落这里，不进库）。
+logs/server_run.out
 
 # ---- 5. 本地工作区 ----
 # 注意必须写 work/*（而不是 work/）：整目录被排除时，子项的 ! 例外不生效，
