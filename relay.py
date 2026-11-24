@@ -20,7 +20,7 @@ WATCH_CMDS = {17, 18, 19, 20, 21, 22, 23}
 lock = threading.Lock()
 
 def log(msg):
-    line = "[%s] %s" % (time.strftime("%H:%M:%S"), msg)
+    line = "[%s] %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), msg)
     with lock:
         print(line, flush=True)
         with open(LOG, "a", encoding="utf-8") as f:
@@ -100,7 +100,7 @@ def utf8_runs(b):
 
 def watch(tag, cmd, seq, payload):
     line = "[%s] %s cmd=%d seq=%d len=%d\n  hex=%s\n  utf8=%s\n" % (
-        time.strftime("%H:%M:%S"), tag, cmd, seq, len(payload),
+        time.strftime("%Y-%m-%d %H:%M:%S"), tag, cmd, seq, len(payload),
         payload.hex(), utf8_runs(payload))
     with lock:
         with open(WATCH, "a", encoding="utf-8") as f:

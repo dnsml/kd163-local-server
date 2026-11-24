@@ -13,8 +13,8 @@
 import re
 import sys
 
-LINE = re.compile(r"^\[(\d\d:\d\d:\d\d)\]\s+(?:C->S|S->C)\s+cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)(?: hex=(\S*))?")
-PUSH = re.compile(r"^\[(\d\d:\d\d:\d\d)\]\s+.*push cmd=(\d+)\s+len=(\d+).*hex=(\S*)")
+LINE = re.compile(r"^\[(?:20\d\d-\d\d-\d\d )?(\d\d:\d\d:\d\d)\]\s+(?:C->S|S->C)\s+cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)(?: hex=(\S*))?")
+PUSH = re.compile(r"^\[(?:20\d\d-\d\d-\d\d )?(\d\d:\d\d:\d\d)\]\s+.*push cmd=(\d+)\s+len=(\d+).*hex=(\S*)")
 
 
 def vread(b, i):

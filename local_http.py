@@ -48,7 +48,7 @@ lock = threading.Lock()
 
 
 def log(msg):
-    line = "[%s] %s" % (time.strftime("%H:%M:%S"), msg)
+    line = "[%s] %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), msg)
     with lock:
         print(line, flush=True)
 

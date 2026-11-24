@@ -26,7 +26,7 @@ def main():
     t962 = None
     t947 = {}
     for ln in open(LOG, encoding="utf-8", errors="ignore"):
-        m = re.search(r'\[(\d\d:\d\d:\d\d)\]\s+S->C cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)\s+hex=(\S*)', ln)
+        m = re.search(r'\[(?:20\d\d-\d\d-\d\d )?(\d\d:\d\d:\d\d)\]\s+S->C cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)\s+hex=(\S*)', ln)
         if not m:
             continue
         t, cmd, seq, ln_, hx = m.group(1), int(m.group(2)), int(m.group(3)), int(m.group(4)), m.group(5)
