@@ -44,7 +44,7 @@ add_coexist_rules() {
   # 开 route_localnet（幂等）
   su "echo 1 > /proc/sys/net/ipv4/conf/all/route_localnet"
   # adb reverse：设备侧端口 -> 宿主机端口（幂等，先清后建）
-  # 19000 = 真服抓包 relay，缺它时私服/DNAT 到 127.0.0.1:19000 会「网络连接失败」
+  # 19000 = 真服抓包 relay，缺它时线上服/DNAT 到 127.0.0.1:19000 会「网络连接失败」
   "$ADB" $DEV reverse --remove tcp:8080 >/dev/null 2>&1
   "$ADB" $DEV reverse --remove tcp:9000 >/dev/null 2>&1
   "$ADB" $DEV reverse --remove tcp:19000 >/dev/null 2>&1

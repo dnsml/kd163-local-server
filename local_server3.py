@@ -453,7 +453,7 @@ def send_push(conn, cid, cmd):
         log("c%03d .. push cmd=178    len=%d [动态背包 %d件]" % (cid, len(body), len(cur().bag)))
         return
     if cmd == 818:
-        body = build_818([1, 2, 3, 4, 5, 6, 7])
+        body = build_818(equip_slots())
         conn.sendall(pack(818, 0, body))
         log("c%03d .. push cmd=818    len=%d [动态装备 %s]"
             % (cid, len(body), sorted(cur().equip.items()) or "空"))
@@ -848,7 +848,7 @@ def apply_gm(line):
         return True, "已开战 mob=%d（%d 个连接）" % (mob_id, n)
 
     # `发包 120 0100` —— 给所有在线连接直接发一个原包。
-    # 逆向时没有比这更快的探针：改一个字节就能看客户端反应，不用重启、不用抓包。
+    # 协议分析时没有比这更快的探针：改一个字节就能看客户端反应，不用重启、不用抓包。
     # 只给 GM 用，别接进业务流程。
     if line.startswith("发包") or line.startswith("send "):
         parts = line.split()
@@ -1282,8 +1282,30 @@ YUELI_SLOT = None
 # ---- 装备栏：槽位 -> 物品 id ----
 # 槽位顺序由 Item.xml 的 item_kind2 决定（真服 17/817/818 包对齐结果）：
 #   kind2 1=武器->槽7 / 6=战甲->槽1 / 7=腰带->槽2 / 8=护腕->槽3
-#   kind2 9=护手->槽4 / 10=长裤->槽5 / 11=长靴->槽6 / 其它(护符等)->槽8
-SLOT_OF_KIND2 = {1: 7, 6: 1, 7: 2, 8: 3, 9: 4, 10: 5, 11: 6}
+#   kind2 9=护手->槽4 / 10=长裤->槽5 / 11=长靴->槽6
+#   kind2 13=戒指->槽9 / 12=护符->槽11（首饰槽 9~12，见下面 ACC_SLOTS）
+SLOT_OF_KIND2 = {1: 7, 6: 1, 7: 2, 8: 3, 9: 4, 10: 5, 11: 6,
+                 # ★ 2026-11-25：首饰槽补进来。以前只有 7 个槽，背包里点
+                 # 10305 飞仙戒指 / 10306 飞仙护符（kind2=13/12）会走到
+                 # 「这件装备的槽位还没对上，道具已保留」——就是玩家反馈的
+                 # 「系统送的护符戒指穿不上」。
+                 # 真服 817（客户端上报装备栏）实证 00:15:10：
+                 #   0b cd2842 0b / cd2842 0c / ... / cd2841 09 / cd2841 0a
+                 #   => 首饰槽 = 9/10（戒指×2）、11/12（护符×2）。
+                 # 本地服只用一个戒指槽 + 一个护符槽，够用且不会重复算属性。
+                 13: 9, 12: 11}
+
+# 首饰槽（30 包槽 6 与槽 7 之间那 16 字节就是这 4 个槽：空 4B、有装备 6B）
+ACC_SLOTS = (9, 10, 11, 12)
+
+
+def equip_slots():
+    """当前要下发给客户端的槽位列表（1~7 固定 + 已穿首饰）。"""
+    out = [1, 2, 3, 4, 5, 6, 7]
+    for s in ACC_SLOTS:
+        if cur().equip.get(s):
+            out.append(s)
+    return out
 # [player] 状态已移入 player.Player：EQUIP
 
 # 强化等级：槽位 -> +N。真服 818 单条记录 offset 6 就是这个值
@@ -2245,13 +2267,26 @@ def build_30():
             out += b"\xcd" + iid.to_bytes(2, "big") + bytes([slot]) + b"\x01\x01"
         else:
             out += b"\x00\x00\x00\x00"
-    out += b"\x00" * 16
+    # ---- 首饰区：4 个槽（9/10 戒指、11/12 护符）----
+    # 真服 82B 原包里这 16 字节全 0 = 4 个空首饰槽（空槽编码 4B，与上面空装备槽同理）。
+    # 真服 96B 样本（23:52:25）在这 16 字节位置变成了
+    #   cd2842 0b 0101 / cd2842 0c 0101 / cd2841 09 0101 / cd2841 0a 0101
+    # 即「有装备 6B、空槽 4B」的变长写法。本地服只穿一个戒指(9) + 一个护符(11)，
+    # 总长仍保持 82B：每多 1 件首饰就少 2 字节尾部填充，避免客户端按固定偏移解析错位。
+    _acc_filled = 0
+    for _as in ACC_SLOTS:
+        _aid = cur().equip.get(_as, 0) & 0xFFFF
+        if _aid:
+            out += b"\xcd" + _aid.to_bytes(2, "big") + bytes([_as]) + b"\x01\x01"
+            _acc_filled += 1
+        else:
+            out += b"\x00\x00\x00\x00"
     iid7 = cur().equip.get(7, 0) & 0xFFFF
     if iid7:
         out += b"\xcd" + iid7.to_bytes(2, "big") + b"\x07\x01\x01"
     else:
         out += b"\x00\x00\x00\x00"
-    out += b"\x00" * 24
+    out += b"\x00" * max(0, 24 - 2 * _acc_filled)
     return bytes(out)
 
 
@@ -2680,7 +2715,7 @@ def builtin_resp(cmd, payload):
         log("[equip] 819 槽%d payload=%s -> 818 全量%s"
             % (slot, payload.hex(),
                ("+ 实验 820(len=%d)" % len(pr)) if pr is not None else "+ 28"))
-        return 818, build_818([1, 2, 3, 4, 5, 6, 7]), [28]
+        return 818, build_818(equip_slots()), [28]
     if cmd == 837:
         # 837 = 打开衣柜（C->S 空包）→ 838 已拥有时装列表。
         # 以前这个号完全没处理：客户端发了 837 什么都没回来，衣柜界面就一直转圈。
@@ -3162,7 +3197,7 @@ def handle_game(conn, cid):
                 # 真服是「点怪 → 116(00) → 客户端自己寻路（一串 115）→ 走到跟前发 145」。
                 # 本地服补了 118 位置广播后客户端仍只走两步就停（115 seq=45/46），
                 # 走不到怪跟前就永远不发 145。所以这里试「服务端直接推 151 开战」：
-                # 很多私服就是推送型开战，客户端收到 151 自己切战斗界面。
+                # 很多线上服就是推送型开战，客户端收到 151 自己切战斗界面。
                 # 开关默认关；开了之后点任意目标（116 payload=00）都按当前场景第一个
                 # 刷怪点开战，用来验证「151 一推就能进战斗 + 血条折算是否同步走空」。
                 if (cmd == 116 and os.environ.get("BATTLE_116_BATTLE") == "1"

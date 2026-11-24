@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""KD163 本机私服 · 网页管理后台
+"""KD163 本机线上服 · 网页管理后台
 
 只用标准库（http.server + json），不装任何依赖。
 

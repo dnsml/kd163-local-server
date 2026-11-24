@@ -8,7 +8,7 @@ DEV="-s 192.168.0.111:5555"
 
 "$ADB" $DEV shell am force-stop com.kdxx.local1
 sleep 2
-"$ADB" $DEV shell input tap 894 250        # 桌面「口袋修仙 本机私服版」图标
+"$ADB" $DEV shell input tap 894 250        # 桌面「口袋修仙 本机服务版」图标
 sleep 34
 "$ADB" $DEV shell input tap 800 480        # 密码框
 sleep 1

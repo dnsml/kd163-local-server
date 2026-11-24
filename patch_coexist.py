@@ -28,7 +28,7 @@ KEY = 'patch/exact.key'
 OLD_PKG = 'com.kdxx.online'          # 15 字符
 NEW_PKG = 'com.kdxx.local1'          # 15 字符，等长替换不破坏 AXML 偏移
 OLD_LABEL = '口袋修仙·联网复活版'      # manifest 字符串池里的应用名（实测在 AXML，不在 arsc）
-NEW_LABEL = '口袋修仙·本机私服版'      # 同 10 个字符（·也占 1 个），等长替换
+NEW_LABEL = '口袋修仙·本机服务版'      # 同 10 个字符（·也占 1 个），等长替换
 
 
 def utf16_bytes(s):
