@@ -43549,3 +43549,15 @@ cmd=1）
 [20:17:41] c002 <- cmd=4      seq=234  len=5  hex=ce6b058064
 [20:17:51] c002 <- cmd=4      seq=235  len=5  hex=ce6b05806f
 [20:18:01] c002 <- cmd=4      seq=236  len=5  hex=ce6b058079
+[20:18:11] c002 <- cmd=4      seq=237  len=5  hex=ce6b058083
+[20:18:22] c002 <- cmd=4      seq=238  len=5  hex=ce6b05808d
+[20:18:32] c002 <- cmd=4      seq=239  len=5  hex=ce6b058097
+[20:18:42] c002 <- cmd=4      seq=240  len=5  hex=ce6b0580a1
+[20:18:52] c002 <- cmd=4      seq=241  len=5  hex=ce6b0580ab
+[20:19:02] c002 <- cmd=4      seq=242  len=5  hex=ce6b0580b5
+[20:19:12] c002 <- cmd=4      seq=243  len=5  hex=ce6b0580bf
+[20:19:22] c002 <- cmd=4      seq=244  len=5  hex=ce6b0580c9
+[20:19:32] c002 <- cmd=4      seq=245  len=5  hex=ce6b0580d3
+[20:19:42] c002 <- cmd=4      seq=246  len=5  hex=ce6b0580dd
+[20:19:52] c002 <- cmd=4      seq=247  len=5  hex=ce6b0580e7
+[20:20:02] c002 <- cmd=4      seq=248  len=5  hex=ce6b0580f1
