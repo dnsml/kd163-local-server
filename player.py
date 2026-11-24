@@ -27,7 +27,7 @@ class Player(object):
         "pets",
         "spirit_bag", "spirit_slot",
         "quest_active", "quest_ready", "done_quests",
-        "scene",
+        "scene", "pos_x", "pos_y",
     )
 
     def __init__(self):
@@ -74,6 +74,11 @@ class Player(object):
         self.quest_ready = False
         self.done_quests = set()
         self.scene = 101
+        # 最后所在坐标（115 上报的 x/y，一格 1 字节）。
+        # 老号登录要回到「最后一次下线的地点」，所以坐标必须和场景一起落盘；
+        # 默认值 21,7 是原 17 模板里那对坐标，保持既有手感不变。
+        self.pos_x = 21
+        self.pos_y = 7
 
     def purses(self):
         """货币键 -> 可变列表（GM 与商城共用同一份引用）。"""
@@ -160,7 +165,8 @@ def reset_newbie(p=None):
     p.quest_active = 0
     p.quest_ready = False
     p.done_quests = set()
-    p.scene = 101
+    p.scene = 101              # ★ 新号只出生在蓬莱仙境，不看老号的存档场景
+    p.pos_x, p.pos_y = 21, 7   # 与 17 模板默认落点一致
     p.name = ""
     p.sex = 1
     p.has_char = False
