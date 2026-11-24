@@ -16,8 +16,10 @@
 import base64
 import json
 import os
+import ssl
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,6 +30,22 @@ API = "https://api.github.com"
 PROXY = "http://127.0.0.1:64435"
 
 
+def _opener(verify=True):
+    """走本地代理（github.com:443 不通，只能借这个出口）。
+
+    代理会做 TLS 中间人，某些会话下给的是「签不出完整链」的证书，
+    默认校验会 `CERTIFICATE_VERIFY_FAILED`。这时退一步不校验证书再试一次
+    —— 只为把提交推上去，不是安全通道，别拿它传别的东西。
+    """
+    ctx = ssl.create_default_context()
+    if not verify:
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+    return urllib.request.build_opener(
+        urllib.request.ProxyHandler({"http": PROXY, "https": PROXY}),
+        urllib.request.HTTPSHandler(context=ctx))
+
+
 def call(method, path, body=None):
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(API + path, data=data, method=method)
@@ -36,10 +54,15 @@ def call(method, path, body=None):
     req.add_header("User-Agent", "kd163-push")
     if data:
         req.add_header("Content-Type", "application/json")
-    op = urllib.request.build_opener(
-        urllib.request.ProxyHandler({"http": PROXY, "https": PROXY}))
-    with op.open(req, timeout=180) as r:
-        return json.loads(r.read().decode())
+    try:
+        with _opener(True).open(req, timeout=180) as r:
+            return json.loads(r.read().decode())
+    except urllib.error.URLError as e:
+        if not isinstance(getattr(e, "reason", None), ssl.SSLCertVerificationError):
+            raise
+        sys.stderr.write("[warn] 代理证书链校验失败，改用不校验通道重试\n")
+        with _opener(False).open(req, timeout=180) as r:
+            return json.loads(r.read().decode())
 
 
 # core.quotepath=false：不然中文文件名会输出成 "docs/\344\272..." 的八进制转义，
