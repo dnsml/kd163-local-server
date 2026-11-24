@@ -89,30 +89,33 @@ def state_payload():
 
 
 def run_gm(lines):
-    """写 gm.cmd，等游戏服消费完，再从 server.log 捞回每条指令的执行结果。"""
-    before = tail(SERVER_LOG, 4000)
+    """写 gm.cmd，等游戏服消费完，再从 server.log 捞回每条指令的执行结果。
+
+    注意：游戏服是「先删 gm.cmd、后写 [gm] 日志」的（甚至反过来），
+    只等「文件消失」就立刻读日志会抢跑，出现「明明执行成功却回没确认」。
+    所以这里改成按行逐个轮询，最多等 6 秒，拿到全部结果就提前退出。
+    """
+    before = set(tail(SERVER_LOG, 4000).splitlines())
     with open(GM_CMD, "a", encoding="utf-8") as f:
         for ln in lines:
             f.write(ln + "\n")
-    deadline = time.time() + 4
-    while time.time() < deadline and os.path.exists(GM_CMD):
-        time.sleep(0.06)
-    after = tail(SERVER_LOG, 4000)
-    fresh = [x for x in after.splitlines() if x not in set(before.splitlines())]
-    results = []
-    for ln in lines:
-        hit = None
-        for row in reversed(fresh):
-            if "[gm]" in row and (" " + ln + " ->") in row:
-                hit = row
-                break
-        if hit:
-            ok = "[gm] OK" in hit
-            msg = hit.split("->", 1)[1].strip() if "->" in hit else hit
-            results.append([ok, msg])
-        else:
-            results.append([False, "已写入，但没等到游戏服确认（服务端在跑吗？）"])
-    return results
+    deadline = time.time() + 6
+    results = [None] * len(lines)
+    while time.time() < deadline:
+        fresh = [x for x in tail(SERVER_LOG, 4000).splitlines() if x not in before]
+        for i, ln in enumerate(lines):
+            if results[i] is not None:
+                continue
+            for row in reversed(fresh):
+                if "[gm]" in row and (" " + ln + " ->") in row:
+                    ok = "[gm] OK" in row
+                    msg = row.split("->", 1)[1].strip() if "->" in row else row
+                    results[i] = [ok, msg]
+                    break
+        if all(r is not None for r in results):
+            break
+        time.sleep(0.15)
+    return [r or [False, "已写入，但没等到游戏服确认（服务端在跑吗？）"] for r in results]
 
 
 class Handler(BaseHTTPRequestHandler):
