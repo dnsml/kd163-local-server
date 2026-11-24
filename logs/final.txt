@@ -1,0 +1,26 @@
+[关福利面板]
+[触发出确认再取消]
+[开始旅程]
+[接受任务]
+=== 服务端新增 ===
+[13:59:47] c003 <- cmd=115    seq=41   len=2  hex=1304
+[13:59:47] c003 -> cmd=116    seq=41   len=1 (模板 116)
+[13:59:47] c003 <- cmd=115    seq=42   len=2  hex=1506
+[13:59:47] c003 -> cmd=116    seq=42   len=1 (模板 116)
+[13:59:47] c003 <- cmd=4      seq=43   len=5  hex=ce6b0284d3
+[13:59:47] c003 .. 无模板 cmd=4 seq=43，静默丢弃（不回 cmd=1）
+[13:59:48] c003 <- cmd=115    seq=44   len=2  hex=1807
+[13:59:48] c003 -> cmd=116    seq=44   len=1 (模板 116)
+=== 客户端 ===
+11-22 13:59:47.081 D/cocos2d-x debug info(29680): running, fight set speed = 0.070000
+11-22 13:59:47.083 D/cocos2d-x debug info(29680): end sit, state = 2
+11-22 13:59:47.568 D/cocos2d-x debug info(29680): got packet, seq = 41, cmd = 116
+11-22 13:59:47.568 D/cocos2d-x debug info(29680): no handler for cmd 116
+11-22 13:59:47.900 D/cocos2d-x debug info(29680): got packet, seq = 42, cmd = 116
+11-22 13:59:47.900 D/cocos2d-x debug info(29680): no handler for cmd 116
+11-22 13:59:48.388 D/cocos2d-x debug info(29680): got packet, seq = 44, cmd = 116
+11-22 13:59:48.388 D/cocos2d-x debug info(29680): no handler for cmd 116
+11-22 13:59:48.853 D/cocos2d-x debug info(29680): dest reached
+11-22 13:59:48.853 D/cocos2d-x debug info(29680): start sit, state = 0
+=== 进程 ===
+29680

@@ -1,0 +1,22 @@
+GET /assets/layout/boss_battle.xml HTTP/1.1
+Host: 124.223.56.189
+Accept: */*
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:33 GMT
+Content-Type: application/xml
+Content-Length: 892
+Connection: keep-alive
+Cache-Control: no-store
+
+<layout background="" height="515" margin="0" padding="0" type="vertical" width="834">
+	<image rotate="0" src="assets/ui/common/window_frame.png" />
+	<button id="1000415" name="colse_btn" normal="assets/ui/common/close_btn.png" selected="assets/ui/common/close_btn_p.png" x="753" y="-26" />
+	<tab height="46" id="1000416" margin="-2" name="main_tab" vertical="false" width="834" x="39" y="-18">
+		<tabitem normal="assets/ui/boss_battle/boss_battle_2.png" selected="assets/ui/boss_battle/boss_battle_2p.png" />
+		<tabitem normal="assets/ui/boss_battle/boss_battle_1.png" selected="assets/ui/boss_battle/boss_battle_1p.png" />
+		<tabitem normal="assets/ui/boss_battle/boss_battle_3.png" selected="assets/ui/boss_battle/boss_battle_3p.png" />
+	</tab>
+	<layout background="" height="448" id="1000417" margin="0" name="content_bg" padding="0" type="vertical" width="775" x="29" y="48" />
+</layout>

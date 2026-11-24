@@ -1,0 +1,22 @@
+GET /assets/layout/operating_activity_shop.xml HTTP/1.1
+Host: 124.223.56.189
+Accept: */*
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:34 GMT
+Content-Type: application/xml
+Content-Length: 872
+Connection: keep-alive
+Cache-Control: no-store
+
+<layout background="assets/ui/common/layer2_frame.png" height="455" width="565">
+    <label align="center" color="beige" fontsize="28" id="1003904" name="shop_title" text="活动商店" width="525" x="20" y="16" />
+    <label align="left" color="green" fontsize="18" id="1001635" name="activity_content" text="" width="525" x="20" y="58" />
+    <layout background="assets/ui/operating/operating_2.png" height="38" name="shop_columns" width="547" x="9" y="96">
+        <label color="beige" fontsize="22" text="道具" width="190" x="105" y="6" />
+        <label color="beige" fontsize="22" text="价格" width="130" x="285" y="6" />
+        <label color="beige" fontsize="22" text="操作" width="85" x="450" y="6" />
+    </layout>
+    <listview column="1" height="310" id="1001972" name="detail_list" scrollbar="true" vertical="true" width="557" x="4" y="138" />
+</layout>

@@ -1,0 +1,37 @@
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on wlan0, link-type EN10MB (Ethernet), capture size 262144 bytes
+00:09:04.146758 IP 172.16.1.4.35510 > 124.223.56.189.http: Flags [P.], seq 371261768:371262126, ack 2503652, win 65535, length 358: HTTP: POST /api/recharge/status HTTP/1.1
+E...a~@.@.u;....|.8....P.!.H.&3.P...d1..POST /api/recharge/status HTTP/1.1
+Content-Type: application/json; charset=utf-8
+Accept: application/json
+Content-Length: 71
+User-Agent: Dalvik/2.1.0 (Linux; U; Android 9; 2509FPN0BC Build/PQ3B.190801.11101518)
+Host: 124.223.56.189
+Connection: Keep-Alive
+Accept-Encoding: gzip
+
+{"uid":"1784366","token":"W11nwqduOoif6bvgnIYWyQOrmyRnqXDi02yrkq7C-ZM"}
+00:09:04.191512 IP 124.223.56.189.http > 172.16.1.4.35510: Flags [P.], seq 1:778, ack 358, win 32052, length 777: HTTP: HTTP/1.1 200 OK
+E..1......M.|.8......P...&3..!..P.}4=...HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 16:09:04 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 324
+Connection: keep-alive
+Cache-Control: no-store
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+X-Frame-Options: DENY
+Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+
+{"cards":[],"clock_rollback":false,"daily_amount":88,"daily_amount_yuan":88,"daily_claimed":true,"day":"2026-11-23","gold":1749,"gold_per_yuan":10,"next_reset_at":"2026-11-24T00:00:00+08:00","pending_cards":0,"role_id":12,"role_name":"......","total_gold":1760,"total_yuan":176.0,"vip_active":false,"vip_growth":0,"ok":true}
+00:09:04.191554 IP 172.16.1.4.35510 > 124.223.56.189.http: Flags [.], ack 778, win 65535, length 0
+E..(a.@.@.v.....|.8....P.!...&6.P...b...
+00:10:09.191480 IP 124.223.56.189.http > 172.16.1.4.35510: Flags [F.], seq 778, ack 358, win 32052, length 0
+E..(	.....P.|.8......P...&6..!..P.}4....
+00:10:09.235084 IP 172.16.1.4.35510 > 124.223.56.189.http: Flags [.], ack 779, win 65535, length 0
+E..(a.@.@.v.....|.8....P.!...&6.P...b...
+
+5 packets captured
+5 packets received by filter
+0 packets dropped by kernel

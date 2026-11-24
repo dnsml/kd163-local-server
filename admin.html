@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>口袋修仙 · 私服管理后台</title>
+<style>
+  :root{
+    --bg:#111318; --panel:#191c23; --panel2:#1f232c; --line:#2b3040;
+    --text:#e7e9ef; --muted:#8a91a3; --gold:#e8b45c; --gold2:#f5cf8a;
+    --green:#3ecf8e; --red:#ef6b6b; --blue:#6aa9ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#1c2130 0%,var(--bg) 55%);
+       color:var(--text);font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+       font-size:14px;min-height:100vh}
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 20px 60px}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+  h1{font-size:19px;margin:0;font-weight:600;letter-spacing:.5px}
+  h1 span{color:var(--gold)}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:#1b2a22;color:var(--green);
+         border:1px solid #24463a;border-radius:20px;padding:4px 11px;font-size:12px}
+  .badge.off{background:#2a1b1b;color:var(--red);border-color:#4a2626}
+  .dot{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+  .spacer{flex:1}
+  .muted{color:var(--muted)}
+  .small{font-size:12px}
+  .grid{display:grid;gap:14px}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+  .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+        border-radius:12px;padding:14px 15px;position:relative;overflow:hidden}
+  .card::after{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+               background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.35}
+  .card .label{color:var(--muted);font-size:12px;letter-spacing:.5px}
+  .card .num{font-size:26px;font-weight:600;margin:6px 0 10px;font-variant-numeric:tabular-nums;
+             color:var(--gold2);word-break:break-all}
+  .row{display:flex;gap:6px;flex-wrap:wrap}
+  button{cursor:pointer;font-family:inherit;font-size:12px;border-radius:7px;padding:5px 9px;
+         background:#242938;color:var(--text);border:1px solid #333a4d;transition:.15s}
+  button:hover{background:#2d3346;border-color:#46506a}
+  button.gold{background:#3a2c14;border-color:#6b4f1e;color:var(--gold2)}
+  button.gold:hover{background:#4a3818}
+  button.danger{background:#331d1d;border-color:#5a2a2a;color:#f0a0a0}
+  button.danger:hover{background:#422323}
+  button.primary{background:linear-gradient(180deg,#e8b45c,#c9922f);border:none;color:#241a05;font-weight:600}
+  section{margin-top:26px}
+  section h2{font-size:14px;font-weight:600;margin:0 0 12px;color:#cfd4e0;
+             display:flex;align-items:center;gap:8px}
+  section h2::before{content:"";width:3px;height:14px;background:var(--gold);border-radius:2px}
+  .bag{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px}
+  .slot{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 11px}
+  .slot .pos{font-size:11px;color:var(--muted);font-family:ui-monospace,Consolas,monospace}
+  .slot .nm{font-size:13px;margin:3px 0 2px;min-height:34px;line-height:1.35}
+  .slot .qty{color:var(--gold);font-variant-numeric:tabular-nums;font-size:12px}
+  .slot .ops{display:flex;gap:6px;margin-top:8px}
+  .empty{color:var(--muted);border:1px dashed var(--line);border-radius:10px;padding:22px;text-align:center}
+  input{background:#0e1015;border:1px solid #2c3242;color:var(--text);border-radius:7px;
+        padding:7px 9px;font-family:inherit;font-size:13px;outline:none;width:100%}
+  input:focus{border-color:#4a5570}
+  .search{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .search input.kw{flex:1;min-width:180px}
+  .search input.qty{width:88px}
+  .results{margin-top:10px;max-height:216px;overflow:auto;border:1px solid var(--line);
+           border-radius:10px;background:var(--panel)}
+  .res{display:flex;justify-content:space-between;gap:10px;padding:8px 11px;cursor:pointer;
+       border-bottom:1px solid #22262f;font-size:13px}
+  .res:last-child{border-bottom:none}
+  .res:hover{background:#232838}
+  .res .id{color:var(--muted);font-family:ui-monospace,Consolas,monospace;font-size:11px}
+  pre{margin:0;background:#0e1015;border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+      font-family:ui-monospace,Consolas,monospace;font-size:11.5px;line-height:1.6;color:#aeb6c8;
+      max-height:260px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+  .toast{position:fixed;right:20px;bottom:20px;background:#20261f;border:1px solid #2f4a35;
+         color:#bfe8cd;padding:10px 14px;border-radius:9px;font-size:13px;opacity:0;
+         transform:translateY(8px);transition:.2s;pointer-events:none;z-index:99;max-width:70vw}
+  .toast.show{opacity:1;transform:none}
+  .toast.err{background:#2a1d1d;border-color:#5a2a2a;color:#f0b4b4}
+  .lvbar{height:6px;background:#0e1015;border-radius:4px;overflow:hidden;margin-top:8px}
+  .lvbar i{display:block;height:100%;background:linear-gradient(90deg,#c9922f,#f5cf8a)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>口袋修仙 <span>· 私服管理后台</span></h1>
+    <div id="online" class="badge off"><i class="dot"></i><span>未连接</span></div>
+    <div class="spacer"></div>
+    <div class="muted small" id="stamp">—</div>
+  </header>
+
+  <section>
+    <h2>角色数值</h2>
+    <div class="grid cards" id="cards"></div>
+  </section>
+
+  <section>
+    <h2>背包 <span class="muted small" id="bagnum"></span></h2>
+    <div class="bag" id="bag"></div>
+  </section>
+
+  <section>
+    <h2>发放道具</h2>
+    <div class="search">
+      <input class="kw" id="kw" placeholder="输入道具名搜索，如：元宝 / 见闻录 / 礼包 / 妖丹">
+      <input class="qty" id="qty" type="number" value="1" min="1">
+      <button class="primary" id="give">发放</button>
+    </div>
+    <div class="results" id="results" style="display:none"></div>
+  </section>
+
+  <section>
+    <h2>GM 指令台</h2>
+    <div class="search">
+      <input class="kw" id="gm" placeholder="例：元宝 +100000 / 绑定元宝 =9999 / 物品 20735 10 / 删除 3 / 清包">
+      <button class="gold" id="gmrun">执行</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button data-gm="元宝 +100000">元宝 +10万</button>
+      <button data-gm="绑定元宝 +100000">绑元 +10万</button>
+      <button data-gm="铜钱 +1000000">铜钱 +100万</button>
+      <button data-gm="阅历 +10000">阅历 +1万</button>
+      <button class="danger" data-gm="清包">清空背包</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>服务端日志</h2>
+    <pre id="log">加载中…</pre>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const FIELDS = [
+  {key:"yuanbao",      label:"元宝",     step:10000},
+  {key:"bind_yuanbao", label:"绑定元宝", step:10000},
+  {key:"tongqian",     label:"铜钱",     step:100000},
+  {key:"bind_coin",    label:"绑定铜钱", step:100000},
+  {key:"yueli",        label:"阅历",     step:1000},
+];
+let items = [];
+
+function toast(msg, ok=true){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "toast show" + (ok ? "" : " err");
+  clearTimeout(t._h); t._h = setTimeout(()=>t.className="toast", 2200);
+}
+function fmt(n){ return (n??0).toLocaleString("zh-CN"); }
+
+async function api(path, opt){
+  const r = await fetch(path, opt);
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function gm(line){
+  const j = await api("/api/gm", {method:"POST", headers:{"Content-Type":"application/json"},
+                                  body: JSON.stringify({lines:[line]})});
+  const first = j.results && j.results[0];
+  toast(first ? (first[0] ? "✔ " : "✘ ") + first[1] : "已发送", !!(first && first[0]));
+  refresh();
+}
+
+function renderCards(s){
+  const wrap = document.getElementById("cards");
+  wrap.innerHTML = FIELDS.map(f=>`
+    <div class="card">
+      <div class="label">${f.label}</div>
+      <div class="num">${fmt(s[f.key])}</div>
+      <div class="row">
+        <button data-add="${f.key}" data-v="${10*f.step}">+${fmt(10*f.step)}</button>
+        <button data-add="${f.key}" data-v="${f.step}">+${fmt(f.step)}</button>
+        <button class="danger" data-set="${f.key}">归零</button>
+      </div>
+    </div>`).join("") + `
+    <div class="card">
+      <div class="label">等级 / 经验</div>
+      <div class="num">Lv ${s.level||0}</div>
+      <div class="muted small">${fmt(s.exp)} / ${fmt(s.need)}</div>
+      <div class="lvbar"><i style="width:${Math.min(100,(s.exp||0)/(s.need||1)*100)}%"></i></div>
+      <div class="row" style="margin-top:10px">
+        <button data-add="level" data-v="1">等级 +1</button>
+        <button data-gm="经验 +10000">经验 +1万</button>
+        <button class="danger" data-set="level">等级清零</button>
+      </div>
+    </div>`;
+  wrap.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.add, v=+b.dataset.v;
+    gm(k==="level" ? `等级 +${v}` : `${labelOf(k)} +${v}`);
+  });
+  wrap.querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>{
+    const lb = labelOf(b.dataset.set);
+    if(!confirm(`确定把「${lb}」清零吗？此操作立即生效。`)) return;
+    gm(`${lb} =0`);
+  });
+  wrap.querySelectorAll("[data-gm]").forEach(b=>b.onclick=()=>{
+    if(b.classList.contains("danger") && !confirm(`确定执行「${b.dataset.gm}」吗？`)) return;
+    gm(b.dataset.gm);
+  });
+}
+function labelOf(k){ const f=FIELDS.find(x=>x.key===k); return f?f.label:k; }
+
+function renderBag(s){
+  const bag = s.bag || {};
+  const keys = Object.keys(bag).sort((a,b)=>a-b);
+  const el = document.getElementById("bag");
+  document.getElementById("bagnum").textContent = keys.length ? `${keys.length} 格` : "";
+  if(!keys.length){ el.innerHTML = `<div class="empty">背包是空的</div>`; return; }
+  el.innerHTML = keys.map(k=>{
+    const [id,n] = bag[k];
+    return `<div class="slot">
+      <div class="pos">格 ${String(k).padStart(2,"0")} · #${id}</div>
+      <div class="nm">${s.names && s.names[id] ? s.names[id] : "未知道具"}</div>
+      <div class="qty">× ${n}</div>
+      <div class="ops">
+        <button data-use="${k}">用 1</button>
+        <button class="danger" data-del="${k}">删除</button>
+      </div>
+    </div>`;
+  }).join("");
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>gm(`删除 ${b.dataset.del}`));
+  el.querySelectorAll("[data-use]").forEach(b=>b.onclick=()=>toast("游戏内点击使用才会走真实逻辑，这里只做删除/发放"));
+}
+
+async function refresh(){
+  try{
+    const s = await api("/api/state");
+    const on = document.getElementById("online");
+    on.className = "badge" + (s.online ? "" : " off");
+    on.querySelector("span").textContent = s.online ? `在线 ${s.online}` : "无人在线";
+    document.getElementById("stamp").textContent = "更新于 " + (s.time || "—");
+    renderCards(s); renderBag(s);
+    const lg = await api("/api/log?n=60");
+    const pre = document.getElementById("log");
+    const atBottom = pre.scrollTop + pre.clientHeight >= pre.scrollHeight - 30;
+    pre.textContent = lg.text || "";
+    if(atBottom) pre.scrollTop = pre.scrollHeight;
+  }catch(e){
+    const on = document.getElementById("online");
+    on.className = "badge off"; on.querySelector("span").textContent = "后台未连接";
+  }
+}
+
+let searchTimer=null;
+document.getElementById("kw").addEventListener("input", e=>{
+  clearTimeout(searchTimer);
+  const q = e.target.value.trim();
+  const box = document.getElementById("results");
+  if(!q){ box.style.display="none"; return; }
+  searchTimer = setTimeout(async ()=>{
+    items = await api("/api/items?q=" + encodeURIComponent(q));
+    box.style.display = "block";
+    box.innerHTML = items.length ? items.map((it,i)=>
+      `<div class="res" data-i="${i}"><span>${it.name}</span><span class="id">#${it.id}</span></div>`
+    ).join("") : `<div class="res"><span class="muted">没有匹配的道具</span></div>`;
+    box.querySelectorAll("[data-i]").forEach(d=>d.onclick=()=>{
+      document.getElementById("kw").value = items[+d.dataset.i].name;
+      box.style.display="none";
+    });
+  }, 220);
+});
+
+document.getElementById("give").onclick = ()=>{
+  const name = document.getElementById("kw").value.trim();
+  const n = +document.getElementById("qty").value || 1;
+  const it = items.find(x=>x.name===name);
+  if(!it) return toast("先在列表里选一个道具", false);
+  gm(`物品 ${it.id} ${n}`);
+};
+document.getElementById("gmrun").onclick = ()=>{
+  const v = document.getElementById("gm").value.trim();
+  if(v) gm(v);
+};
+document.getElementById("gm").addEventListener("keydown", e=>{
+  if(e.key==="Enter") document.getElementById("gmrun").click();
+});
+document.querySelectorAll("[data-gm]").forEach(b=>b.onclick=()=>gm(b.dataset.gm));
+
+refresh();
+setInterval(()=>{ if(!document.activeElement.matches("input")) refresh(); }, 2500);
+</script>
+</body>
+</html>

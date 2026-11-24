@@ -1,0 +1,12 @@
+[1] 启动，等 20s
+[2] 点登录
+[3] 点开始游戏
+  t=0s 存活 server.log=121B
+  t=10s 存活 server.log=121B
+  t=20s 存活 server.log=121B
+  t=30s 存活 server.log=121B
+  t=40s 存活 server.log=121B
+=== 服务端尾部 ===
+[13:27:57] 回放序列 42 包（推送 15）
+[13:27:57] 服务端 v3 监听 :9000（TLS /auth + 明文游戏协议）
+done

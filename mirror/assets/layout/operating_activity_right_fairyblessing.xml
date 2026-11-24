@@ -1,0 +1,7 @@
+<layout height="455" width="565">
+	<image src="assets/ui/operating/operating_1.png" x="0" y="0" />
+	<button id="1003108" name="btn_go" normal="assets/ui/operating/answer_activity_btn_go_normal.png" selected="assets/ui/operating/answer_activity_btn_go_p.png" x="410" y="385" />
+	<label color="white" fontsize="22" text="四种祝福分别抽取2、3、4、5级宝石。" width="535" x="15" y="165" />
+	<label color="white" fontsize="22" text="九种属性各1/9概率，每次获得1颗绑定宝石。" width="535" x="15" y="210" />
+	<label color="white" fontsize="22" text="前往活动后点击购买，可用元宝兑换祝福。" width="535" x="15" y="255" />
+</layout>

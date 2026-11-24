@@ -1,0 +1,694 @@
+--------- beginning of system
+11-22 13:30:21.913 I/ActivityManager( 1603): START u0 {flg=0x10000000 cmp=com.kdxx.online/com.aiyou.mhsj.MainActivity} from uid 2000
+11-22 13:30:21.917 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '2212' (No space left on device); fd=24
+11-22 13:30:21.918 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:45 android.app.ActivityThread.handleReceiver:3424 
+--------- beginning of main
+11-22 13:30:21.925 I/main    (25239): type=1400 audit(0.0:7493): avc: denied { mounton } for path="/system/lib/arm/cpuinfo" dev="sdb2" ino=393343 scontext=u:r:zygote:s0 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=1
+11-22 13:30:21.929 D/libnativeloader( 1431): CrashArm64 config not exist or not readable: /system/vendor/firmware_mnt/haehn/CrashArm64
+11-22 13:30:21.929 I/Zygote  ( 1431): IsCopy  libcrashcatcher: 0
+11-22 13:30:21.930 D/nativebridge(25239): PreInitializeNativeBridge name=zygote instruction_set=arm
+11-22 13:30:21.937 I/ActivityManager( 1603): Start proc 25239:com.kdxx.online/u0a55 for activity com.kdxx.online/com.aiyou.mhsj.MainActivity
+11-22 13:30:21.941 I/Binder:1459_1( 1459): type=1400 audit(0.0:7494): avc: denied { read write } for path="/dev/fastpipe" dev="tmpfs" ino=4146 scontext=u:r:system_server:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:30:21.944 W/nativebridge(25239): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: Not a directory
+11-22 13:30:21.952 I/Zygote  (25239): seccomp disabled by setenforce 0
+11-22 13:30:21.952 I/com.kdxx.onlin(25239): Late-enabling -Xcheck:jni
+11-22 13:30:21.965 I/com.kdxx.onlin(25239): type=1400 audit(0.0:7495): avc: denied { execmod } for path="/system/lib/libhoudini.so" dev="sda2" ino=3043 scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:object_r:system_file:s0 tclass=file permissive=1
+11-22 13:30:21.965 I/com.kdxx.online(25239): type=1400 audit(0.0:7496): avc: denied { open } for path="/data/local/cfg-haehn/app_device" dev="sdb2" ino=393352 scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=1
+11-22 13:30:21.967 V/libnb   (25239): enter native_bridge2_initialize /data/user/0/com.kdxx.online/code_cache arm
+11-22 13:30:21.968 D/houdini (25239): [25239] Initialize library(version: 9.0.7a_y.38597 RELEASE)... successfully.
+11-22 13:30:21.968 V/libnb   (25239): enter native_bridge2_isCompatibleWith 2
+11-22 13:30:21.968 I/chatty  (25239): uid=10055(com.kdxx.online) identical 63 lines
+11-22 13:30:21.968 V/libnb   (25239): enter native_bridge2_isCompatibleWith 2
+11-22 13:30:21.971 I/surfaceflinger( 1459): type=1400 audit(0.0:7497): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6867 scontext=u:r:surfaceflinger:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:30:21.971 I/HwBinder:1446_1( 1446): type=1400 audit(0.0:7498): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6867 scontext=u:r:hal_graphics_allocator_default:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:30:21.971 I/HwBinder:1446_1( 1446): type=1400 audit(0.0:7499): avc: denied { read write } for name="fastpipe" dev="tmpfs" ino=4146 scontext=u:r:hal_graphics_allocator_default:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:30:21.971 I/HwBinder:1446_1( 1446): type=1400 audit(0.0:7500): avc: denied { open } for path="/dev/fastpipe" dev="tmpfs" ino=4146 scontext=u:r:hal_graphics_allocator_default:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:30:21.974 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '25239' (No space left on device); fd=27
+11-22 13:30:21.997 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.008 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.026 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:54 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:30:22.030 I/com.kdxx.onlin(25239): The ClassLoaderContext is a special shared library.
+11-22 13:30:22.049 V/libnb   (25239): enter native_bridge2_isCompatibleWith 3
+11-22 13:30:22.049 V/libnb   (25239): enter native_bridge3_isPathSupported /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/lib/arm:/system/fake-libs:/data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/base.apk!/lib/armeabi-v7a
+11-22 13:30:22.049 V/libnb   (25239): enter native_bridge2_isCompatibleWith 3
+11-22 13:30:22.049 V/libnb   (25239): enter native_bridge3_initAnonymousNamespace libandroid.so:libaaudio.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativewindow.so:libneuralnetworks.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so, /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/lib/arm:/system/fake-libs:/data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/base.apk!/lib/armeabi-v7a
+11-22 13:30:22.049 V/libnb   (25239): enter native_bridge2_isCompatibleWith 3
+11-22 13:30:22.049 V/libnb   (25239): enter native_bridge3_isPathSupported /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/lib/arm:/system/fake-libs:/data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/base.apk!/lib/armeabi-v7a
+11-22 13:30:22.049 V/libnb   (25239): enter native_bridge2_isCompatibleWith 3
+11-22 13:30:22.049 V/libnb   (25239): enter native_bridge3_createNamespace classloader-namespace, (null), /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/lib/arm:/system/fake-libs:/data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/base.apk!/lib/armeabi-v7a, /data:/mnt/expand:/data/user/0/com.kdxx.online
+11-22 13:30:22.049 V/libnb   (25239): enter native_bridge2_isCompatibleWith 4
+11-22 13:30:22.049 V/libnb   (25239): enter native_bridge2_isCompatibleWith 3
+11-22 13:30:22.049 V/libnb   (25239): enter native_bridge3_linkNamespaces libandroid.so:libaaudio.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativewindow.so:libneuralnetworks.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+11-22 13:30:22.053 D/libnativeloader(25239): CrashArm64 config not exist or not readable: /system/vendor/firmware_mnt/haehn/CrashArm64
+11-22 13:30:22.079 D/com.aiyou.mhsj.MainActivity(25239): MainActivity.onCreate
+11-22 13:30:22.084 W/System  ( 1603): A resource failed to call close. 
+11-22 13:30:22.084 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 21 lines
+11-22 13:30:22.084 W/System  ( 1603): A resource failed to call close. 
+11-22 13:30:22.091 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.104 D/com.aiyou.mhsj.MainActivity(25239): MainActivity setContentView done
+11-22 13:30:22.107 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.117 D/com.aiyou.mhsj.MainActivity(25239): before check network
+11-22 13:30:22.121 D/com.aiyou.mhsj.MainActivity(25239): after check network
+11-22 13:30:22.123 D/com.aiyou.mhsj.MainActivity(25239): ----------oncreate,pkg type=0
+11-22 13:30:22.123 I/mhsj    (25239): sendReport: /data/user/0/com.kdxx.online/files/405fcab5-56fb-0c29-0087a2c4-3d1e1b87.dmp
+11-22 13:30:22.123 D/com.aiyou.mhsj.MainActivity(25239): before sdk init
+11-22 13:30:22.124 D/NetworkSecurityConfig(25239): No Network Security Config specified, using platform default
+11-22 13:30:22.125 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.127 D/com.aiyou.mhsj.MainActivity(25239): after sdk init
+11-22 13:30:22.128 I/mhsj    (25239): Received failure HTTP response code from server: 501
+11-22 13:30:22.133 D/com.aiyou.mhsj.MainActivity(25239): before check version
+11-22 13:30:22.133 W/System.err(25239): java.io.FileNotFoundException: mhsj_res_obb.md5
+11-22 13:30:22.133 W/System.err(25239): 	at android.content.res.AssetManager.nativeOpenAsset(Native Method)
+11-22 13:30:22.133 W/System.err(25239): 	at android.content.res.AssetManager.open(AssetManager.java:815)
+11-22 13:30:22.133 W/System.err(25239): 	at android.content.res.AssetManager.open(AssetManager.java:792)
+11-22 13:30:22.133 W/System.err(25239): 	at com.aiyou.mhsj.MainActivity.getObbFileMD5(MainActivity.java:1056)
+11-22 13:30:22.133 W/System.err(25239): 	at com.aiyou.mhsj.MainActivity.onSplashEnd(MainActivity.java:1087)
+11-22 13:30:22.133 W/System.err(25239): 	at com.aiyou.mhsj.MainActivity.onCreate(MainActivity.java:890)
+11-22 13:30:22.133 W/System.err(25239): 	at android.app.Activity.performCreate(Activity.java:7284)
+11-22 13:30:22.133 W/System.err(25239): 	at android.app.Activity.performCreate(Activity.java:7275)
+11-22 13:30:22.133 W/System.err(25239): 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+11-22 13:30:22.133 W/System.err(25239): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2938)
+11-22 13:30:22.133 W/System.err(25239): 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3093)
+11-22 13:30:22.133 W/System.err(25239): 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+11-22 13:30:22.133 W/System.err(25239): 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+11-22 13:30:22.133 W/System.err(25239): 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+11-22 13:30:22.133 W/System.err(25239): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1823)
+11-22 13:30:22.133 W/System.err(25239): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-22 13:30:22.133 W/System.err(25239): 	at android.os.Looper.loop(Looper.java:193)
+11-22 13:30:22.133 W/System.err(25239): 	at android.app.ActivityThread.main(ActivityThread.java:6838)
+11-22 13:30:22.133 W/System.err(25239): 	at java.lang.reflect.Method.invoke(Native Method)
+11-22 13:30:22.133 W/System.err(25239): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-22 13:30:22.133 W/System.err(25239): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:860)
+11-22 13:30:22.135 W/System.err(25239): java.lang.Exception: Toast callstack! strTip=检测资源同步中，请等待...
+11-22 13:30:22.136 W/System.err(25239): 	at android.widget.Toast.show(Toast.java:143)
+11-22 13:30:22.136 W/System.err(25239): 	at com.aiyou.mhsj.MainActivity.showProgress(MainActivity.java:1018)
+11-22 13:30:22.136 W/System.err(25239): 	at com.aiyou.mhsj.MainActivity.onSplashEnd(MainActivity.java:1101)
+11-22 13:30:22.136 W/System.err(25239): 	at com.aiyou.mhsj.MainActivity.onCreate(MainActivity.java:890)
+11-22 13:30:22.136 W/System.err(25239): 	at android.app.Activity.performCreate(Activity.java:7284)
+11-22 13:30:22.136 W/System.err(25239): 	at android.app.Activity.performCreate(Activity.java:7275)
+11-22 13:30:22.136 W/System.err(25239): 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+11-22 13:30:22.136 W/System.err(25239): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2938)
+11-22 13:30:22.136 W/System.err(25239): 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3093)
+11-22 13:30:22.136 W/System.err(25239): 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+11-22 13:30:22.136 W/System.err(25239): 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+11-22 13:30:22.136 W/System.err(25239): 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+11-22 13:30:22.136 W/System.err(25239): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1823)
+11-22 13:30:22.136 W/System.err(25239): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-22 13:30:22.136 W/System.err(25239): 	at android.os.Looper.loop(Looper.java:193)
+11-22 13:30:22.136 W/System.err(25239): 	at android.app.ActivityThread.main(ActivityThread.java:6838)
+11-22 13:30:22.136 W/System.err(25239): 	at java.lang.reflect.Method.invoke(Native Method)
+11-22 13:30:22.136 W/System.err(25239): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-22 13:30:22.136 W/System.err(25239): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:860)
+11-22 13:30:22.139 D/com.aiyou.mhsj.MainActivity(25239): MainActivity.onStart()
+11-22 13:30:22.139 D/OpenGLRenderer(25239): Skia GL Pipeline
+11-22 13:30:22.140 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.159 D/com.aiyou.mhsj.MainActivity(25239): check version done
+11-22 13:30:22.159 V/libnb   (25239): enter native_bridge2_isCompatibleWith 3
+11-22 13:30:22.159 V/libnb   (25239): enter native_bridge3_loadLibraryExt /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/lib/arm/libgame.so, 0, 0x3
+11-22 13:30:22.260 V/libnb   (25239): native_bridge3_loadLibraryExt: 0xd2f6e900
+11-22 13:30:22.260 V/libnb   (25239): enter native_bridge2_getTrampoline JNI_OnLoad, trampoline_addr 0xf2f75000
+11-22 13:30:22.260 E/libsigchain(25239): Warning: Unexpected sigaction action found 0xf73821f7
+11-22 13:30:22.260 V/libnb   (25239): enter native_bridge2_getTrampoline Java_com_aiyou_mhsj_JniHelp_nativeSetExternalResourcePath, trampoline_addr 0xf2f75010
+11-22 13:30:22.260 D/cocos2d-x debug info(25239): nativeSetExternalResourcePath: /data/user/0/com.kdxx.online/files/
+11-22 13:30:22.260 D/cocos2d-x debug info(25239): CCFileUtils::setExternalResourcePath /data/user/0/com.kdxx.online/files/
+11-22 13:30:22.260 V/libnb   (25239): enter native_bridge2_getTrampoline Java_com_aiyou_mhsj_JniHelp_nativeSetServerListURL, trampoline_addr 0xf2f75020
+11-22 13:30:22.260 D/cocos2d-x debug info(25239): nativeSetServerListURL: http://124.223.56.189/server-list.xml
+11-22 13:30:22.262 W/System.err(25239): java.lang.Exception: Toast callstack! strTip=检测资源同步中，请等待...
+11-22 13:30:22.262 W/System.err(25239): 	at android.widget.Toast.show(Toast.java:143)
+11-22 13:30:22.262 W/System.err(25239): 	at com.aiyou.mhsj.MainActivity.showProgress(MainActivity.java:1018)
+11-22 13:30:22.262 W/System.err(25239): 	at com.aiyou.mhsj.MainActivity.onVersionCheckOk(MainActivity.java:592)
+11-22 13:30:22.262 W/System.err(25239): 	at com.aiyou.mhsj.MainActivity$LocalHandler.handleMessage(MainActivity.java:728)
+11-22 13:30:22.262 W/System.err(25239): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-22 13:30:22.262 W/System.err(25239): 	at android.os.Looper.loop(Looper.java:193)
+11-22 13:30:22.262 W/System.err(25239): 	at android.app.ActivityThread.main(ActivityThread.java:6838)
+11-22 13:30:22.262 W/System.err(25239): 	at java.lang.reflect.Method.invoke(Native Method)
+11-22 13:30:22.262 W/System.err(25239): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-22 13:30:22.262 W/System.err(25239): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:860)
+11-22 13:30:22.264 I/KDXXOnlineHttp(25239): http://124.223.56.189/assets.txt
+11-22 13:30:22.273 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.149 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:54 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:30:22.291 W/NotificationService( 1603): Toast already killed. pkg=com.kdxx.online callback=android.app.ITransientNotification$Stub$Proxy@bba9d3
+11-22 13:30:22.283 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 2 lines
+11-22 13:30:22.291 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.296 D/com.aiyou.mhsj.MainActivity(25239): local asset md5 = 5efc42ed36978e860f135a96bd93c85a remote = 5efc42ed36978e860f135a96bd93c85a
+11-22 13:30:22.296 D/cocos2d-x(25239): will call nativeInitPackage, incrementalUpdate = false
+11-22 13:30:22.296 V/libnb   (25239): enter native_bridge2_getTrampoline Java_com_aiyou_mhsj_JniHelp_nativeInitPackage, trampoline_addr 0xf2f75030
+11-22 13:30:22.296 D/cocos2d-x debug info(25239): in initMPackage
+11-22 13:30:22.296 D/cocos2d-x debug info(25239): start to incremental update ...
+11-22 13:30:22.298 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:30:22.301 D/vndksupport(25239): Loading /vendor/lib/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-22 13:30:22.301 D/vndksupport(25239): Loading /vendor/lib/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-22 13:30:22.302 D/cocos2d-x debug info(25239): meta.xml parsed.
+11-22 13:30:22.302 D/cocos2d-x debug info(25239): in MPackage::MPackage
+11-22 13:30:22.303 D/cocos2d-x debug info(25239): in MPackage::init_
+11-22 13:30:22.303 I/        (25239): fastpipe: Connect success
+11-22 13:30:22.304 I/        (25239): fastpipe: Connect success
+11-22 13:30:22.304 D/HostConnection(25239): HostRPC::connect sucess: app=com.kdxx.online, pid=25239, tid=25239, this=0xe7904180
+11-22 13:30:22.305 D/HostConnection(25239): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:com.kdxx.online
+11-22 13:30:22.321 D/cocos2d-x debug info(25239): MPackage inited.
+11-22 13:30:22.332 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.332 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.332 W/system_server( 1603): Failed to determine oat file name for dex location /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/base.apk: Dalvik cache directory does not exist
+11-22 13:30:22.332 I/ActivityManager( 1603): Displayed com.kdxx.online/com.aiyou.mhsj.MainActivity: +420ms
+11-22 13:30:22.338 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.338 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 1 line
+11-22 13:30:22.340 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.350 D/cocos2d-x debug info(25239): work queue created, size = 0
+11-22 13:30:22.361 D/com.aiyou.mhsj.MainActivity(25239): package prepared, jump to game activity now
+11-22 13:30:22.361 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.299 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:30:22.361 I/ActivityManager( 1603): START u0 {cmp=com.kdxx.online/com.aiyou.mhsj.GameActivity} from uid 10055
+11-22 13:30:22.366 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:45 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:30:22.366 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 2 lines
+11-22 13:30:22.390 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.390 W/SurfaceFlinger( 1459): Attempting to set client state on removed layer: Splash Screen com.kdxx.online#0
+11-22 13:30:22.390 W/SurfaceFlinger( 1459): Attempting to destroy on removed layer: Splash Screen com.kdxx.online#0
+11-22 13:30:22.406 W/System  ( 1603): A resource failed to call close. 
+11-22 13:30:22.406 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 22 lines
+11-22 13:30:22.406 W/System  ( 1603): A resource failed to call close. 
+11-22 13:30:22.407 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.414 W/ActivityThread(25239): handleWindowVisibility: no activity for token android.os.BinderProxy@bbf703e
+11-22 13:30:22.416 V/libnb   (25239): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxHelper_nativeSetApkPath, trampoline_addr 0xf2f75040
+11-22 13:30:22.418 W/SoundPool(25239): Use of stream types is deprecated for operations other than volume control
+11-22 13:30:22.418 W/SoundPool(25239): See the documentation of SoundPool() for what to use instead with android.media.AudioAttributes to qualify your playback use case
+11-22 13:30:22.418 W/com.kdxx.onlin(25239): Accessing hidden method Landroid/util/FloatMath;->ceil(F)F (light greylist, linking)
+11-22 13:30:22.430 V/libnb   (25239): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeOnResume, trampoline_addr 0xf2f75050
+11-22 13:30:22.430 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:54 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:30:22.439 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.453 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 1 line
+11-22 13:30:22.453 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.456 I/        (25239): fastpipe: Connect success
+11-22 13:30:22.457 D/HostConnection(25239): HostRPC::connect sucess: app=com.kdxx.online, pid=25239, tid=25274, this=0xd25f31c0
+11-22 13:30:22.457 D/HostConnection(25239): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:com.kdxx.online
+11-22 13:30:22.458 I/ConfigStore(25239): android::hardware::configstore::V1_0::ISurfaceFlingerConfigs::hasWideColorDisplay retrieved: 0
+11-22 13:30:22.458 I/ConfigStore(25239): android::hardware::configstore::V1_0::ISurfaceFlingerConfigs::hasHDRDisplay retrieved: 0
+11-22 13:30:22.462 D/EGL_emulation(25239): eglCreateContext: 0xec232490: maj 3 min 1 rcv 4
+11-22 13:30:22.479 E/eglCodecCommon(25239): glUtilsParamSize: unknow param 0x000082da
+11-22 13:30:22.479 E/eglCodecCommon(25239): glUtilsParamSize: unknow param 0x000082e5
+11-22 13:30:22.479 V/libnb   (25239): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit, trampoline_addr 0xf2f75060
+11-22 13:30:22.479 D/cocos2d-x debug info(25239): Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit, 1600x900
+11-22 13:30:22.480 D/cocos2d-x debug info(25239): background loader, started ...
+11-22 13:30:22.480 D/cocos2d-x debug info(25239): processing work item 0 ...
+11-22 13:30:22.487 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.513 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:30:22.505 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.518 D/cocos2d-x debug info(25239): processing work item 1 ...
+11-22 13:30:22.518 D/cocos2d-x debug info(25239): begin to init ChineseRepository ...
+11-22 13:30:22.523 D/cocos2d-x debug info(25239): ChineseRepository init finished
+11-22 13:30:22.523 D/cocos2d-x debug info(25239): processing work item 2 ...
+11-22 13:30:22.523 D/cocos2d-x debug info(25239): begin to init ServerRepository
+11-22 13:30:22.523 D/cocos2d-x debug info(25239): in getServerList, url = http://124.223.56.189/server-list.xml
+11-22 13:30:22.527 D/cocos2d-x debug info(25239): server list downloaded.
+11-22 13:30:22.527 D/cocos2d-x debug info(25239): ServerRepository init finished, 1 servers found
+11-22 13:30:22.527 D/cocos2d-x debug info(25239): processing work item 3 ...
+11-22 13:30:22.528 D/cocos2d-x debug info(25239): begin to init XingRepository
+11-22 13:30:22.528 D/cocos2d-x debug info(25239): XingRepository init finished
+11-22 13:30:22.528 D/cocos2d-x debug info(25239): processing work item 4 ...
+11-22 13:30:22.528 D/cocos2d-x debug info(25239): begin to init FnameRepository
+11-22 13:30:22.529 D/cocos2d-x debug info(25239): FnameRepository init finished
+11-22 13:30:22.529 D/cocos2d-x debug info(25239): processing work item 5 ...
+11-22 13:30:22.529 D/cocos2d-x debug info(25239): begin to init MnameRepository
+11-22 13:30:22.530 D/cocos2d-x debug info(25239): MnameRepository init finished
+11-22 13:30:22.530 D/cocos2d-x debug info(25239): processing work item 6 ...
+11-22 13:30:22.530 D/cocos2d-x debug info(25239): begin to init BlockedWordsRepository ...
+11-22 13:30:22.531 D/cocos2d-x debug info(25239): BlockedWordsRepository init finished
+11-22 13:30:22.531 D/cocos2d-x debug info(25239): processing work item 7 ...
+11-22 13:30:22.531 D/cocos2d-x debug info(25239): begin to init SceneRepository ...
+11-22 13:30:22.533 V/libnb   (25239): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxBitmap_nativeInitBitmapDC, trampoline_addr 0xf2f75070
+11-22 13:30:22.547 D/cocos2d-x debug info(25239): SceneRepository init finished
+11-22 13:30:22.547 D/cocos2d-x debug info(25239): processing work item 8 ...
+11-22 13:30:22.547 D/cocos2d-x debug info(25239): windowSize = 1600.000000 * 900.000000
+11-22 13:30:22.547 D/cocos2d-x debug info(25239): scale = 0.711111
+11-22 13:30:22.548 D/cocos2d-x debug info(25239): begin to init NPCRepository ...
+11-22 13:30:22.552 D/cocos2d-x debug info(25239): NPCRepository init finished
+11-22 13:30:22.555 D/cocos2d-x debug info(25239): processing work item 9 ...
+11-22 13:30:22.555 D/cocos2d-x debug info(25239): begin to init JumppointRepository ...
+11-22 13:30:22.556 D/cocos2d-x debug info(25239): JumppointRepository init finished
+11-22 13:30:22.556 D/cocos2d-x debug info(25239): processing work item 10 ...
+11-22 13:30:22.556 D/cocos2d-x debug info(25239): begin to init FightSetRepository ...
+11-22 13:30:22.556 D/cocos2d-x debug info(25239): FightSetRepository init finished
+11-22 13:30:22.556 D/cocos2d-x debug info(25239): processing work item 11 ...
+11-22 13:30:22.557 D/cocos2d-x debug info(25239): begin to init ClassRepository ...
+11-22 13:30:22.558 D/cocos2d-x debug info(25239): ClassRepository init finished
+11-22 13:30:22.558 D/cocos2d-x debug info(25239): processing work item 12 ...
+11-22 13:30:22.558 D/cocos2d-x debug info(25239): begin to init HorseRepository ...
+11-22 13:30:22.560 D/cocos2d-x debug info(25239): HorseRepository init finished
+11-22 13:30:22.560 D/cocos2d-x debug info(25239): processing work item 13 ...
+11-22 13:30:22.560 D/cocos2d-x debug info(25239): begin to init PetRepository ...
+11-22 13:30:22.564 D/cocos2d-x debug info(25239): PetRepository init finished
+11-22 13:30:22.564 D/cocos2d-x debug info(25239): processing work item 14 ...
+11-22 13:30:22.564 D/cocos2d-x debug info(25239): begin to init FashionEquipmentRepository ...
+11-22 13:30:22.568 D/cocos2d-x debug info(25239): SceneRepository init finished
+11-22 13:30:22.568 D/cocos2d-x debug info(25239): processing work item 15 ...
+11-22 13:30:22.568 D/cocos2d-x debug info(25239): begin to init GatherpointRepository ...
+11-22 13:30:22.569 D/cocos2d-x debug info(25239): SceneRepository init finished
+11-22 13:30:22.569 D/cocos2d-x debug info(25239): processing work item 16 ...
+11-22 13:30:22.569 D/cocos2d-x debug info(25239): begin to init SpawnPointRepository ...
+11-22 13:30:22.570 D/cocos2d-x debug info(25239): getLastLoginServeId id=1
+11-22 13:30:22.571 D/cocos2d-x debug info(25239): SpawnPointProperty init finished
+11-22 13:30:22.571 D/cocos2d-x debug info(25239): processing work item 17 ...
+11-22 13:30:22.571 D/cocos2d-x debug info(25239): begin to init MonsterRepository ...
+11-22 13:30:22.571 D/cocos2d-x debug info(25239): native init ok
+11-22 13:30:22.571 V/libnb   (25239): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeRender, trampoline_addr 0xf2f75080
+11-22 13:30:22.618 D/cocos2d-x debug info(25239): MonsterRepository init finished
+11-22 13:30:22.618 D/cocos2d-x debug info(25239): processing work item 18 ...
+11-22 13:30:22.618 D/cocos2d-x debug info(25239): begin to init ClamRepository ...
+11-22 13:30:22.619 D/cocos2d-x debug info(25239): ShapeRepository init finished
+11-22 13:30:22.619 D/cocos2d-x debug info(25239): processing work item 19 ...
+11-22 13:30:22.619 D/cocos2d-x debug info(25239): begin to init SkillLearnRepository ...
+11-22 13:30:22.623 D/cocos2d-x debug info(25239): SkillLearnRepository init finished
+11-22 13:30:22.624 D/cocos2d-x debug info(25239): processing work item 20 ...
+11-22 13:30:22.624 D/cocos2d-x debug info(25239): begin to init SkillRepository ...
+11-22 13:30:22.630 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.634 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 1 line
+11-22 13:30:22.638 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.672 D/cocos2d-x debug info(25239): SkillRepository init finished
+11-22 13:30:22.672 D/cocos2d-x debug info(25239): processing work item 21 ...
+11-22 13:30:22.672 D/cocos2d-x debug info(25239): begin to init ItemRepository
+11-22 13:30:22.701 D/cocos2d-x debug info(25239): init ItemRepository finished
+11-22 13:30:22.701 D/cocos2d-x debug info(25239): processing work item 22 ...
+11-22 13:30:22.701 D/cocos2d-x debug info(25239): begin to init NPCRepository ...
+11-22 13:30:22.706 D/cocos2d-x debug info(25239): NPCRepository init finished
+11-22 13:30:22.706 D/cocos2d-x debug info(25239): processing work item 23 ...
+11-22 13:30:22.706 D/cocos2d-x debug info(25239): begin to init BuffRepository ...
+11-22 13:30:22.719 D/cocos2d-x debug info(25239): SceneRepository init finished
+11-22 13:30:22.719 D/cocos2d-x debug info(25239): processing work item 24 ...
+11-22 13:30:22.719 D/cocos2d-x debug info(25239): begin to init QuestRepository ...
+11-22 13:30:22.738 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.738 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.749 D/cocos2d-x debug info(25239): QuestRepository init finished
+11-22 13:30:22.749 D/cocos2d-x debug info(25239): processing work item 25 ...
+11-22 13:30:22.749 D/cocos2d-x debug info(25239): begin to init GuideRepository
+11-22 13:30:22.752 D/cocos2d-x debug info(25239): guideRepository init finished
+11-22 13:30:22.752 D/cocos2d-x debug info(25239): processing work item 26 ...
+11-22 13:30:22.752 D/cocos2d-x debug info(25239): begin to init InstanceRepository ...
+11-22 13:30:22.753 D/cocos2d-x debug info(25239): SceneRepository init finished
+11-22 13:30:22.753 D/cocos2d-x debug info(25239): processing work item 27 ...
+11-22 13:30:22.753 D/cocos2d-x debug info(25239): begin to init DailyRepository ...
+11-22 13:30:22.754 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.755 D/cocos2d-x debug info(25239): DailyRepository init finished
+11-22 13:30:22.755 D/cocos2d-x debug info(25239): processing work item 28 ...
+11-22 13:30:22.755 D/cocos2d-x debug info(25239): begin to init MallRepository ...
+11-22 13:30:22.757 D/cocos2d-x debug info(25239): MallRepository init finished
+11-22 13:30:22.757 D/cocos2d-x debug info(25239): processing work item 29 ...
+11-22 13:30:22.757 D/cocos2d-x debug info(25239): begin to init ShopRepository ...
+11-22 13:30:22.758 D/cocos2d-x debug info(25239): ShopRepository init finished
+11-22 13:30:22.758 D/cocos2d-x debug info(25239): processing work item 30 ...
+11-22 13:30:22.759 D/cocos2d-x debug info(25239): begin to init SuiteRepository
+11-22 13:30:22.759 D/cocos2d-x debug info(25239): PetStageRepository init finished
+11-22 13:30:22.759 D/cocos2d-x debug info(25239): processing work item 31 ...
+11-22 13:30:22.759 D/cocos2d-x debug info(25239): begin to init GiftBagRepository ...
+11-22 13:30:22.762 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.766 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '2212' (No space left on device); fd=25
+11-22 13:30:22.766 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '2383' (No space left on device); fd=25
+11-22 13:30:22.766 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '2460' (No space left on device); fd=25
+11-22 13:30:22.777 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:54 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:30:22.778 D/cocos2d-x debug info(25239): NPCRepository init finished
+11-22 13:30:22.778 D/cocos2d-x debug info(25239): processing work item 32 ...
+11-22 13:30:22.778 D/cocos2d-x debug info(25239): begin to init FactionSkillRepository ...
+11-22 13:30:22.778 D/cocos2d-x debug info(25239): FactionSkillRepository init finished
+11-22 13:30:22.778 D/cocos2d-x debug info(25239): processing work item 33 ...
+11-22 13:30:22.778 D/cocos2d-x debug info(25239): begin to init DreamPoolRepository ...
+11-22 13:30:22.780 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:22.780 D/cocos2d-x debug info(25239): DreamPoolRepository init finished
+11-22 13:30:22.780 D/cocos2d-x debug info(25239): processing work item 34 ...
+11-22 13:30:22.780 D/cocos2d-x debug info(25239): begin to init DreamPoolRewardRepository ...
+11-22 13:30:22.780 D/cocos2d-x debug info(25239): DreamPoolRepository init finished
+11-22 13:30:22.780 D/cocos2d-x debug info(25239): processing work item 35 ...
+11-22 13:30:22.781 D/cocos2d-x debug info(25239): begin to init ElixirRepository
+11-22 13:30:22.783 D/cocos2d-x debug info(25239): ElixirRepository init finished
+11-22 13:30:22.783 D/cocos2d-x debug info(25239): processing work item 36 ...
+11-22 13:30:22.783 D/cocos2d-x debug info(25239): begin to init ClamRepository ...
+11-22 13:30:22.783 D/cocos2d-x debug info(25239): ClamRepository init finished
+11-22 13:30:22.783 D/cocos2d-x debug info(25239): processing work item 37 ...
+11-22 13:30:22.784 D/cocos2d-x debug info(25239): begin to init ClamRepository ...
+11-22 13:30:22.784 D/cocos2d-x debug info(25239): ClamRepository init finished
+11-22 13:30:22.784 D/cocos2d-x debug info(25239): processing work item 38 ...
+11-22 13:30:22.784 D/cocos2d-x debug info(25239): begin to init targetRepository ...
+11-22 13:30:22.786 D/cocos2d-x debug info(25239): targetRepository init finished
+11-22 13:30:22.786 D/cocos2d-x debug info(25239): processing work item 39 ...
+11-22 13:30:22.786 D/cocos2d-x debug info(25239): begin to init ItemInsRepository
+11-22 13:30:22.786 D/cocos2d-x debug info(25239): init ItemInsRepository finished
+11-22 13:30:22.786 D/cocos2d-x debug info(25239): processing work item 40 ...
+11-22 13:30:22.786 D/cocos2d-x debug info(25239): begin to init AssistantRepository ...
+11-22 13:30:22.790 D/cocos2d-x debug info(25239): AssistantRepository init finished
+11-22 13:30:22.790 D/cocos2d-x debug info(25239): processing work item 41 ...
+11-22 13:30:22.790 I/        ( 2212): fastpipe: close connect
+11-22 13:30:22.790 D/cocos2d-x debug info(25239): begin to init TitleRepository ...
+11-22 13:30:22.793 D/cocos2d-x debug info(25239): TitleRepository init finished
+11-22 13:30:22.793 D/cocos2d-x debug info(25239): processing work item 42 ...
+11-22 13:30:22.793 D/cocos2d-x debug info(25239): begin to init ExerciseRepository ...
+11-22 13:30:22.793 D/cocos2d-x debug info(25239): NPCRepository init finished
+11-22 13:30:22.794 D/cocos2d-x debug info(25239): processing work item 43 ...
+11-22 13:30:22.794 D/cocos2d-x debug info(25239): begin to init SpiritStageRepository ...
+11-22 13:30:22.794 D/cocos2d-x debug info(25239): NPCRepository init finished
+11-22 13:30:22.794 D/cocos2d-x debug info(25239): processing work item 44 ...
+11-22 13:30:22.794 D/cocos2d-x debug info(25239): begin to init DailyMissionRepository ...
+11-22 13:30:22.795 D/cocos2d-x debug info(25239): DailyMissionRepository init finished
+11-22 13:30:22.795 D/cocos2d-x debug info(25239): processing work item 45 ...
+11-22 13:30:22.795 D/cocos2d-x debug info(25239): begin to init RewardRepository ...
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): PetRepository init finished
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): processing work item 46 ...
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): begin to init HorseUpGradeRepository ...
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): HorseGradeUpRepository init finished
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): processing work item 47 ...
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): begin to init HorseUpGradeRepository ...
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): HorseGradeUpRepository init finished
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): processing work item 48 ...
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): begin to init HorseUpGradeRepository ...
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): HorseGradeUpRepository init finished
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): processing work item 49 ...
+11-22 13:30:22.796 D/cocos2d-x debug info(25239): begin to init HorseUpGradeRepository ...
+11-22 13:30:22.797 D/cocos2d-x debug info(25239): HorseGradeUpRepository init finished
+11-22 13:30:22.797 D/cocos2d-x debug info(25239): processing work item 50 ...
+11-22 13:30:22.797 D/cocos2d-x debug info(25239): begin to init HorseSkillRepository ...
+11-22 13:30:22.798 D/cocos2d-x debug info(25239): HorseSkillRepository init finished
+11-22 13:30:22.798 D/cocos2d-x debug info(25239): processing work item 51 ...
+11-22 13:30:22.798 D/cocos2d-x debug info(25239): begin to init HorsePillRepository ...
+11-22 13:30:22.798 D/cocos2d-x debug info(25239): HorsePillRepository init finished
+11-22 13:30:22.798 D/cocos2d-x debug info(25239): processing work item 52 ...
+11-22 13:30:22.798 D/cocos2d-x debug info(25239): begin to init HorseUpGradeRepository ...
+11-22 13:30:22.798 D/cocos2d-x debug info(25239): HorseGradeUpRepository init finished
+11-22 13:30:22.798 D/cocos2d-x debug info(25239): processing work item 53 ...
+11-22 13:30:22.798 D/cocos2d-x debug info(25239): begin to init EsotericaRepository ...
+11-22 13:30:22.799 D/cocos2d-x debug info(25239): EsotericaRepository init finished
+11-22 13:30:22.799 D/cocos2d-x debug info(25239): processing work item 54 ...
+11-22 13:30:22.799 D/cocos2d-x debug info(25239): begin to init EsotericaExpRepository ...
+11-22 13:30:22.799 D/cocos2d-x debug info(25239): EsotericaExpRepository init finished
+11-22 13:30:22.799 D/cocos2d-x debug info(25239): processing work item 55 ...
+11-22 13:30:22.799 D/cocos2d-x debug info(25239): begin to init PetGrowthRepository ...
+11-22 13:30:22.804 D/cocos2d-x debug info(25239): PetGrowthRepository init finished
+11-22 13:30:22.804 D/cocos2d-x debug info(25239): processing work item 56 ...
+11-22 13:30:22.804 D/cocos2d-x debug info(25239): begin to init AnswerQuestionRepository ...
+11-22 13:30:22.805 D/cocos2d-x debug info(25239): AnswerQuestionRepository init finished...
+11-22 13:30:22.805 D/cocos2d-x debug info(25239): processing work item 57 ...
+11-22 13:30:22.805 D/cocos2d-x debug info(25239): begin to init ManorRepository ...
+11-22 13:30:22.807 D/cocos2d-x debug info(25239): ManorRepository init finished
+11-22 13:30:22.807 D/cocos2d-x debug info(25239): processing work item 58 ...
+11-22 13:30:22.807 D/cocos2d-x debug info(25239): begin to init MoonlightRepository ...
+11-22 13:30:22.808 D/cocos2d-x debug info(25239): MoonlightRepository init finished
+11-22 13:30:22.808 D/cocos2d-x debug info(25239): processing work item 59 ...
+11-22 13:30:22.808 D/cocos2d-x debug info(25239): begin to init WingUpGradeRepository ...
+11-22 13:30:22.809 D/cocos2d-x debug info(25239): WingGradeUpRepository init finished
+11-22 13:30:22.809 D/cocos2d-x debug info(25239): processing work item 60 ...
+11-22 13:30:22.809 D/cocos2d-x debug info(25239): begin to init WingRepository ...
+11-22 13:30:22.810 W/System  ( 1603): A resource failed to call close. 
+11-22 13:30:22.810 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 15 lines
+11-22 13:30:22.810 W/System  ( 1603): A resource failed to call close. 
+11-22 13:30:22.811 D/cocos2d-x debug info(25239): WingRepository init finished
+11-22 13:30:22.811 D/cocos2d-x debug info(25239): processing work item 61 ...
+11-22 13:30:22.811 D/cocos2d-x debug info(25239): begin to init WingPosRepository ...
+11-22 13:30:22.811 W/System  ( 1603): A resource failed to call close. 
+11-22 13:30:22.811 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 2 lines
+11-22 13:30:22.811 W/System  ( 1603): A resource failed to call close. 
+11-22 13:30:22.813 D/cocos2d-x debug info(25239): WingPosRepository init finished
+11-22 13:30:22.813 D/cocos2d-x debug info(25239): processing work item 62 ...
+11-22 13:30:22.813 D/cocos2d-x debug info(25239): begin to init WingUpGradeRepository ...
+11-22 13:30:22.813 D/cocos2d-x debug info(25239): WingGradeUpRepository init finished
+11-22 13:30:22.813 D/cocos2d-x debug info(25239): processing work item 63 ...
+11-22 13:30:22.813 D/cocos2d-x debug info(25239): begin to init MazePanelRepositoty ...
+11-22 13:30:22.814 D/cocos2d-x debug info(25239): MazePanelRepositoty init finished
+11-22 13:30:22.814 D/cocos2d-x debug info(25239): processing work item 64 ...
+11-22 13:30:22.814 D/cocos2d-x debug info(25239): begin to init StrapRepository ...
+11-22 13:30:22.816 D/cocos2d-x debug info(25239): StrapRepository init finished
+11-22 13:30:22.816 D/cocos2d-x debug info(25239): processing work item 65 ...
+11-22 13:30:22.816 D/cocos2d-x debug info(25239): begin to init StrapPosRepository ...
+11-22 13:30:22.816 D/cocos2d-x debug info(25239): StrapPosRepository init finished
+11-22 13:30:22.816 D/cocos2d-x debug info(25239): processing work item 66 ...
+11-22 13:30:22.816 D/cocos2d-x debug info(25239): begin to init StrapActivateRepository ...
+11-22 13:30:22.816 D/cocos2d-x debug info(25239): StrapActivateRepository init finished
+11-22 13:30:22.816 D/cocos2d-x debug info(25239): processing work item 67 ...
+11-22 13:30:22.816 D/cocos2d-x debug info(25239): begin to init EquipBlessRepository ...
+11-22 13:30:22.817 D/cocos2d-x debug info(25239): EquipBlessRepository init finished
+11-22 13:30:22.817 D/cocos2d-x debug info(25239): processing work item 68 ...
+11-22 13:30:22.817 D/cocos2d-x debug info(25239): begin to init EquipFateRepository ...
+11-22 13:30:22.818 D/cocos2d-x debug info(25239): EquipFateRepository init finished
+11-22 13:30:22.818 D/cocos2d-x debug info(25239): processing work item 69 ...
+11-22 13:30:22.818 D/cocos2d-x debug info(25239): begin to init SuiteRepository
+11-22 13:30:22.823 D/cocos2d-x debug info(25239): HorseRepository init finished
+11-22 13:30:22.823 D/cocos2d-x debug info(25239): processing work item 70 ...
+11-22 13:30:22.823 D/cocos2d-x debug info(25239): begin to init EquipRepository ...
+11-22 13:30:23.022 D/cocos2d-x debug info(25239): EquipRepository init finished
+11-22 13:30:23.022 D/cocos2d-x debug info(25239): processing work item 71 ...
+11-22 13:30:23.022 D/cocos2d-x debug info(25239): begin to init FormulaRepository ...
+11-22 13:30:23.042 D/cocos2d-x debug info(25239): FormulaProperty init finished
+11-22 13:30:23.042 D/cocos2d-x debug info(25239): processing work item 72 ...
+11-22 13:30:23.042 D/cocos2d-x debug info(25239): begin to init GemRepository
+11-22 13:30:23.046 D/cocos2d-x debug info(25239): GemRepository init finished
+11-22 13:30:23.046 D/cocos2d-x debug info(25239): processing work item 73 ...
+11-22 13:30:23.046 D/cocos2d-x debug info(25239): begin to init MissionRepository ...
+11-22 13:30:23.047 D/cocos2d-x debug info(25239): MissonRepository init finished
+11-22 13:30:23.047 D/cocos2d-x debug info(25239): processing work item 74 ...
+11-22 13:30:23.047 D/cocos2d-x debug info(25239): begin to init VipRepository ...
+11-22 13:30:23.048 D/cocos2d-x debug info(25239): VipRepository init finished
+11-22 13:30:23.048 D/cocos2d-x debug info(25239): processing work item 75 ...
+11-22 13:30:23.048 D/cocos2d-x debug info(25239): begin to init StrengthAddOnRepository ...
+11-22 13:30:23.049 D/cocos2d-x debug info(25239): processing work item 76 ...
+11-22 13:30:23.049 D/cocos2d-x debug info(25239): begin to init ActionIntervalRepository ...
+11-22 13:30:23.053 D/cocos2d-x debug info(25239): ActionIntervalRepository init finished
+11-22 13:30:23.053 D/cocos2d-x debug info(25239): processing work item 77 ...
+11-22 13:30:23.053 D/cocos2d-x debug info(25239): begin to init SkillDelayRepository ...
+11-22 13:30:23.058 D/cocos2d-x debug info(25239): SkillDelayRepository init finished
+11-22 13:30:23.058 D/cocos2d-x debug info(25239): processing work item 78 ...
+11-22 13:30:23.058 D/cocos2d-x debug info(25239): begin to init ActionIntervalRepository ...
+11-22 13:30:23.063 D/cocos2d-x debug info(25239): ActionIntervalRepository init finished
+11-22 13:30:23.063 D/cocos2d-x debug info(25239): processing work item 79 ...
+11-22 13:30:23.063 D/cocos2d-x debug info(25239): begin to init ActionIntervalRepository ...
+11-22 13:30:23.063 D/cocos2d-x debug info(25239): ActionIntervalRepository init finished
+11-22 13:30:23.063 D/cocos2d-x debug info(25239): processing work item 80 ...
+11-22 13:30:23.063 D/cocos2d-x debug info(25239): begin to init EndlessRepository
+11-22 13:30:23.064 D/cocos2d-x debug info(25239): EndlessRepository init finished
+11-22 13:30:23.064 D/cocos2d-x debug info(25239): processing work item 81 ...
+11-22 13:30:23.064 D/cocos2d-x debug info(25239): begin to init PetEquipRepository ...
+11-22 13:30:23.067 D/cocos2d-x debug info(25239): PetEquipRepository init finished
+11-22 13:30:23.067 D/cocos2d-x debug info(25239): processing work item 82 ...
+11-22 13:30:23.067 D/cocos2d-x debug info(25239): begin to init PetEquipLevelUpRepository ...
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): PetEquipLevelUpRepository init finished
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): processing work item 83 ...
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): begin to init FactionDrawRepository ...
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): FactionDrawRepository init finished
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): processing work item 84 ...
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): begin to init EndlessAwardRepository ...
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): EndlessAwardRepository init finished
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): processing work item 85 ...
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): begin to init PandoraRepository ...
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): PandoraRepository init finished
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): processing work item 86 ...
+11-22 13:30:23.068 D/cocos2d-x debug info(25239): begin to init EsotericaEffectRepository ...
+11-22 13:30:23.071 D/cocos2d-x debug info(25239): EsotericaEffectRepository init finished
+11-22 13:30:23.071 D/cocos2d-x debug info(25239): processing work item 87 ...
+11-22 13:30:23.071 D/cocos2d-x debug info(25239): begin to init QinmojiLearnRepository ...
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): QinmojiLearnRepository init finished
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): processing work item 88 ...
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): begin to init LuckyDayRepository ...
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): LuckyDayRepository init finished
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): processing work item 89 ...
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): begin to init FactionInfoRepository ...
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): FactionInfoRepository init finished
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): processing work item 90 ...
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): begin to init FindExpRepository ...
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): FindExpRepository init finished
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): processing work item 91 ...
+11-22 13:30:23.072 D/cocos2d-x debug info(25239): begin to init FishRepository ...
+11-22 13:30:23.073 D/cocos2d-x debug info(25239): FishRepository init finished
+11-22 13:30:23.073 D/cocos2d-x debug info(25239): processing work item 92 ...
+11-22 13:30:23.073 D/cocos2d-x debug info(25239): begin to init MazeCellRepository ...
+11-22 13:30:23.074 D/cocos2d-x debug info(25239): MazeCellRepository init finished
+11-22 13:30:23.074 D/cocos2d-x debug info(25239): processing work item 93 ...
+11-22 13:30:23.074 D/cocos2d-x debug info(25239): begin to init StrapLevelUpRepository ...
+11-22 13:30:23.074 D/cocos2d-x debug info(25239): StrapLevelUpRepository init finished
+11-22 13:30:23.074 D/cocos2d-x debug info(25239): processing work item 94 ...
+11-22 13:30:23.075 D/cocos2d-x debug info(25239): begin to init StrapSpiritRepository ...
+11-22 13:30:23.075 D/cocos2d-x debug info(25239): StrapSpiritRepository init finished
+11-22 13:30:23.075 D/cocos2d-x debug info(25239): processing work item 95 ...
+11-22 13:30:23.075 D/cocos2d-x debug info(25239): begin to init TowerRepository ...
+11-22 13:30:23.077 D/cocos2d-x debug info(25239): TowerRepository init finished
+11-22 13:30:23.077 D/cocos2d-x debug info(25239): processing work item 96 ...
+11-22 13:30:23.077 D/cocos2d-x debug info(25239): begin to init ActivitiesRanksRepository ...
+11-22 13:30:23.077 D/cocos2d-x debug info(25239): ActivitiesRanksRepository init finished
+11-22 13:30:23.077 D/cocos2d-x debug info(25239): processing work item 97 ...
+11-22 13:30:23.077 D/cocos2d-x debug info(25239): begin to init ExerciseLotteryRepository ...
+11-22 13:30:23.077 D/cocos2d-x debug info(25239): ExerciseLotteryRepository init finished
+11-22 13:30:23.077 D/cocos2d-x debug info(25239): processing work item 98 ...
+11-22 13:30:23.077 D/cocos2d-x debug info(25239): begin to init CelestialBuffRepository ...
+11-22 13:30:23.077 D/cocos2d-x debug info(25239): ChineseRepository init finished
+11-22 13:30:23.077 D/cocos2d-x debug info(25239): background loader: done.
+11-22 13:30:23.429 D/mhsj    (25239): call login
+11-22 13:30:23.944 E/storaged( 1480): getDiskStats failed with result NOT_SUPPORTED and size 0
+11-22 13:30:24.265 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:24.267 W/NotificationService( 1603): Toast already killed. pkg=com.kdxx.online callback=android.app.ITransientNotification$Stub$Proxy@695dcff
+11-22 13:30:24.267 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 2 lines
+11-22 13:30:24.428 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:24.428 W/SurfaceFlinger( 1459): Attempting to destroy on removed layer: 283ac09 Toast#0
+11-22 13:30:24.429 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:24.472 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 2 lines
+11-22 13:30:24.472 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:24.472 D/SurfaceFlinger( 1459): duplicate layer name: changing com.kdxx.online/com.aiyou.mhsj.GameActivity to com.kdxx.online/com.aiyou.mhsj.GameActivity#1
+11-22 13:30:24.479 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:30:24.475 I/utmethod.pinyin( 2483): type=1400 audit(0.0:7509): avc: denied { open } for path="/data/local/cfg-haehn/input" dev="sdb2" ino=393372 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=1
+11-22 13:30:24.482 W/System  ( 2483): A resource failed to call close. 
+11-22 13:30:24.482 I/chatty  ( 2483): uid=10034(com.android.inputmethod.pinyin) FinalizerDaemon identical 1 line
+11-22 13:30:24.482 W/System  ( 2483): A resource failed to call close. 
+11-22 13:30:24.488 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:24.560 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 3 lines
+11-22 13:30:24.576 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:24.978 I/ldinit  ( 1456): type=1400 audit(0.0:7510): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6869 scontext=u:r:ldinit:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:30:24.481 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:30:25.661 W/WindowManager( 1603): Unable to start animation, surface is null or no children.
+11-22 13:30:25.662 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:25.906 W/WindowManager( 1603): Unable to start animation, surface is null or no children.
+11-22 13:30:26.869 W/wificond( 1481): Scan already started
+11-22 13:30:25.906 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:26.921 I/ldinit  ( 1456): type=1400 audit(0.0:7511): avc: denied { read } for name="partitions" dev="proc" ino=4026532046 scontext=u:r:ldinit:s0 tcontext=u:object_r:proc:s0 tclass=file permissive=1
+11-22 13:30:26.921 I/ldinit  ( 1456): type=1400 audit(0.0:7512): avc: denied { open } for path="/proc/partitions" dev="proc" ino=4026532046 scontext=u:r:ldinit:s0 tcontext=u:object_r:proc:s0 tclass=file permissive=1
+11-22 13:30:27.872 D/WificondControl( 1603): Scan result ready event
+11-22 13:30:33.600 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:30:33.600 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:30:35.266 W/WindowManager( 1603): removeWindowToken: Attempted to remove non-existing token: android.os.Binder@8c7b15e
+11-22 13:30:42.343 E/cutils-trace(25280): Error opening trace file: No such file or directory (2)
+11-22 13:30:42.343 D/vndksupport(25280): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-22 13:30:42.343 D/vndksupport(25280): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-22 13:30:42.345 I/        (25280): fastpipe: Connect success
+11-22 13:30:42.346 I/        (25280): fastpipe: Connect success
+11-22 13:30:42.346 D/HostConnection(25280): HostRPC::connect sucess: app=screencap, pid=25280, tid=25280, this=0x763893ee4540
+11-22 13:30:42.347 D/HostConnection(25280): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-22 13:30:42.341 I/screencap(25280): type=1400 audit(0.0:7514): avc: denied { open } for path="/data/local/cfg-haehn/gl_force" dev="sdb2" ino=393368 scontext=u:r:shell:s0 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=1
+11-22 13:30:42.541 I/com.kdxx.online(25239): type=1400 audit(0.0:7515): avc: denied { write } for name="qmux_bluetooth" dev="tmpfs" ino=1558 scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:object_r:socket_device:s0 tclass=sock_file permissive=1
+11-22 13:30:42.779 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:30:42.779 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:30:42.780 D/MediaScannerReceiver( 2333): action: android.intent.action.MEDIA_SCANNER_SCAN_FILE path: /storage/emulated/0/g1_login.png
+11-22 13:30:43.182 I/appproc (25289): app_process main with argv: /system/bin com.android.commands.input.Input tap 673 575 
+11-22 13:30:43.182 D/AndroidRuntime(25289): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:30:43.184 E/cutils-trace(25289): Error opening trace file: No such file or directory (2)
+11-22 13:30:43.190 V/libnb   (25289): enter native_bridge2_isCompatibleWith 3
+11-22 13:30:43.197 I/libnb   (25289): Found /system/lib64/libhoudini.so version 3
+11-22 13:30:43.209 I/app_process(25289): The ClassLoaderContext is a special shared library.
+11-22 13:30:43.209 W/app_process(25289): Could not create mount namespace.
+11-22 13:30:43.209 D/nativebridge(25289): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:30:43.209 W/nativebridge(25289): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:30:43.209 W/nativebridge(25289): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:30:43.209 D/nativebridge(25289): call UnloadNativeBridge! state=2
+11-22 13:30:43.205 I/main    (25289): type=1400 audit(0.0:7516): avc: denied { mounton } for path="/proc/cpuinfo" dev="proc" ino=4026531992 scontext=u:r:shell:s0 tcontext=u:object_r:proc_cpuinfo:s0 tclass=file permissive=1
+11-22 13:30:43.216 D/AndroidRuntime(25289): Calling main entry com.android.commands.input.Input
+11-22 13:30:43.217 I/Input   (25289): injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=673.0, y[0]=575.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8240941, downTime=8240941, deviceId=3, source=0x1002 }
+11-22 13:30:43.225 I/Input   (25289): injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=673.0, y[0]=575.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8240941, downTime=8240941, deviceId=3, source=0x1002 }
+11-22 13:30:43.233 D/AndroidRuntime(25289): Shutting down VM
+11-22 13:30:43.239 D/audio_hw_hal( 1436): raw_start_output_stream, stream=0xf5e1b000, sampleRate=48000, channel=2, bps=16, bufSize=4096
+11-22 13:30:43.235 I/writer  ( 1436): type=1400 audit(0.0:7517): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6869 scontext=u:r:hal_audio_default:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:30:43.250 W/System  ( 1603): A resource failed to call close. 
+11-22 13:30:43.250 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 22 lines
+11-22 13:30:43.250 W/System  ( 1603): A resource failed to call close. 
+11-22 13:30:43.261 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:43.386 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 2 lines
+11-22 13:30:43.402 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:30:46.317 D/audio_hw_hal( 1436): log_func, out_standby
+11-22 13:30:46.317 D/audio_hw_hal( 1436): raw_close_output_stream, dev=0xf5e18000, stream =0xf5e1b000
+11-22 13:30:46.317 D/audio_hw_hal( 1436): raw_close_output_stream, stream=0xf5e1b000,  success!
+11-22 13:30:50.617 E/cutils-trace(25299): Error opening trace file: No such file or directory (2)
+11-22 13:30:50.617 D/vndksupport(25299): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-22 13:30:50.617 D/vndksupport(25299): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-22 13:30:50.619 I/        (25299): fastpipe: Connect success
+11-22 13:30:50.620 I/        (25299): fastpipe: Connect success
+11-22 13:30:50.620 D/HostConnection(25299): HostRPC::connect sucess: app=screencap, pid=25299, tid=25299, this=0x763893ee4540
+11-22 13:30:50.622 D/HostConnection(25299): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-22 13:30:51.053 D/MediaScannerReceiver( 2333): action: android.intent.action.MEDIA_SCANNER_SCAN_FILE path: /storage/emulated/0/g2_select.png
+11-22 13:30:51.503 I/appproc (25308): app_process main with argv: /system/bin com.android.commands.input.Input tap 755 573 
+11-22 13:30:51.503 D/AndroidRuntime(25308): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:30:51.504 E/cutils-trace(25308): Error opening trace file: No such file or directory (2)
+11-22 13:30:51.510 V/libnb   (25308): enter native_bridge2_isCompatibleWith 3
+11-22 13:30:51.517 I/libnb   (25308): Found /system/lib64/libhoudini.so version 3
+11-22 13:30:51.529 I/app_process(25308): The ClassLoaderContext is a special shared library.
+11-22 13:30:51.529 W/app_process(25308): Could not create mount namespace.
+11-22 13:30:51.529 D/nativebridge(25308): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:30:51.529 W/nativebridge(25308): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:30:51.529 W/nativebridge(25308): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:30:51.529 D/nativebridge(25308): call UnloadNativeBridge! state=2
+11-22 13:30:51.536 D/AndroidRuntime(25308): Calling main entry com.android.commands.input.Input
+11-22 13:30:51.537 I/Input   (25308): injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=755.0, y[0]=573.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8249261, downTime=8249261, deviceId=3, source=0x1002 }
+11-22 13:30:51.545 I/Input   (25308): injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=755.0, y[0]=573.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8249261, downTime=8249261, deviceId=3, source=0x1002 }
+11-22 13:30:51.551 D/AndroidRuntime(25308): Shutting down VM
+11-22 13:30:51.558 D/audio_hw_hal( 1436): raw_start_output_stream, stream=0xf5e1b000, sampleRate=48000, channel=2, bps=16, bufSize=4096
+11-22 13:30:52.085 I/com.kdxx.online(25239): type=1400 audit(0.0:7518): avc: denied { sendto } for path="/dev/socket/qmux_bluetooth" scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:r:ldinit:s0 tclass=unix_dgram_socket permissive=1
+11-22 13:30:54.629 D/audio_hw_hal( 1436): log_func, out_standby
+11-22 13:30:54.629 D/audio_hw_hal( 1436): raw_close_output_stream, dev=0xf5e18000, stream =0xf5e1b000
+11-22 13:30:54.629 D/audio_hw_hal( 1436): raw_close_output_stream, stream=0xf5e1b000,  success!
+11-22 13:30:55.911 I/RenderThread( 1754): type=1400 audit(0.0:7519): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6869 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:30:59.193 W/System  ( 1603): A resource failed to call close. 
+11-22 13:30:59.193 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 23 lines
+11-22 13:30:59.193 W/System  ( 1603): A resource failed to call close. 
+11-22 13:31:00.004 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:31:00.004 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:31:01.661 I/system_server( 1603): type=1400 audit(0.0:7520): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6865 scontext=u:r:system_server:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:31:03.174 D/audio_hw_hal( 1436): raw_start_output_stream, stream=0xf5e1b000, sampleRate=48000, channel=2, bps=16, bufSize=4096
+11-22 13:31:03.197 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:31:05.186 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:31:03.304 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 2 lines
+11-22 13:31:03.321 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:31:05.181 I/oid.coreservice( 2187): type=1400 audit(0.0:7522): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6869 scontext=u:r:system_app:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:31:05.202 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:31:05.209 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:31:05.215 W/IInputConnectionWrapper(25239): getCursorCapsMode on inactive InputConnection
+11-22 13:31:05.232 W/IInputConnectionWrapper(25239): getCursorCapsMode on inactive InputConnection
+11-22 13:31:05.308 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:31:05.325 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:31:06.247 D/audio_hw_hal( 1436): log_func, out_standby
+11-22 13:31:06.247 D/audio_hw_hal( 1436): raw_close_output_stream, dev=0xf5e18000, stream =0xf5e1b000
+11-22 13:31:06.247 D/audio_hw_hal( 1436): raw_close_output_stream, stream=0xf5e1b000,  success!
+11-22 13:31:08.248 D/audio_hw_hal( 1436): raw_start_output_stream, stream=0xf5e1b000, sampleRate=48000, channel=2, bps=16, bufSize=4096
+11-22 13:31:08.266 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:31:10.273 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 4 lines
+11-22 13:31:10.279 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:31:10.284 W/IInputConnectionWrapper(25239): getCursorCapsMode on inactive InputConnection
+11-22 13:31:10.303 W/IInputConnectionWrapper(25239): getCursorCapsMode on inactive InputConnection
+11-22 13:31:10.379 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:31:10.397 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:31:11.318 D/audio_hw_hal( 1436): log_func, out_standby
+11-22 13:31:11.318 D/audio_hw_hal( 1436): raw_close_output_stream, dev=0xf5e18000, stream =0xf5e1b000
+11-22 13:31:11.318 D/audio_hw_hal( 1436): raw_close_output_stream, stream=0xf5e1b000,  success!
+11-22 13:31:15.939 W/System  ( 1603): A resource failed to call close. 
+11-22 13:31:10.304 I/chatty  ( 2187): uid=1000(system) com.android.coreservice identical 8 lines
+11-22 13:31:10.304 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:31:23.945 E/storaged( 1480): getDiskStats failed with result NOT_SUPPORTED and size 0
+11-22 13:31:15.939 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 16 lines
+11-22 13:31:15.939 W/System  ( 1603): A resource failed to call close. 
+11-22 13:31:23.945 I/storaged( 1480): type=1400 audit(0.0:7523): avc: denied { call } for scontext=u:r:storaged:s0 tcontext=u:r:init:s0 tclass=binder permissive=1
+11-22 13:31:33.699 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:31:33.699 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:31:54.231 W/System  ( 1603): A resource failed to call close. 
+11-22 13:31:54.231 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 16 lines
+11-22 13:31:54.231 W/System  ( 1603): A resource failed to call close. 
+11-22 13:32:14.637 D/audio_hw_hal( 1436): raw_start_output_stream, stream=0xf5e1b000, sampleRate=48000, channel=2, bps=16, bufSize=4096
+11-22 13:32:14.649 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:32:14.774 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 2 lines
+11-22 13:32:14.790 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:32:15.995 W/System  ( 1603): A resource failed to call close. 
+11-22 13:32:15.995 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 21 lines
+11-22 13:32:15.995 W/System  ( 1603): A resource failed to call close. 
+11-22 13:32:16.648 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:32:16.648 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:32:16.649 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:32:16.655 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:32:16.655 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:32:16.659 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:32:16.659 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:32:16.671 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:32:16.680 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:32:16.684 W/IInputConnectionWrapper(25239): getCursorCapsMode on inactive InputConnection
+11-22 13:32:16.703 W/IInputConnectionWrapper(25239): getCursorCapsMode on inactive InputConnection
+11-22 13:32:16.796 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:32:16.813 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:32:17.719 D/audio_hw_hal( 1436): log_func, out_standby
+11-22 13:32:17.719 D/audio_hw_hal( 1436): raw_close_output_stream, dev=0xf5e18000, stream =0xf5e1b000
+11-22 13:32:17.719 D/audio_hw_hal( 1436): raw_close_output_stream, stream=0xf5e1b000,  success!
+11-22 13:32:16.703 I/chatty  ( 2187): uid=1000(system) com.android.coreservice identical 3 lines
+11-22 13:32:16.704 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:32:23.948 E/storaged( 1480): getDiskStats failed with result NOT_SUPPORTED and size 0
+11-22 13:32:28.406 E/cutils-trace(25421): Error opening trace file: No such file or directory (2)
+11-22 13:32:28.407 D/vndksupport(25421): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-22 13:32:28.407 D/vndksupport(25421): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-22 13:32:28.409 I/        (25421): fastpipe: Connect success
+11-22 13:32:28.410 I/        (25421): fastpipe: Connect success
+11-22 13:32:28.410 D/HostConnection(25421): HostRPC::connect sucess: app=screencap, pid=25421, tid=25421, this=0x763893ee4540
+11-22 13:32:28.411 D/HostConnection(25421): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-22 13:32:28.408 I/screencap(25421): type=1400 audit(0.0:7524): avc: denied { open } for path="/data/local/cfg-haehn/gl_force" dev="sdb2" ino=393368 scontext=u:r:shell:s0 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=1
+11-22 13:32:28.900 D/MediaScannerReceiver( 2333): action: android.intent.action.MEDIA_SCANNER_SCAN_FILE path: /storage/emulated/0/g3_ingame.png

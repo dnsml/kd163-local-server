@@ -1,0 +1,17 @@
+GET /assets/layout/operating_activity_lucky_day.xml HTTP/1.1
+Host: 124.223.56.189
+Accept: */*
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:34 GMT
+Content-Type: application/xml
+Content-Length: 515
+Connection: keep-alive
+Cache-Control: no-store
+
+<layout background="assets/ui/common/layer2_frame.png" height="455" width="565">
+    <label align="center" color="beige" fontsize="28" name="lucky_day_title" text="幸运吉日" width="525" x="20" y="16" />
+    <label align="left" color="green" fontsize="18" name="lucky_day_description" text="每日零点轮换，以下为本服兼容排期" width="525" x="20" y="58" />
+    <listview column="1" height="355" id="1001972" name="detail_list" scrollbar="true" vertical="true" width="557" x="4" y="92" />
+</layout>

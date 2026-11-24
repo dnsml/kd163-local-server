@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+kd163 本地 HTTP 服务端（端口 80）
+模拟真服的静态资源端点，供「零改客户端 + DNAT」路线使用。
+
+端点：
+  GET /server-list.xml   服务器列表（把 ip 改写成本机）
+  GET /version.txt       强制更新开关 → 永不强制
+  GET /assets.txt        资源清单（md5 用本地包的真实 md5，url 指向本机）
+  GET /meta.xml          资源 md5 清单（原样镜像）
+  GET /mhsj_res.zip      完整资源包（114.6MB，流式发送）
+  GET /assets/*          单文件资源（mirror/assets 下已镜像的部分）
+  其它                   404，但会记录（方便发现漏了哪个端点）
+
+用法：python local_http.py [port] [host_ip]
+"""
+import os
+import sys
+import time
+import hashlib
+import socket
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import unquote, urlparse
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+MIRROR = os.path.join(HERE, "mirror")
+# 资源必须与「抓包时的服务端数据」同版本，否则协议里引用的新资源在包里不存在，
+# nativeGetFileOffsetAndSize 查不到偏移直接 abort。
+# APK 内置包(8c6ee66e)比服务端更新包(5efc42ed)旧，用它会在进主城时崩。
+RESPKG = os.path.join(HERE, "res_update", "mhsj_res.zip")
+RESPKG_MD5 = "5efc42ed36978e860f135a96bd93c85a"   # 真服当前版本，与抓包数据配套
+META_XML = os.path.join(HERE, "srvres", "meta.xml")
+
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 80
+HOST_IP = sys.argv[2] if len(sys.argv) > 2 else "192.168.0.111"
+REAL_IP = "124.223.56.189"
+
+lock = threading.Lock()
+
+
+def log(msg):
+    line = "[%s] %s" % (time.strftime("%H:%M:%S"), msg)
+    with lock:
+        print(line, flush=True)
+
+
+def read(name, default=b""):
+    p = os.path.join(MIRROR, name)
+    if os.path.exists(p):
+        return open(p, "rb").read()
+    return default
+
+
+def rewrite_host(b):
+    """把镜像里的真服 IP 换成本机 IP（DNAT 下其实无所谓，但便于直连调试）"""
+    return b.replace(REAL_IP.encode(), HOST_IP.encode())
+
+
+class Handler(BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.1"
+    server_version = "nginx/1.18.0"
+
+    def log_message(self, fmt, *args):
+        pass  # 用统一 log
+
+    def _send(self, code, body, ctype="application/octet-stream", extra=None):
+        self.send_response(code)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        if extra:
+            for k, v in extra.items():
+                self.send_header(k, v)
+        self.end_headers()
+        try:
+            self.wfile.write(body)
+        except Exception:
+            pass
+
+    def do_HEAD(self):
+        """客户端更新前可能先探测大小；不实现会回 501 导致它放弃下载。"""
+        path = unquote(urlparse(self.path).path)
+        log("HEAD %s" % path)
+        if path in ("/mhsj_res.zip", "/mhsj_res_2.zip") and os.path.exists(RESPKG):
+            size = os.path.getsize(RESPKG)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/zip")
+            self.send_header("Content-Length", str(size))
+            self.send_header("Accept-Ranges", "bytes")
+            self.end_headers()
+            return
+        self.send_response(200)
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
+    def do_GET(self):
+        path = unquote(urlparse(self.path).path)
+        log("GET %s  UA=%s" % (path, (self.headers.get("User-Agent") or "")[:40]))
+
+        if path in ("/server-list.xml", "/server_list.xml"):
+            body = rewrite_host(read("server-list.xml"))
+            return self._send(200, body, "text/xml; charset=utf-8")
+
+        if path == "/version.txt":
+            body = b"version=0&url=-&force=0"
+            return self._send(200, body, "text/plain")
+
+        if path == "/assets.txt":
+            # 必须用原版镜像的格式、原版 host（124.223.56.189）。
+            # 客户端会校验 URL 里的 host 与它连接的服务器是否一致；
+            # 换成 192.168.x.x 会导致它认为资源地址无效，卡在「0/6251 已更新 0KB」。
+            body = read("assets.txt")
+            if body:
+                import re as _re
+                body = _re.sub(rb"assets_md5=[0-9a-f]+", b"assets_md5=" + RESPKG_MD5.encode(), body)
+                body = _re.sub(rb"assets_md5_2=[0-9a-f]+", b"assets_md5_2=" + RESPKG_MD5.encode(), body)
+            else:
+                url = "http://%s:80/mhsj_res.zip" % REAL_IP
+                body = ("assets_md5=%s&assets_md5_2=%s&assets_url=%s&assets_url_2=%s"
+                        "&meta=http://%s:80/meta.xml&meta_2=http://%s:80/meta.xml"
+                        % (RESPKG_MD5, RESPKG_MD5, url, url, REAL_IP, REAL_IP)).encode()
+            return self._send(200, body, "text/plain")
+
+        if path == "/meta.xml":
+            if os.path.exists(META_XML):
+                return self._send(200, open(META_XML, "rb").read(), "text/xml; charset=utf-8")
+            return self._send(200, rewrite_host(read("meta.xml")), "text/xml; charset=utf-8")
+
+        if path in ("/mhsj_res.zip", "/mhsj_res_2.zip"):
+            if not os.path.exists(RESPKG):
+                log("  !! 资源包不存在：%s" % RESPKG)
+                return self._send(404, b"not found")
+            size = os.path.getsize(RESPKG)
+            # 支持 Range：114MB 大包，客户端常用分块续传，回 200 全量会让它一直等
+            rng = self.headers.get("Range")
+            start, end, partial = 0, size - 1, False
+            if rng and rng.startswith("bytes="):
+                spec = rng[6:].split(",")[0].strip()
+                a, _, b = spec.partition("-")
+                try:
+                    if a:
+                        start = int(a)
+                        if b:
+                            end = int(b)
+                    elif b:
+                        start = max(0, size - int(b))
+                    partial = True
+                except ValueError:
+                    partial = False
+                if start >= size or end < start:
+                    return self._send(416, b"range not satisfiable")
+                end = min(end, size - 1)
+            length = (end - start + 1) if partial else size
+            log("  资源包下发 start=%d end=%d（%d 字节，%s）"
+                % (start, end, length, "Range" if partial else "全量"))
+            self.send_response(206 if partial else 200)
+            self.send_header("Content-Type", "application/zip")
+            self.send_header("Content-Length", str(length))
+            self.send_header("Accept-Ranges", "bytes")
+            if partial:
+                self.send_header("Content-Range", "bytes %d-%d/%d" % (start, end, size))
+            self.end_headers()
+            sent = 0
+            t0 = time.time()
+            try:
+                with open(RESPKG, "rb") as f:
+                    f.seek(start)
+                    while sent < length:
+                        chunk = f.read(min(1 << 20, length - sent))
+                        if not chunk:
+                            break
+                        self.wfile.write(chunk)
+                        sent += len(chunk)
+            except Exception as e:
+                log("  资源包传输中断 %s（已发 %d/%d）" % (e, sent, length))
+                return
+            log("  资源包发送完成 %d 字节，%.1fs" % (sent, time.time() - t0))
+            return
+
+        if path.startswith("/assets/"):
+            rel = path[len("/assets/"):]
+            p = os.path.join(MIRROR, "assets", rel.replace("/", os.sep))
+            if os.path.isfile(p):
+                return self._send(200, open(p, "rb").read())
+            log("  !! 资源缺失 /assets/%s" % rel)
+            return self._send(404, b"not found")
+
+        if path in ("/", "/index.html"):
+            return self._send(200, b"kd163 local http ok\n", "text/plain")
+
+        log("  !! 未实现端点 %s" % path)
+        return self._send(404, b"not found")
+
+
+def main():
+    if not os.path.exists(RESPKG):
+        log("警告：没有 %s，/assets.txt 会退回镜像版本" % RESPKG)
+    srv = ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
+    srv.daemon_threads = True
+    log("本地 HTTP 监听 :%d   host_ip=%s" % (PORT, HOST_IP))
+    srv.serve_forever()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,42 @@
+GET /assets/configure/Wing.xml HTTP/1.1
+Host: 124.223.56.189
+Accept: */*
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:33 GMT
+Content-Type: application/xml
+Content-Length: 7461
+Connection: keep-alive
+Cache-Control: no-store
+
+<?xml version="1.0" encoding="utf-8" ?>
+<Wing>
+<item id="40001" name="白色羽翼" animation="wings/w_baiseyuyi,6" particle="" effect="" time="*" effect_describe=""/>
+<item id="40002" name="蜻蜓点水" animation="wings/w_qingtingchibang,6" particle="" effect="" time="*" effect_describe=""/>
+<item id="40003" name="蝶舞纷飞" animation="wings/w_hudiechibang,6" particle="" effect="" time="*" effect_describe=""/>
+<item id="40004" name="圣堂之光" animation="wings/w_yundingzhiguang,6" particle="" effect="" time="*" effect_describe=""/>
+<item id="400001" name="云顶之光" animation="wings/w_yundingzhiguang,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400002" name="天使翅膀" animation="wings/w_baiseyuyi,6" particle="" effect="" time="*" effect_describe=""/>
+<item id="400003" name="旭日光辉" animation="wings/w_xuriguanghui,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400004" name="冰雪羽翼" animation="wings/w_bingxueyuyi,6" particle="piaoxue1,0.3,0.3,0;piaoxue2,0.4,0.4,0;piaoxue3,0.6,0.4,0;piaoxue1,0.7,0.3,0;" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400005" name="红火羽翼" animation="wings/w_honghuoyuyi,6" particle="feather1,0.4,0.3,0;feather1,0.4,0.4,0;feather1,0.6,0.4,0;feather1,0.6,0.3,0;" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400006" name="赤霞彤云" animation="wings/w_chixiatongyun,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400007" name="琉璃凤蝶" animation="wings/w_liulifengdie,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400008" name="繁华灯饰" animation="wings/w_huadengchibang,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400009" name="云雨之翼" animation="wings/w_yunyuzhiyi,6" particle="piaoxue1,0.3,0.3,0;yudi,0.4,0.4,0;yudi,0.6,0.4,0;piaoxue1,0.7,0.3,0;" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400010" name="精灵之翼" animation="wings/w_jinglingzhiyi,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400011" name="魔龙骨翼" animation="wings/w_molongguyi,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400012" name="孔明王翼" animation="wings/w_kongmingwangyi,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400013" name="寒冰之翼" animation="wings/w_hanbingzhiyi,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400014" name="梦幻之蓝" animation="wings/w_menghuanzhilan,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400015" name="冰蓝之翼" animation="wings/w_binlanyuyi,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400016" name="烈焰翅膀" animation="wings/w_lieyan,5" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400017" name="比翼双飞" animation="wings/w_biyishuangfei,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400018" name="亡灵之翼" animation="wings/w_wanglinzhiyi,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400019" name="紫蝶梦境" animation="wings/w_zidiemengjing,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400020" name="花好月圆" animation="wings/w_huahaoyueyuan,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400021" name="枫叶纷飞" animation="wings/w_qiuyefengfei,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400022" name="雏菊翅膀" animation="wings/w_chuju,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+<item id="400023" name="寒梅花枝" animation="wings/w_hanmei,6" particle="" effect="add_spirit,28;add_hp_max,120;add_hit,18;add_wuxing_defense,50;add_defense,90;add_superdamage,100;" time="*" effect_describe="精神 +28;气血 +120;命中+18;五行抗性 +50;防御 +90;绝对伤害+100"/>
+</Wing>

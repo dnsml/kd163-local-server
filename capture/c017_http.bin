@@ -1,0 +1,48 @@
+GET /assets/layout/escort_mm_window.xml HTTP/1.1
+Host: 124.223.56.189
+Accept: */*
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:33 GMT
+Content-Type: application/xml
+Content-Length: 3445
+Connection: keep-alive
+Cache-Control: no-store
+
+<layout background="assets/ui/common/window_frame.png" height="515" margin="0" padding="0" type="vertical" width="835">
+	<layout background="assets/ui/common/layer2_frame.png" height="458" padding="4" type="vertical" width="785" x="25" y="43">
+		<image src="assets/ui/images/escort_bg.png" />
+		<image src="assets/ui/escort/surplus_label.png" x="26" y="22" />
+		<label color="beige" fontsize="24" id="1000065" name="surplus_label" text="0" x="223" y="20" />
+		<button id="1000103" name="btn_add" normal="assets/ui/escort/btn_add_normal.png" selected="assets/ui/escort/btn_add_selected.png" x="-2048" y="15" />
+		<button id="1000108" name="btn_silence" normal="assets/ui/escort/btn_scilence_normal.png" selected="assets/ui/escort/btn_scilence_selected.png" x="188" y="388" />
+		<button id="1000261" name="btn_justic" normal="assets/ui/escort/btn_justic_normal.png" selected="assets/ui/escort/btn_justic_selected.png" x="11" y="388" />
+		<checkbox fontsize="26" id="1000068" label="一键刷新九天玄女" labelcolor="green" name="checkbox" x="398" y="399" />
+		<button id="1000668" name="btn_refresh" normal="assets/ui/escort/btn_refresh_normal.png" selected="assets/ui/escort/btn_refresh_selected.png" x="675" y="391" />
+		<image id="1001249" name="img_base_1" src="assets/ui/escort/arrow.png" x="36" y="281" />
+		<image id="1001250" name="img_base_2" src="assets/ui/escort/arrow.png" x="586" y="282" />
+		<image id="1001267" name="img_base_3" src="assets/ui/escort/arrow.png" x="172" y="184" />
+		<image id="1001363" name="img_base_4" src="assets/ui/escort/arrow.png" x="467" y="185" />
+		<image id="1001364" name="img_base_5" src="assets/ui/escort/arrow.png" x="329" y="159" />
+		<animation ax="0.5" ay="0.0" delay="0.1" nframes="6" plist="assets/npcs/n_meinv_1_idle" x="116" y="363" />
+		<animation ax="0.5" ay="0.0" delay="0.1" nframes="6" plist="assets/npcs/n_meinv_2_idle" rotatey="180" x="660" y="367" />
+		<animation ax="0.5" ay="0.0" delay="0.1" nframes="6" plist="assets/npcs/n_meinv_3_idle" x="248" y="268" />
+		<animation ax="0.5" ay="0.0" delay="0.1" nframes="6" plist="assets/npcs/n_meinv_4_idle" rotatey="180" x="542" y="270" />
+		<animation ax="0.5" ay="0.0" delay="0.1" nframes="6" plist="assets/npcs/n_jiutianxuannv_idle_2" x="405" y="241" />
+		<image src="assets/ui/escort/1.png" x="371" y="228" />
+		<image src="assets/ui/escort/2.png" x="519" y="257" />
+		<image src="assets/ui/escort/3.png" x="212" y="251" />
+		<image src="assets/ui/escort/4.png" x="634" y="353" />
+		<image src="assets/ui/escort/5.png" x="85" y="352" />
+		<label color="green" fontsize="24" text="护送" x="294" y="282" />
+		<label color="green" fontsize="24" text="美女" x="461" y="282" />
+		<label align="center" ax="0.5" ay="0.5" color="beige" fontsize="25" id="1001365" name="name_label" text="" x="402" y="291" />
+		<label color="green" fontsize="24" text="可获得奖励" x="343" y="314" />
+		<image src="assets/ui/common/coin_bound.png" x="261" y="348" />
+		<label align="left" color="green" fontsize="24" id="1001366" name="coin_reward_label" text="0000" x="303" y="347" />
+		<image src="assets/ui/common/exp.png" x="419" y="346" />
+		<label align="left" color="green" fontsize="24" id="1001367" name="exp_reward_label" text="0001" x="472" y="347" />
+	</layout>
+	<button id="1000031" label="" label_color="" name="close_button" normal="assets/ui/common/close_btn.png" selected="assets/ui/common/close_btn_p.png" x="754" y="-24" />
+</layout>

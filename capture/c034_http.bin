@@ -1,0 +1,16 @@
+POST /legacy/equipment.php HTTP/1.1
+Content-Length: 340
+Content-Type: application/x-www-form-urlencoded
+Host: 124.223.56.189
+Connection: Keep-Alive
+User-Agent: Apache-HttpClient/UNAVAILABLE (java 1.4)
+
+{"sdk":28,"release":"9","cpu1":"armeabi-v7a","device":"star2qltechn","manufacturer":"XIAOMI","width":"1600","height":"900","deviceId":"b63bb483-edc5-3dcc-a400-7a4c4e4def39","network":"2","simOperator":"46000","stype":5,"ext":"","sid":"1","uid":"1784366","vname":"2.2.1-online-r149-bluestacks","packname":"com.kdxx.online","platform_id":"1"}HTTP/1.1 404 Not Found
+Server: nginx
+Date: Sun, 22 Nov 2026 03:26:17 GMT
+Content-Type: text/plain
+Content-Length: 9
+Connection: keep-alive
+Cache-Control: no-store
+
+not found

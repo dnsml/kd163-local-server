@@ -1,0 +1,19 @@
+GET /assets/layout/operating_activity_right_fairyblessing.xml HTTP/1.1
+Host: 124.223.56.189
+Accept: */*
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:34 GMT
+Content-Type: application/xml
+Content-Length: 672
+Connection: keep-alive
+Cache-Control: no-store
+
+<layout height="455" width="565">
+	<image src="assets/ui/operating/operating_1.png" x="0" y="0" />
+	<button id="1003108" name="btn_go" normal="assets/ui/operating/answer_activity_btn_go_normal.png" selected="assets/ui/operating/answer_activity_btn_go_p.png" x="410" y="385" />
+	<label color="white" fontsize="22" text="四种祝福分别抽取2、3、4、5级宝石。" width="535" x="15" y="165" />
+	<label color="white" fontsize="22" text="九种属性各1/9概率，每次获得1颗绑定宝石。" width="535" x="15" y="210" />
+	<label color="white" fontsize="22" text="前往活动后点击购买，可用元宝兑换祝福。" width="535" x="15" y="255" />
+</layout>

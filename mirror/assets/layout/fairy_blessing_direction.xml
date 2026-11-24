@@ -1,0 +1,11 @@
+<layout background="assets/ui/common/tips_frame.png" height="350" width="500">
+	<button id="1003073" name="btn_close" normal="assets/ui/common/close_btn.png" selected="assets/ui/common/close_btn_p.png" x="435" y="0" />
+	<label color="white" fontsize="24" text="仙子祝福说明" x="15" y="54" />
+	<label color="white" fontsize="20" text="白薇祝福80元宝/张，抽取2级宝石。" width="470" x="15" y="88" />
+	<label color="white" fontsize="20" text="绿萝祝福100元宝/张，抽取3级宝石。" width="470" x="15" y="120" />
+	<label color="white" fontsize="20" text="蓝翎祝福200元宝/张，抽取4级宝石。" width="470" x="15" y="152" />
+	<label color="white" fontsize="20" text="紫霞祝福600元宝/张，抽取5级宝石。" width="470" x="15" y="184" />
+	<label color="white" fontsize="20" text="每次消耗对应祝福1张，获得1颗绑定宝石。" width="470" x="15" y="216" />
+	<label color="white" fontsize="20" text="每档九种属性，每种概率1/9。" width="470" x="15" y="248" />
+	<label color="white" fontsize="20" text="奖励直接入背包，放不下时本次不扣祝福。" width="470" x="15" y="280" />
+</layout>

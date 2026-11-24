@@ -1,0 +1,1887 @@
+--------- beginning of main
+11-22 13:35:54.479 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon expire 21 lines
+11-22 13:35:54.479 W/System  ( 1603): A resource failed to call close. 
+--------- beginning of system
+11-22 13:38:32.618 I/ActivityManager( 1603): START u0 {flg=0x10000000 cmp=com.kdxx.online/com.aiyou.mhsj.MainActivity} from uid 2000
+11-22 13:38:32.622 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '2212' (No space left on device); fd=24
+11-22 13:38:32.623 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:45 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:32.628 I/main    (26515): type=1400 audit(0.0:7667): avc: denied { mounton } for path="/system/lib/arm/cpuinfo" dev="sdb2" ino=393343 scontext=u:r:zygote:s0 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=1
+11-22 13:38:32.632 D/libnativeloader( 1431): CrashArm64 config not exist or not readable: /system/vendor/firmware_mnt/haehn/CrashArm64
+11-22 13:38:32.632 I/Zygote  ( 1431): IsCopy  libcrashcatcher: 0
+11-22 13:38:32.633 D/nativebridge(26515): PreInitializeNativeBridge name=zygote instruction_set=arm
+11-22 13:38:32.638 I/Binder:1459_3( 1459): type=1400 audit(0.0:7668): avc: denied { read write } for path="/dev/fastpipe" dev="tmpfs" ino=4146 scontext=u:r:system_server:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:38:32.638 I/android.anim( 1603): type=1400 audit(0.0:7669): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=686e scontext=u:r:system_server:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:38:32.640 I/ActivityManager( 1603): Start proc 26515:com.kdxx.online/u0a55 for activity com.kdxx.online/com.aiyou.mhsj.MainActivity
+11-22 13:38:32.644 W/nativebridge(26515): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: Not a directory
+11-22 13:38:32.648 I/android.anim( 1603): type=1400 audit(0.0:7670): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=686c scontext=u:r:system_server:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:38:32.648 I/Zygote  (26515): seccomp disabled by setenforce 0
+11-22 13:38:32.649 I/com.kdxx.onlin(26515): Late-enabling -Xcheck:jni
+11-22 13:38:32.655 I/Binder:1459_5( 1459): type=1400 audit(0.0:7671): avc: denied { read write } for path="/dev/fastpipe" dev="tmpfs" ino=4146 scontext=u:r:system_server:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:38:32.673 V/libnb   (26515): enter native_bridge2_initialize /data/user/0/com.kdxx.online/code_cache arm
+11-22 13:38:32.674 D/houdini (26515): [26515] Initialize library(version: 9.0.7a_y.38597 RELEASE)... successfully.
+11-22 13:38:32.674 V/libnb   (26515): enter native_bridge2_isCompatibleWith 2
+11-22 13:38:32.674 I/chatty  (26515): uid=10055(com.kdxx.online) identical 63 lines
+11-22 13:38:32.674 V/libnb   (26515): enter native_bridge2_isCompatibleWith 2
+11-22 13:38:32.679 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '26515' (No space left on device); fd=27
+11-22 13:38:32.682 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:32.706 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:32.728 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:54 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:32.731 I/com.kdxx.onlin(26515): The ClassLoaderContext is a special shared library.
+11-22 13:38:32.751 V/libnb   (26515): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:32.751 V/libnb   (26515): enter native_bridge3_isPathSupported /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/lib/arm:/system/fake-libs:/data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/base.apk!/lib/armeabi-v7a
+11-22 13:38:32.751 V/libnb   (26515): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:32.751 V/libnb   (26515): enter native_bridge3_initAnonymousNamespace libandroid.so:libaaudio.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativewindow.so:libneuralnetworks.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so, /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/lib/arm:/system/fake-libs:/data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/base.apk!/lib/armeabi-v7a
+11-22 13:38:32.751 V/libnb   (26515): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:32.751 V/libnb   (26515): enter native_bridge3_isPathSupported /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/lib/arm:/system/fake-libs:/data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/base.apk!/lib/armeabi-v7a
+11-22 13:38:32.751 V/libnb   (26515): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:32.751 V/libnb   (26515): enter native_bridge3_createNamespace classloader-namespace, (null), /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/lib/arm:/system/fake-libs:/data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/base.apk!/lib/armeabi-v7a, /data:/mnt/expand:/data/user/0/com.kdxx.online
+11-22 13:38:32.751 V/libnb   (26515): enter native_bridge2_isCompatibleWith 4
+11-22 13:38:32.751 V/libnb   (26515): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:32.751 V/libnb   (26515): enter native_bridge3_linkNamespaces libandroid.so:libaaudio.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativewindow.so:libneuralnetworks.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+11-22 13:38:32.753 D/libnativeloader(26515): CrashArm64 config not exist or not readable: /system/vendor/firmware_mnt/haehn/CrashArm64
+11-22 13:38:32.780 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:32.780 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 21 lines
+11-22 13:38:32.780 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:32.780 D/com.aiyou.mhsj.MainActivity(26515): MainActivity.onCreate
+11-22 13:38:32.789 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:32.802 D/com.aiyou.mhsj.MainActivity(26515): MainActivity setContentView done
+11-22 13:38:32.814 D/com.aiyou.mhsj.MainActivity(26515): before check network
+11-22 13:38:32.818 D/com.aiyou.mhsj.MainActivity(26515): after check network
+11-22 13:38:32.819 I/mhsj    (26515): sendReport: /data/user/0/com.kdxx.online/files/405fcab5-56fb-0c29-0087a2c4-3d1e1b87.dmp
+11-22 13:38:32.820 D/com.aiyou.mhsj.MainActivity(26515): ----------oncreate,pkg type=0
+11-22 13:38:32.820 D/com.aiyou.mhsj.MainActivity(26515): before sdk init
+11-22 13:38:32.820 D/NetworkSecurityConfig(26515): No Network Security Config specified, using platform default
+11-22 13:38:32.822 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:32.822 D/com.aiyou.mhsj.MainActivity(26515): after sdk init
+11-22 13:38:32.825 I/mhsj    (26515): Received failure HTTP response code from server: 501
+11-22 13:38:32.830 D/com.aiyou.mhsj.MainActivity(26515): before check version
+11-22 13:38:32.830 W/System.err(26515): java.io.FileNotFoundException: mhsj_res_obb.md5
+11-22 13:38:32.830 W/System.err(26515): 	at android.content.res.AssetManager.nativeOpenAsset(Native Method)
+11-22 13:38:32.830 W/System.err(26515): 	at android.content.res.AssetManager.open(AssetManager.java:815)
+11-22 13:38:32.830 W/System.err(26515): 	at android.content.res.AssetManager.open(AssetManager.java:792)
+11-22 13:38:32.830 W/System.err(26515): 	at com.aiyou.mhsj.MainActivity.getObbFileMD5(MainActivity.java:1056)
+11-22 13:38:32.830 W/System.err(26515): 	at com.aiyou.mhsj.MainActivity.onSplashEnd(MainActivity.java:1087)
+11-22 13:38:32.830 W/System.err(26515): 	at com.aiyou.mhsj.MainActivity.onCreate(MainActivity.java:890)
+11-22 13:38:32.830 W/System.err(26515): 	at android.app.Activity.performCreate(Activity.java:7284)
+11-22 13:38:32.830 W/System.err(26515): 	at android.app.Activity.performCreate(Activity.java:7275)
+11-22 13:38:32.830 W/System.err(26515): 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+11-22 13:38:32.830 W/System.err(26515): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2938)
+11-22 13:38:32.830 W/System.err(26515): 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3093)
+11-22 13:38:32.830 W/System.err(26515): 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+11-22 13:38:32.831 W/System.err(26515): 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+11-22 13:38:32.831 W/System.err(26515): 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+11-22 13:38:32.831 W/System.err(26515): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1823)
+11-22 13:38:32.831 W/System.err(26515): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-22 13:38:32.831 W/System.err(26515): 	at android.os.Looper.loop(Looper.java:193)
+11-22 13:38:32.831 W/System.err(26515): 	at android.app.ActivityThread.main(ActivityThread.java:6838)
+11-22 13:38:32.831 W/System.err(26515): 	at java.lang.reflect.Method.invoke(Native Method)
+11-22 13:38:32.831 W/System.err(26515): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-22 13:38:32.831 W/System.err(26515): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:860)
+11-22 13:38:32.833 W/System.err(26515): java.lang.Exception: Toast callstack! strTip=检测资源同步中，请等待...
+11-22 13:38:32.833 W/System.err(26515): 	at android.widget.Toast.show(Toast.java:143)
+11-22 13:38:32.833 W/System.err(26515): 	at com.aiyou.mhsj.MainActivity.showProgress(MainActivity.java:1018)
+11-22 13:38:32.833 W/System.err(26515): 	at com.aiyou.mhsj.MainActivity.onSplashEnd(MainActivity.java:1101)
+11-22 13:38:32.833 W/System.err(26515): 	at com.aiyou.mhsj.MainActivity.onCreate(MainActivity.java:890)
+11-22 13:38:32.833 W/System.err(26515): 	at android.app.Activity.performCreate(Activity.java:7284)
+11-22 13:38:32.833 W/System.err(26515): 	at android.app.Activity.performCreate(Activity.java:7275)
+11-22 13:38:32.833 W/System.err(26515): 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+11-22 13:38:32.833 W/System.err(26515): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2938)
+11-22 13:38:32.833 W/System.err(26515): 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3093)
+11-22 13:38:32.833 W/System.err(26515): 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+11-22 13:38:32.833 W/System.err(26515): 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+11-22 13:38:32.833 W/System.err(26515): 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+11-22 13:38:32.833 W/System.err(26515): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1823)
+11-22 13:38:32.833 W/System.err(26515): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-22 13:38:32.833 W/System.err(26515): 	at android.os.Looper.loop(Looper.java:193)
+11-22 13:38:32.833 W/System.err(26515): 	at android.app.ActivityThread.main(ActivityThread.java:6838)
+11-22 13:38:32.833 W/System.err(26515): 	at java.lang.reflect.Method.invoke(Native Method)
+11-22 13:38:32.833 W/System.err(26515): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-22 13:38:32.833 W/System.err(26515): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:860)
+11-22 13:38:32.835 D/com.aiyou.mhsj.MainActivity(26515): MainActivity.onStart()
+11-22 13:38:32.836 D/OpenGLRenderer(26515): Skia GL Pipeline
+11-22 13:38:32.856 D/com.aiyou.mhsj.MainActivity(26515): check version done
+11-22 13:38:32.856 V/libnb   (26515): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:32.856 V/libnb   (26515): enter native_bridge3_loadLibraryExt /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/lib/arm/libgame.so, 0, 0x3
+11-22 13:38:32.955 V/libnb   (26515): native_bridge3_loadLibraryExt: 0xd2fee900
+11-22 13:38:32.955 V/libnb   (26515): enter native_bridge2_getTrampoline JNI_OnLoad, trampoline_addr 0xf2f75000
+11-22 13:38:32.955 E/libsigchain(26515): Warning: Unexpected sigaction action found 0xf73821f7
+11-22 13:38:32.956 V/libnb   (26515): enter native_bridge2_getTrampoline Java_com_aiyou_mhsj_JniHelp_nativeSetExternalResourcePath, trampoline_addr 0xf2f75010
+11-22 13:38:32.956 D/cocos2d-x debug info(26515): nativeSetExternalResourcePath: /data/user/0/com.kdxx.online/files/
+11-22 13:38:32.956 D/cocos2d-x debug info(26515): CCFileUtils::setExternalResourcePath /data/user/0/com.kdxx.online/files/
+11-22 13:38:32.956 V/libnb   (26515): enter native_bridge2_getTrampoline Java_com_aiyou_mhsj_JniHelp_nativeSetServerListURL, trampoline_addr 0xf2f75020
+11-22 13:38:32.956 D/cocos2d-x debug info(26515): nativeSetServerListURL: http://124.223.56.189/server-list.xml
+11-22 13:38:32.957 W/System.err(26515): java.lang.Exception: Toast callstack! strTip=检测资源同步中，请等待...
+11-22 13:38:32.957 W/System.err(26515): 	at android.widget.Toast.show(Toast.java:143)
+11-22 13:38:32.957 W/System.err(26515): 	at com.aiyou.mhsj.MainActivity.showProgress(MainActivity.java:1018)
+11-22 13:38:32.957 W/System.err(26515): 	at com.aiyou.mhsj.MainActivity.onVersionCheckOk(MainActivity.java:592)
+11-22 13:38:32.957 W/System.err(26515): 	at com.aiyou.mhsj.MainActivity$LocalHandler.handleMessage(MainActivity.java:728)
+11-22 13:38:32.957 W/System.err(26515): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-22 13:38:32.957 W/System.err(26515): 	at android.os.Looper.loop(Looper.java:193)
+11-22 13:38:32.957 W/System.err(26515): 	at android.app.ActivityThread.main(ActivityThread.java:6838)
+11-22 13:38:32.957 W/System.err(26515): 	at java.lang.reflect.Method.invoke(Native Method)
+11-22 13:38:32.957 W/System.err(26515): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-22 13:38:32.957 W/System.err(26515): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:860)
+11-22 13:38:32.958 I/KDXXOnlineHttp(26515): http://124.223.56.189/assets.txt
+11-22 13:38:32.966 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:32.966 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:32.974 D/com.aiyou.mhsj.MainActivity(26515): local asset md5 = 5efc42ed36978e860f135a96bd93c85a remote = 5efc42ed36978e860f135a96bd93c85a
+11-22 13:38:32.975 D/cocos2d-x(26515): will call nativeInitPackage, incrementalUpdate = false
+11-22 13:38:32.975 V/libnb   (26515): enter native_bridge2_getTrampoline Java_com_aiyou_mhsj_JniHelp_nativeInitPackage, trampoline_addr 0xf2f75030
+11-22 13:38:32.975 D/cocos2d-x debug info(26515): in initMPackage
+11-22 13:38:32.975 D/cocos2d-x debug info(26515): start to incremental update ...
+11-22 13:38:32.836 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:54 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:32.976 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:32.980 D/vndksupport(26515): Loading /vendor/lib/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-22 13:38:32.981 D/cocos2d-x debug info(26515): meta.xml parsed.
+11-22 13:38:32.981 D/cocos2d-x debug info(26515): in MPackage::MPackage
+11-22 13:38:32.981 D/cocos2d-x debug info(26515): in MPackage::init_
+11-22 13:38:32.991 D/vndksupport(26515): Loading /vendor/lib/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-22 13:38:32.994 I/        (26515): fastpipe: Connect success
+11-22 13:38:32.995 I/        (26515): fastpipe: Connect success
+11-22 13:38:32.995 D/HostConnection(26515): HostRPC::connect sucess: app=com.kdxx.online, pid=26515, tid=26515, this=0xd6d0ff40
+11-22 13:38:32.995 D/HostConnection(26515): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:com.kdxx.online
+11-22 13:38:33.007 D/cocos2d-x debug info(26515): MPackage inited.
+11-22 13:38:33.022 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.022 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.023 W/system_server( 1603): Failed to determine oat file name for dex location /data/app/com.kdxx.online-9xX8aPfHtex7axtAXHanzg==/base.apk: Dalvik cache directory does not exist
+11-22 13:38:33.023 I/ActivityManager( 1603): Displayed com.kdxx.online/com.aiyou.mhsj.MainActivity: +405ms
+11-22 13:38:33.026 D/cocos2d-x debug info(26515): work queue created, size = 0
+11-22 13:38:33.028 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.028 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 1 line
+11-22 13:38:33.038 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.068 D/com.aiyou.mhsj.MainActivity(26515): package prepared, jump to game activity now
+11-22 13:38:33.068 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:32.977 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:33.068 I/ActivityManager( 1603): START u0 {cmp=com.kdxx.online/com.aiyou.mhsj.GameActivity} from uid 10055
+11-22 13:38:33.074 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:45 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:33.074 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 2 lines
+11-22 13:38:33.088 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.089 W/SurfaceFlinger( 1459): Attempting to set client state on removed layer: Splash Screen com.kdxx.online#0
+11-22 13:38:33.089 W/SurfaceFlinger( 1459): Attempting to destroy on removed layer: Splash Screen com.kdxx.online#0
+11-22 13:38:33.102 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.107 W/ActivityThread(26515): handleWindowVisibility: no activity for token android.os.BinderProxy@cb7143
+11-22 13:38:33.111 V/libnb   (26515): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxHelper_nativeSetApkPath, trampoline_addr 0xf2f75040
+11-22 13:38:33.113 W/SoundPool(26515): Use of stream types is deprecated for operations other than volume control
+11-22 13:38:33.113 W/SoundPool(26515): See the documentation of SoundPool() for what to use instead with android.media.AudioAttributes to qualify your playback use case
+11-22 13:38:33.113 W/com.kdxx.onlin(26515): Accessing hidden method Landroid/util/FloatMath;->ceil(F)F (light greylist, linking)
+11-22 13:38:33.122 V/libnb   (26515): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeOnResume, trampoline_addr 0xf2f75050
+11-22 13:38:33.122 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:54 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:33.142 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.143 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.154 I/        (26515): fastpipe: Connect success
+11-22 13:38:33.155 D/HostConnection(26515): HostRPC::connect sucess: app=com.kdxx.online, pid=26515, tid=26550, this=0xd2af31c0
+11-22 13:38:33.155 D/HostConnection(26515): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:com.kdxx.online
+11-22 13:38:33.156 I/ConfigStore(26515): android::hardware::configstore::V1_0::ISurfaceFlingerConfigs::hasWideColorDisplay retrieved: 0
+11-22 13:38:33.156 I/ConfigStore(26515): android::hardware::configstore::V1_0::ISurfaceFlingerConfigs::hasHDRDisplay retrieved: 0
+11-22 13:38:33.160 D/EGL_emulation(26515): eglCreateContext: 0xec23e490: maj 3 min 1 rcv 4
+11-22 13:38:33.170 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:33.170 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 23 lines
+11-22 13:38:33.170 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:33.175 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.178 E/eglCodecCommon(26515): glUtilsParamSize: unknow param 0x000082da
+11-22 13:38:33.179 E/eglCodecCommon(26515): glUtilsParamSize: unknow param 0x000082e5
+11-22 13:38:33.183 V/libnb   (26515): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit, trampoline_addr 0xf2f75060
+11-22 13:38:33.184 D/cocos2d-x debug info(26515): Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit, 1600x900
+11-22 13:38:33.186 D/cocos2d-x debug info(26515): background loader, started ...
+11-22 13:38:33.186 D/cocos2d-x debug info(26515): processing work item 0 ...
+11-22 13:38:33.194 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:33.204 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.206 V/libnb   (26515): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxBitmap_nativeInitBitmapDC, trampoline_addr 0xf2f75070
+11-22 13:38:33.208 D/cocos2d-x debug info(26515): windowSize = 1600.000000 * 900.000000
+11-22 13:38:33.208 D/cocos2d-x debug info(26515): scale = 0.711111
+11-22 13:38:33.224 D/cocos2d-x debug info(26515): processing work item 1 ...
+11-22 13:38:33.224 D/cocos2d-x debug info(26515): begin to init ChineseRepository ...
+11-22 13:38:33.236 D/cocos2d-x debug info(26515): ChineseRepository init finished
+11-22 13:38:33.236 D/cocos2d-x debug info(26515): processing work item 2 ...
+11-22 13:38:33.237 D/cocos2d-x debug info(26515): begin to init ServerRepository
+11-22 13:38:33.237 D/cocos2d-x debug info(26515): in getServerList, url = http://124.223.56.189/server-list.xml
+11-22 13:38:33.240 D/cocos2d-x debug info(26515): server list downloaded.
+11-22 13:38:33.240 D/cocos2d-x debug info(26515): ServerRepository init finished, 1 servers found
+11-22 13:38:33.240 D/cocos2d-x debug info(26515): processing work item 3 ...
+11-22 13:38:33.241 D/cocos2d-x debug info(26515): begin to init XingRepository
+11-22 13:38:33.241 D/cocos2d-x debug info(26515): XingRepository init finished
+11-22 13:38:33.241 D/cocos2d-x debug info(26515): processing work item 4 ...
+11-22 13:38:33.241 D/cocos2d-x debug info(26515): begin to init FnameRepository
+11-22 13:38:33.242 D/cocos2d-x debug info(26515): FnameRepository init finished
+11-22 13:38:33.242 D/cocos2d-x debug info(26515): processing work item 5 ...
+11-22 13:38:33.242 D/cocos2d-x debug info(26515): begin to init MnameRepository
+11-22 13:38:33.243 D/cocos2d-x debug info(26515): MnameRepository init finished
+11-22 13:38:33.243 D/cocos2d-x debug info(26515): processing work item 6 ...
+11-22 13:38:33.243 D/cocos2d-x debug info(26515): begin to init BlockedWordsRepository ...
+11-22 13:38:33.244 D/cocos2d-x debug info(26515): BlockedWordsRepository init finished
+11-22 13:38:33.244 D/cocos2d-x debug info(26515): processing work item 7 ...
+11-22 13:38:33.244 D/cocos2d-x debug info(26515): begin to init SceneRepository ...
+11-22 13:38:33.252 D/cocos2d-x debug info(26515): getLastLoginServeId id=1
+11-22 13:38:33.254 D/cocos2d-x debug info(26515): native init ok
+11-22 13:38:33.254 V/libnb   (26515): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeRender, trampoline_addr 0xf2f75080
+11-22 13:38:33.256 D/cocos2d-x debug info(26515): SceneRepository init finished
+11-22 13:38:33.256 D/cocos2d-x debug info(26515): processing work item 8 ...
+11-22 13:38:33.256 D/cocos2d-x debug info(26515): begin to init NPCRepository ...
+11-22 13:38:33.260 D/cocos2d-x debug info(26515): NPCRepository init finished
+11-22 13:38:33.260 D/cocos2d-x debug info(26515): processing work item 9 ...
+11-22 13:38:33.260 D/cocos2d-x debug info(26515): begin to init JumppointRepository ...
+11-22 13:38:33.261 D/cocos2d-x debug info(26515): JumppointRepository init finished
+11-22 13:38:33.261 D/cocos2d-x debug info(26515): processing work item 10 ...
+11-22 13:38:33.261 D/cocos2d-x debug info(26515): begin to init FightSetRepository ...
+11-22 13:38:33.262 D/cocos2d-x debug info(26515): FightSetRepository init finished
+11-22 13:38:33.262 D/cocos2d-x debug info(26515): processing work item 11 ...
+11-22 13:38:33.262 D/cocos2d-x debug info(26515): begin to init ClassRepository ...
+11-22 13:38:33.263 D/cocos2d-x debug info(26515): ClassRepository init finished
+11-22 13:38:33.263 D/cocos2d-x debug info(26515): processing work item 12 ...
+11-22 13:38:33.263 D/cocos2d-x debug info(26515): begin to init HorseRepository ...
+11-22 13:38:33.271 D/cocos2d-x debug info(26515): HorseRepository init finished
+11-22 13:38:33.271 D/cocos2d-x debug info(26515): processing work item 13 ...
+11-22 13:38:33.271 D/cocos2d-x debug info(26515): begin to init PetRepository ...
+11-22 13:38:33.274 D/cocos2d-x debug info(26515): PetRepository init finished
+11-22 13:38:33.274 D/cocos2d-x debug info(26515): processing work item 14 ...
+11-22 13:38:33.274 D/cocos2d-x debug info(26515): begin to init FashionEquipmentRepository ...
+11-22 13:38:33.278 D/cocos2d-x debug info(26515): SceneRepository init finished
+11-22 13:38:33.278 D/cocos2d-x debug info(26515): processing work item 15 ...
+11-22 13:38:33.278 D/cocos2d-x debug info(26515): begin to init GatherpointRepository ...
+11-22 13:38:33.279 D/cocos2d-x debug info(26515): SceneRepository init finished
+11-22 13:38:33.279 D/cocos2d-x debug info(26515): processing work item 16 ...
+11-22 13:38:33.279 D/cocos2d-x debug info(26515): begin to init SpawnPointRepository ...
+11-22 13:38:33.281 D/cocos2d-x debug info(26515): SpawnPointProperty init finished
+11-22 13:38:33.281 D/cocos2d-x debug info(26515): processing work item 17 ...
+11-22 13:38:33.281 D/cocos2d-x debug info(26515): begin to init MonsterRepository ...
+11-22 13:38:33.308 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.310 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 1 line
+11-22 13:38:33.319 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.329 D/cocos2d-x debug info(26515): MonsterRepository init finished
+11-22 13:38:33.329 D/cocos2d-x debug info(26515): processing work item 18 ...
+11-22 13:38:33.329 D/cocos2d-x debug info(26515): begin to init ClamRepository ...
+11-22 13:38:33.330 D/cocos2d-x debug info(26515): ShapeRepository init finished
+11-22 13:38:33.330 D/cocos2d-x debug info(26515): processing work item 19 ...
+11-22 13:38:33.330 D/cocos2d-x debug info(26515): begin to init SkillLearnRepository ...
+11-22 13:38:33.333 D/cocos2d-x debug info(26515): SkillLearnRepository init finished
+11-22 13:38:33.333 D/cocos2d-x debug info(26515): processing work item 20 ...
+11-22 13:38:33.334 D/cocos2d-x debug info(26515): begin to init SkillRepository ...
+11-22 13:38:33.381 D/cocos2d-x debug info(26515): SkillRepository init finished
+11-22 13:38:33.381 D/cocos2d-x debug info(26515): processing work item 21 ...
+11-22 13:38:33.381 D/cocos2d-x debug info(26515): begin to init ItemRepository
+11-22 13:38:33.410 D/cocos2d-x debug info(26515): init ItemRepository finished
+11-22 13:38:33.410 D/cocos2d-x debug info(26515): processing work item 22 ...
+11-22 13:38:33.410 D/cocos2d-x debug info(26515): begin to init NPCRepository ...
+11-22 13:38:33.415 D/cocos2d-x debug info(26515): NPCRepository init finished
+11-22 13:38:33.415 D/cocos2d-x debug info(26515): processing work item 23 ...
+11-22 13:38:33.415 D/cocos2d-x debug info(26515): begin to init BuffRepository ...
+11-22 13:38:33.419 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.429 D/cocos2d-x debug info(26515): SceneRepository init finished
+11-22 13:38:33.429 D/cocos2d-x debug info(26515): processing work item 24 ...
+11-22 13:38:33.429 D/cocos2d-x debug info(26515): begin to init QuestRepository ...
+11-22 13:38:33.435 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.445 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '2212' (No space left on device); fd=25
+11-22 13:38:33.445 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '2383' (No space left on device); fd=25
+11-22 13:38:33.445 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '2460' (No space left on device); fd=25
+11-22 13:38:33.454 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:54 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:33.441 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 1 line
+11-22 13:38:33.454 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:33.461 I/        ( 2212): fastpipe: close connect
+11-22 13:38:33.464 D/cocos2d-x debug info(26515): QuestRepository init finished
+11-22 13:38:33.464 D/cocos2d-x debug info(26515): processing work item 25 ...
+11-22 13:38:33.464 D/cocos2d-x debug info(26515): begin to init GuideRepository
+11-22 13:38:33.466 D/cocos2d-x debug info(26515): guideRepository init finished
+11-22 13:38:33.466 D/cocos2d-x debug info(26515): processing work item 26 ...
+11-22 13:38:33.466 D/cocos2d-x debug info(26515): begin to init InstanceRepository ...
+11-22 13:38:33.468 D/cocos2d-x debug info(26515): SceneRepository init finished
+11-22 13:38:33.468 D/cocos2d-x debug info(26515): processing work item 27 ...
+11-22 13:38:33.468 D/cocos2d-x debug info(26515): begin to init DailyRepository ...
+11-22 13:38:33.470 D/cocos2d-x debug info(26515): DailyRepository init finished
+11-22 13:38:33.470 D/cocos2d-x debug info(26515): processing work item 28 ...
+11-22 13:38:33.470 D/cocos2d-x debug info(26515): begin to init MallRepository ...
+11-22 13:38:33.472 D/cocos2d-x debug info(26515): MallRepository init finished
+11-22 13:38:33.472 D/cocos2d-x debug info(26515): processing work item 29 ...
+11-22 13:38:33.472 D/cocos2d-x debug info(26515): begin to init ShopRepository ...
+11-22 13:38:33.473 D/cocos2d-x debug info(26515): ShopRepository init finished
+11-22 13:38:33.473 D/cocos2d-x debug info(26515): processing work item 30 ...
+11-22 13:38:33.473 D/cocos2d-x debug info(26515): begin to init SuiteRepository
+11-22 13:38:33.474 D/cocos2d-x debug info(26515): PetStageRepository init finished
+11-22 13:38:33.474 D/cocos2d-x debug info(26515): processing work item 31 ...
+11-22 13:38:33.474 D/cocos2d-x debug info(26515): begin to init GiftBagRepository ...
+11-22 13:38:33.487 D/cocos2d-x debug info(26515): NPCRepository init finished
+11-22 13:38:33.487 D/cocos2d-x debug info(26515): processing work item 32 ...
+11-22 13:38:33.487 D/cocos2d-x debug info(26515): begin to init FactionSkillRepository ...
+11-22 13:38:33.487 D/cocos2d-x debug info(26515): FactionSkillRepository init finished
+11-22 13:38:33.487 D/cocos2d-x debug info(26515): processing work item 33 ...
+11-22 13:38:33.488 D/cocos2d-x debug info(26515): begin to init DreamPoolRepository ...
+11-22 13:38:33.489 D/cocos2d-x debug info(26515): DreamPoolRepository init finished
+11-22 13:38:33.489 D/cocos2d-x debug info(26515): processing work item 34 ...
+11-22 13:38:33.489 D/cocos2d-x debug info(26515): begin to init DreamPoolRewardRepository ...
+11-22 13:38:33.490 D/cocos2d-x debug info(26515): DreamPoolRepository init finished
+11-22 13:38:33.490 D/cocos2d-x debug info(26515): processing work item 35 ...
+11-22 13:38:33.490 D/cocos2d-x debug info(26515): begin to init ElixirRepository
+11-22 13:38:33.492 D/cocos2d-x debug info(26515): ElixirRepository init finished
+11-22 13:38:33.492 D/cocos2d-x debug info(26515): processing work item 36 ...
+11-22 13:38:33.492 D/cocos2d-x debug info(26515): begin to init ClamRepository ...
+11-22 13:38:33.492 D/cocos2d-x debug info(26515): ClamRepository init finished
+11-22 13:38:33.492 D/cocos2d-x debug info(26515): processing work item 37 ...
+11-22 13:38:33.492 D/cocos2d-x debug info(26515): begin to init ClamRepository ...
+11-22 13:38:33.492 D/cocos2d-x debug info(26515): ClamRepository init finished
+11-22 13:38:33.492 D/cocos2d-x debug info(26515): processing work item 38 ...
+11-22 13:38:33.492 D/cocos2d-x debug info(26515): begin to init targetRepository ...
+11-22 13:38:33.493 D/cocos2d-x debug info(26515): targetRepository init finished
+11-22 13:38:33.493 D/cocos2d-x debug info(26515): processing work item 39 ...
+11-22 13:38:33.493 D/cocos2d-x debug info(26515): begin to init ItemInsRepository
+11-22 13:38:33.494 D/cocos2d-x debug info(26515): init ItemInsRepository finished
+11-22 13:38:33.494 D/cocos2d-x debug info(26515): processing work item 40 ...
+11-22 13:38:33.494 D/cocos2d-x debug info(26515): begin to init AssistantRepository ...
+11-22 13:38:33.495 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:33.495 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 22 lines
+11-22 13:38:33.495 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:33.497 D/cocos2d-x debug info(26515): AssistantRepository init finished
+11-22 13:38:33.497 D/cocos2d-x debug info(26515): processing work item 41 ...
+11-22 13:38:33.497 D/cocos2d-x debug info(26515): begin to init TitleRepository ...
+11-22 13:38:33.498 D/cocos2d-x debug info(26515): TitleRepository init finished
+11-22 13:38:33.498 D/cocos2d-x debug info(26515): processing work item 42 ...
+11-22 13:38:33.498 D/cocos2d-x debug info(26515): begin to init ExerciseRepository ...
+11-22 13:38:33.498 D/cocos2d-x debug info(26515): NPCRepository init finished
+11-22 13:38:33.498 D/cocos2d-x debug info(26515): processing work item 43 ...
+11-22 13:38:33.498 D/cocos2d-x debug info(26515): begin to init SpiritStageRepository ...
+11-22 13:38:33.498 D/cocos2d-x debug info(26515): NPCRepository init finished
+11-22 13:38:33.498 D/cocos2d-x debug info(26515): processing work item 44 ...
+11-22 13:38:33.498 D/cocos2d-x debug info(26515): begin to init DailyMissionRepository ...
+11-22 13:38:33.499 D/cocos2d-x debug info(26515): DailyMissionRepository init finished
+11-22 13:38:33.499 D/cocos2d-x debug info(26515): processing work item 45 ...
+11-22 13:38:33.499 D/cocos2d-x debug info(26515): begin to init RewardRepository ...
+11-22 13:38:33.500 D/cocos2d-x debug info(26515): PetRepository init finished
+11-22 13:38:33.500 D/cocos2d-x debug info(26515): processing work item 46 ...
+11-22 13:38:33.500 D/cocos2d-x debug info(26515): begin to init HorseUpGradeRepository ...
+11-22 13:38:33.500 D/cocos2d-x debug info(26515): HorseGradeUpRepository init finished
+11-22 13:38:33.500 D/cocos2d-x debug info(26515): processing work item 47 ...
+11-22 13:38:33.500 D/cocos2d-x debug info(26515): begin to init HorseUpGradeRepository ...
+11-22 13:38:33.500 D/cocos2d-x debug info(26515): HorseGradeUpRepository init finished
+11-22 13:38:33.500 D/cocos2d-x debug info(26515): processing work item 48 ...
+11-22 13:38:33.500 D/cocos2d-x debug info(26515): begin to init HorseUpGradeRepository ...
+11-22 13:38:33.501 D/cocos2d-x debug info(26515): HorseGradeUpRepository init finished
+11-22 13:38:33.501 D/cocos2d-x debug info(26515): processing work item 49 ...
+11-22 13:38:33.501 D/cocos2d-x debug info(26515): begin to init HorseUpGradeRepository ...
+11-22 13:38:33.501 D/cocos2d-x debug info(26515): HorseGradeUpRepository init finished
+11-22 13:38:33.501 D/cocos2d-x debug info(26515): processing work item 50 ...
+11-22 13:38:33.501 D/cocos2d-x debug info(26515): begin to init HorseSkillRepository ...
+11-22 13:38:33.502 D/cocos2d-x debug info(26515): HorseSkillRepository init finished
+11-22 13:38:33.502 D/cocos2d-x debug info(26515): processing work item 51 ...
+11-22 13:38:33.502 D/cocos2d-x debug info(26515): begin to init HorsePillRepository ...
+11-22 13:38:33.502 D/cocos2d-x debug info(26515): HorsePillRepository init finished
+11-22 13:38:33.502 D/cocos2d-x debug info(26515): processing work item 52 ...
+11-22 13:38:33.502 D/cocos2d-x debug info(26515): begin to init HorseUpGradeRepository ...
+11-22 13:38:33.502 D/cocos2d-x debug info(26515): HorseGradeUpRepository init finished
+11-22 13:38:33.502 D/cocos2d-x debug info(26515): processing work item 53 ...
+11-22 13:38:33.502 D/cocos2d-x debug info(26515): begin to init EsotericaRepository ...
+11-22 13:38:33.503 D/cocos2d-x debug info(26515): EsotericaRepository init finished
+11-22 13:38:33.503 D/cocos2d-x debug info(26515): processing work item 54 ...
+11-22 13:38:33.503 D/cocos2d-x debug info(26515): begin to init EsotericaExpRepository ...
+11-22 13:38:33.503 D/cocos2d-x debug info(26515): EsotericaExpRepository init finished
+11-22 13:38:33.503 D/cocos2d-x debug info(26515): processing work item 55 ...
+11-22 13:38:33.503 D/cocos2d-x debug info(26515): begin to init PetGrowthRepository ...
+11-22 13:38:33.507 D/cocos2d-x debug info(26515): PetGrowthRepository init finished
+11-22 13:38:33.507 D/cocos2d-x debug info(26515): processing work item 56 ...
+11-22 13:38:33.507 D/cocos2d-x debug info(26515): begin to init AnswerQuestionRepository ...
+11-22 13:38:33.508 D/cocos2d-x debug info(26515): AnswerQuestionRepository init finished...
+11-22 13:38:33.508 D/cocos2d-x debug info(26515): processing work item 57 ...
+11-22 13:38:33.508 D/cocos2d-x debug info(26515): begin to init ManorRepository ...
+11-22 13:38:33.510 D/cocos2d-x debug info(26515): ManorRepository init finished
+11-22 13:38:33.510 D/cocos2d-x debug info(26515): processing work item 58 ...
+11-22 13:38:33.510 D/cocos2d-x debug info(26515): begin to init MoonlightRepository ...
+11-22 13:38:33.512 D/cocos2d-x debug info(26515): MoonlightRepository init finished
+11-22 13:38:33.512 D/cocos2d-x debug info(26515): processing work item 59 ...
+11-22 13:38:33.512 D/cocos2d-x debug info(26515): begin to init WingUpGradeRepository ...
+11-22 13:38:33.513 D/cocos2d-x debug info(26515): WingGradeUpRepository init finished
+11-22 13:38:33.513 D/cocos2d-x debug info(26515): processing work item 60 ...
+11-22 13:38:33.513 D/cocos2d-x debug info(26515): begin to init WingRepository ...
+11-22 13:38:33.514 D/cocos2d-x debug info(26515): WingRepository init finished
+11-22 13:38:33.515 D/cocos2d-x debug info(26515): processing work item 61 ...
+11-22 13:38:33.515 D/cocos2d-x debug info(26515): begin to init WingPosRepository ...
+11-22 13:38:33.517 D/cocos2d-x debug info(26515): WingPosRepository init finished
+11-22 13:38:33.517 D/cocos2d-x debug info(26515): processing work item 62 ...
+11-22 13:38:33.517 D/cocos2d-x debug info(26515): begin to init WingUpGradeRepository ...
+11-22 13:38:33.517 D/cocos2d-x debug info(26515): WingGradeUpRepository init finished
+11-22 13:38:33.517 D/cocos2d-x debug info(26515): processing work item 63 ...
+11-22 13:38:33.517 D/cocos2d-x debug info(26515): begin to init MazePanelRepositoty ...
+11-22 13:38:33.519 D/cocos2d-x debug info(26515): MazePanelRepositoty init finished
+11-22 13:38:33.519 D/cocos2d-x debug info(26515): processing work item 64 ...
+11-22 13:38:33.519 D/cocos2d-x debug info(26515): begin to init StrapRepository ...
+11-22 13:38:33.520 D/cocos2d-x debug info(26515): StrapRepository init finished
+11-22 13:38:33.520 D/cocos2d-x debug info(26515): processing work item 65 ...
+11-22 13:38:33.520 D/cocos2d-x debug info(26515): begin to init StrapPosRepository ...
+11-22 13:38:33.520 D/cocos2d-x debug info(26515): StrapPosRepository init finished
+11-22 13:38:33.520 D/cocos2d-x debug info(26515): processing work item 66 ...
+11-22 13:38:33.520 D/cocos2d-x debug info(26515): begin to init StrapActivateRepository ...
+11-22 13:38:33.521 D/cocos2d-x debug info(26515): StrapActivateRepository init finished
+11-22 13:38:33.521 D/cocos2d-x debug info(26515): processing work item 67 ...
+11-22 13:38:33.521 D/cocos2d-x debug info(26515): begin to init EquipBlessRepository ...
+11-22 13:38:33.521 D/cocos2d-x debug info(26515): EquipBlessRepository init finished
+11-22 13:38:33.521 D/cocos2d-x debug info(26515): processing work item 68 ...
+11-22 13:38:33.521 D/cocos2d-x debug info(26515): begin to init EquipFateRepository ...
+11-22 13:38:33.523 D/cocos2d-x debug info(26515): EquipFateRepository init finished
+11-22 13:38:33.523 D/cocos2d-x debug info(26515): processing work item 69 ...
+11-22 13:38:33.523 D/cocos2d-x debug info(26515): begin to init SuiteRepository
+11-22 13:38:33.526 D/cocos2d-x debug info(26515): HorseRepository init finished
+11-22 13:38:33.526 D/cocos2d-x debug info(26515): processing work item 70 ...
+11-22 13:38:33.527 D/cocos2d-x debug info(26515): begin to init EquipRepository ...
+11-22 13:38:33.728 D/cocos2d-x debug info(26515): EquipRepository init finished
+11-22 13:38:33.728 D/cocos2d-x debug info(26515): processing work item 71 ...
+11-22 13:38:33.728 D/cocos2d-x debug info(26515): begin to init FormulaRepository ...
+11-22 13:38:33.747 D/cocos2d-x debug info(26515): FormulaProperty init finished
+11-22 13:38:33.747 D/cocos2d-x debug info(26515): processing work item 72 ...
+11-22 13:38:33.747 D/cocos2d-x debug info(26515): begin to init GemRepository
+11-22 13:38:33.752 D/cocos2d-x debug info(26515): GemRepository init finished
+11-22 13:38:33.752 D/cocos2d-x debug info(26515): processing work item 73 ...
+11-22 13:38:33.752 D/cocos2d-x debug info(26515): begin to init MissionRepository ...
+11-22 13:38:33.754 D/cocos2d-x debug info(26515): MissonRepository init finished
+11-22 13:38:33.754 D/cocos2d-x debug info(26515): processing work item 74 ...
+11-22 13:38:33.754 D/cocos2d-x debug info(26515): begin to init VipRepository ...
+11-22 13:38:33.755 D/cocos2d-x debug info(26515): VipRepository init finished
+11-22 13:38:33.755 D/cocos2d-x debug info(26515): processing work item 75 ...
+11-22 13:38:33.755 D/cocos2d-x debug info(26515): begin to init StrengthAddOnRepository ...
+11-22 13:38:33.756 D/cocos2d-x debug info(26515): processing work item 76 ...
+11-22 13:38:33.756 D/cocos2d-x debug info(26515): begin to init ActionIntervalRepository ...
+11-22 13:38:33.758 D/cocos2d-x debug info(26515): ActionIntervalRepository init finished
+11-22 13:38:33.758 D/cocos2d-x debug info(26515): processing work item 77 ...
+11-22 13:38:33.758 D/cocos2d-x debug info(26515): begin to init SkillDelayRepository ...
+11-22 13:38:33.762 D/cocos2d-x debug info(26515): SkillDelayRepository init finished
+11-22 13:38:33.762 D/cocos2d-x debug info(26515): processing work item 78 ...
+11-22 13:38:33.762 D/cocos2d-x debug info(26515): begin to init ActionIntervalRepository ...
+11-22 13:38:33.767 D/cocos2d-x debug info(26515): ActionIntervalRepository init finished
+11-22 13:38:33.767 D/cocos2d-x debug info(26515): processing work item 79 ...
+11-22 13:38:33.767 D/cocos2d-x debug info(26515): begin to init ActionIntervalRepository ...
+11-22 13:38:33.767 D/cocos2d-x debug info(26515): ActionIntervalRepository init finished
+11-22 13:38:33.767 D/cocos2d-x debug info(26515): processing work item 80 ...
+11-22 13:38:33.767 D/cocos2d-x debug info(26515): begin to init EndlessRepository
+11-22 13:38:33.768 D/cocos2d-x debug info(26515): EndlessRepository init finished
+11-22 13:38:33.768 D/cocos2d-x debug info(26515): processing work item 81 ...
+11-22 13:38:33.768 D/cocos2d-x debug info(26515): begin to init PetEquipRepository ...
+11-22 13:38:33.771 D/cocos2d-x debug info(26515): PetEquipRepository init finished
+11-22 13:38:33.771 D/cocos2d-x debug info(26515): processing work item 82 ...
+11-22 13:38:33.771 D/cocos2d-x debug info(26515): begin to init PetEquipLevelUpRepository ...
+11-22 13:38:33.771 D/cocos2d-x debug info(26515): PetEquipLevelUpRepository init finished
+11-22 13:38:33.771 D/cocos2d-x debug info(26515): processing work item 83 ...
+11-22 13:38:33.771 D/cocos2d-x debug info(26515): begin to init FactionDrawRepository ...
+11-22 13:38:33.772 D/cocos2d-x debug info(26515): FactionDrawRepository init finished
+11-22 13:38:33.772 D/cocos2d-x debug info(26515): processing work item 84 ...
+11-22 13:38:33.772 D/cocos2d-x debug info(26515): begin to init EndlessAwardRepository ...
+11-22 13:38:33.772 D/cocos2d-x debug info(26515): EndlessAwardRepository init finished
+11-22 13:38:33.772 D/cocos2d-x debug info(26515): processing work item 85 ...
+11-22 13:38:33.772 D/cocos2d-x debug info(26515): begin to init PandoraRepository ...
+11-22 13:38:33.772 D/cocos2d-x debug info(26515): PandoraRepository init finished
+11-22 13:38:33.772 D/cocos2d-x debug info(26515): processing work item 86 ...
+11-22 13:38:33.772 D/cocos2d-x debug info(26515): begin to init EsotericaEffectRepository ...
+11-22 13:38:33.774 D/cocos2d-x debug info(26515): EsotericaEffectRepository init finished
+11-22 13:38:33.774 D/cocos2d-x debug info(26515): processing work item 87 ...
+11-22 13:38:33.774 D/cocos2d-x debug info(26515): begin to init QinmojiLearnRepository ...
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): QinmojiLearnRepository init finished
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): processing work item 88 ...
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): begin to init LuckyDayRepository ...
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): LuckyDayRepository init finished
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): processing work item 89 ...
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): begin to init FactionInfoRepository ...
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): FactionInfoRepository init finished
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): processing work item 90 ...
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): begin to init FindExpRepository ...
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): FindExpRepository init finished
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): processing work item 91 ...
+11-22 13:38:33.775 D/cocos2d-x debug info(26515): begin to init FishRepository ...
+11-22 13:38:33.776 D/cocos2d-x debug info(26515): FishRepository init finished
+11-22 13:38:33.776 D/cocos2d-x debug info(26515): processing work item 92 ...
+11-22 13:38:33.776 D/cocos2d-x debug info(26515): begin to init MazeCellRepository ...
+11-22 13:38:33.778 D/cocos2d-x debug info(26515): MazeCellRepository init finished
+11-22 13:38:33.778 D/cocos2d-x debug info(26515): processing work item 93 ...
+11-22 13:38:33.778 D/cocos2d-x debug info(26515): begin to init StrapLevelUpRepository ...
+11-22 13:38:33.779 D/cocos2d-x debug info(26515): StrapLevelUpRepository init finished
+11-22 13:38:33.779 D/cocos2d-x debug info(26515): processing work item 94 ...
+11-22 13:38:33.779 D/cocos2d-x debug info(26515): begin to init StrapSpiritRepository ...
+11-22 13:38:33.780 D/cocos2d-x debug info(26515): StrapSpiritRepository init finished
+11-22 13:38:33.780 D/cocos2d-x debug info(26515): processing work item 95 ...
+11-22 13:38:33.780 D/cocos2d-x debug info(26515): begin to init TowerRepository ...
+11-22 13:38:33.781 D/cocos2d-x debug info(26515): TowerRepository init finished
+11-22 13:38:33.781 D/cocos2d-x debug info(26515): processing work item 96 ...
+11-22 13:38:33.781 D/cocos2d-x debug info(26515): begin to init ActivitiesRanksRepository ...
+11-22 13:38:33.781 D/cocos2d-x debug info(26515): ActivitiesRanksRepository init finished
+11-22 13:38:33.781 D/cocos2d-x debug info(26515): processing work item 97 ...
+11-22 13:38:33.781 D/cocos2d-x debug info(26515): begin to init ExerciseLotteryRepository ...
+11-22 13:38:33.782 D/cocos2d-x debug info(26515): ExerciseLotteryRepository init finished
+11-22 13:38:33.782 D/cocos2d-x debug info(26515): processing work item 98 ...
+11-22 13:38:33.782 D/cocos2d-x debug info(26515): begin to init CelestialBuffRepository ...
+11-22 13:38:33.782 D/cocos2d-x debug info(26515): ChineseRepository init finished
+11-22 13:38:33.782 D/cocos2d-x debug info(26515): background loader: done.
+11-22 13:38:34.122 D/mhsj    (26515): call login
+11-22 13:38:34.177 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:38:34.177 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:38:34.961 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:34.963 W/NotificationService( 1603): Toast already killed. pkg=com.kdxx.online callback=android.app.ITransientNotification$Stub$Proxy@57ed7a2
+11-22 13:38:35.126 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 3 lines
+11-22 13:38:35.127 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:35.127 W/SurfaceFlinger( 1459): Attempting to destroy on removed layer: 6b0de92 Toast#0
+11-22 13:38:35.143 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:35.155 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 1 line
+11-22 13:38:35.156 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:35.156 D/SurfaceFlinger( 1459): duplicate layer name: changing com.kdxx.online/com.aiyou.mhsj.GameActivity to com.kdxx.online/com.aiyou.mhsj.GameActivity#1
+11-22 13:38:35.163 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:35.158 I/utmethod.pinyin( 2483): type=1400 audit(0.0:7679): avc: denied { open } for path="/data/local/cfg-haehn/input" dev="sdb2" ino=393372 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=1
+11-22 13:38:35.173 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:35.244 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 3 lines
+11-22 13:38:35.261 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:35.661 I/com.kdxx.online(26515): type=1400 audit(0.0:7680): avc: denied { write } for name="qmux_bluetooth" dev="tmpfs" ino=1558 scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:object_r:socket_device:s0 tclass=sock_file permissive=1
+11-22 13:38:35.164 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:36.603 W/WindowManager( 1603): Unable to start animation, surface is null or no children.
+11-22 13:38:36.604 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:36.991 I/ldinit  ( 1456): type=1400 audit(0.0:7683): avc: denied { read } for name="partitions" dev="proc" ino=4026532046 scontext=u:r:ldinit:s0 tcontext=u:object_r:proc:s0 tclass=file permissive=1
+11-22 13:38:45.970 W/WindowManager( 1603): removeWindowToken: Attempted to remove non-existing token: android.os.Binder@cc8423a
+11-22 13:38:51.395 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '2483' (No space left on device); fd=24
+11-22 13:38:51.396 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:38:51.396 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:38:51.397 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:51.406 D/NotificationService( 1603): notify pkg=android pid=1603
+11-22 13:38:51.407 D/NotificationService( 1603): notify pkg=android pid=1603
+11-22 13:38:51.415 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:51.416 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:51.411 I/Binder:1459_4( 1459): type=1400 audit(0.0:7686): avc: denied { read write } for path="/dev/fastpipe" dev="tmpfs" ino=4146 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:38:51.420 E/EGL_emulation( 2483): tid 4274: eglSurfaceAttrib(1504): error 0x3009 (EGL_BAD_MATCH)
+11-22 13:38:51.420 W/OpenGLRenderer( 2483): Failed to set EGL_SWAP_BEHAVIOR on surface 0x7638888f6680, error=EGL_BAD_MATCH
+11-22 13:38:51.431 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:51.432 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:51.434 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:51.434 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 19 lines
+11-22 13:38:51.434 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:51.518 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:51.406 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:53.302 W/SchedPolicy( 1603): add_tid_to_cgroup failed to write '2483' (No space left on device); fd=25
+11-22 13:38:51.533 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:53.302 D/audio_hw_hal( 1436): raw_start_output_stream, stream=0xf5e1b000, sampleRate=48000, channel=2, bps=16, bufSize=4096
+11-22 13:38:53.303 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:38:53.298 I/writer  ( 1436): type=1400 audit(0.0:7688): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6869 scontext=u:r:hal_audio_default:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:38:53.333 V/libnb   (26515): enter native_bridge2_getTrampoline Java_com_aiyou_mhsj_JniHelp_nativeLoginSucceed2, trampoline_addr 0xf2f75090
+11-22 13:38:53.333 D/cocos2d-x debug info(26515): nativeLoginSucceed2 arg0 = test001, arg1 = kBru_CEfAxz8gFbEUfeNeRhOzbwGHeftuCx2gPHFUT8
+11-22 13:38:53.336 W/IInputConnectionWrapper(26515): getCursorCapsMode on inactive InputConnection
+11-22 13:38:53.337 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:53.339 W/IInputConnectionWrapper(26515): getCursorCapsMode on inactive InputConnection
+11-22 13:38:53.405 W/SurfaceFlinger( 1459): Attempting to set client state on removed layer: com.kdxx.online/com.aiyou.mhsj.GameActivity#1
+11-22 13:38:53.405 W/SurfaceFlinger( 1459): Attempting to destroy on removed layer: com.kdxx.online/com.aiyou.mhsj.GameActivity#1
+11-22 13:38:53.405 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:53.419 W/SurfaceFlinger( 1459): Attempting to set client state on removed layer: Dim Layer for - Task=52#0
+11-22 13:38:53.419 W/SurfaceFlinger( 1459): Attempting to destroy on removed layer: Dim Layer for - Task=52#0
+11-22 13:38:53.420 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:38:53.846 V/libnb   (26515): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesBegin, trampoline_addr 0xf2f750a0
+11-22 13:38:53.916 V/libnb   (26515): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesEnd, trampoline_addr 0xf2f750b0
+11-22 13:38:53.961 D/cocos2d-x debug info(26515): setLastLoginServerId id = 1
+11-22 13:38:53.962 D/cocos2d-x debug info(26515): server id = 1
+11-22 13:38:53.962 D/cocos2d-x debug info(26515): call cmd = 17, seq = 2
+11-22 13:38:53.962 D/cocos2d-x debug info(26515): no handler for cmd -100
+11-22 13:38:53.984 D/cocos2d-x debug info(26515): got packet, seq = 2, cmd = 17
+11-22 13:38:53.984 D/cocos2d-x debug info(26515): no handler for cmd -101
+11-22 13:38:53.985 D/cocos2d-x debug info(26515): set Account 1784366
+11-22 13:38:53.985 D/cocos2d-x debug info(26515): set PlayerName 萌新
+11-22 13:38:53.985 D/cocos2d-x debug info(26515): start to build Player ...
+11-22 13:38:53.985 D/cocos2d-x debug info(26515): Player build ok ...
+11-22 13:38:53.985 D/cocos2d-x debug info(26515): start to build Scene ...
+11-22 13:38:53.986 D/cocos2d-x debug info(26515): Scene build ok ...
+11-22 13:38:53.986 D/cocos2d-x debug info(26515): player enter scene: 101
+11-22 13:38:53.991 I/com.kdxx.online(26515): type=1400 audit(0.0:7690): avc: denied { ioctl } for comm=474C54687265616420323239 path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6867 scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:38:54.007 D/cocos2d-x debug info(26515): start sit, state = 0
+11-22 13:38:54.008 D/cocos2d-x debug info(26515): begin to load scene layer ...
+11-22 13:38:54.031 D/cocos2d-x debug info(26515): done
+11-22 13:38:54.054 D/cocos2d-x debug info(26515): call cmd = 981, seq = 3
+11-22 13:38:54.054 D/cocos2d-x debug info(26515): no handler for cmd -100
+11-22 13:38:54.083 D/cocos2d-x debug info(26515): call cmd = 881, seq = 10
+11-22 13:38:54.083 D/cocos2d-x debug info(26515): loading begin, m_depth = 1
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): call cmd = 849, seq = 11
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): loading begin, m_depth = 2
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): call cmd = 1134, seq = 13
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): loading begin, m_depth = 3
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): call cmd = 1282, seq = 14
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): loading begin, m_depth = 4
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): call cmd = 1345, seq = 16
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): loading begin, m_depth = 5
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): call cmd = 1921, seq = 19
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): loading begin, m_depth = 6
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): call cmd = 2113, seq = 21
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): loading begin, m_depth = 7
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): call cmd = 90, seq = 24
+11-22 13:38:54.084 D/cocos2d-x debug info(26515): loading begin, m_depth = 8
+11-22 13:38:54.086 D/cocos2d-x debug info(26515): call cmd = 22, seq = 26
+11-22 13:38:54.086 D/cocos2d-x debug info(26515): loading begin, m_depth = 9
+11-22 13:38:54.086 D/cocos2d-x debug info(26515): call cmd = 502, seq = 27
+11-22 13:38:54.086 D/cocos2d-x debug info(26515): loading begin, m_depth = 10
+11-22 13:38:54.103 I/System.out(26515): ====type=-1
+11-22 13:38:54.114 D/cocos2d-x debug info(26515): call cmd = 849, seq = 29
+11-22 13:38:54.114 D/cocos2d-x debug info(26515): loading begin, m_depth = 11
+11-22 13:38:54.114 D/cocos2d-x debug info(26515): call cmd = 689, seq = 30
+11-22 13:38:54.114 D/cocos2d-x debug info(26515): loading begin, m_depth = 12
+11-22 13:38:54.115 D/cocos2d-x debug info(26515): call cmd = 1154, seq = 31
+11-22 13:38:54.115 D/cocos2d-x debug info(26515): loading begin, m_depth = 13
+11-22 13:38:54.115 D/cocos2d-x debug info(26515): call cmd = 663, seq = 32
+11-22 13:38:54.115 D/cocos2d-x debug info(26515): loading begin, m_depth = 14
+11-22 13:38:54.115 D/cocos2d-x debug info(26515): activate view: 101 ...
+11-22 13:38:54.124 D/cocos2d-x debug info(26515): in GameScene::visitEveryGatherpoint
+11-22 13:38:54.124 D/cocos2d-x debug info(26515): done
+11-22 13:38:54.124 D/Cocos2dxMusic(26515): createMediaplayer assets/sound/BGSound/b6.mp3
+11-22 13:38:54.124 V/libnb   (26515): enter native_bridge2_getTrampoline Java_com_aiyou_mhsj_JniHelp_nativeGetFileOffsetAndSize, trampoline_addr 0xf2f750c0
+11-22 13:38:54.125 D/NuPlayerDriver( 1477): NuPlayerDriver(0xf2a99a80) created, clientPid(26515)
+11-22 13:38:54.125 D/GenericSource( 1477): FileSource remote
+11-22 13:38:54.126 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (1, 0, 0, -1), loop setting(0, 0)
+11-22 13:38:54.127 D/NuPlayerDriver( 1477): stop(0xf2a99a80)
+11-22 13:38:54.127 I/GenericSource( 1477): start
+11-22 13:38:54.128 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (1, 0, 0, -1), loop setting(0, 1)
+11-22 13:38:54.128 D/NuPlayerDriver( 1477): seekTo(0xf2a99a80) (0 ms, 0) at state 10
+11-22 13:38:54.128 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (7, 0, 0, -1), loop setting(0, 1)
+11-22 13:38:54.128 I/OMXClient( 1477): IOmx service obtained
+11-22 13:38:54.128 E/bt_btif ( 1738): register_notification_rsp: Avrcp device is not connected, handle: 0x0
+11-22 13:38:54.128 I/chatty  ( 1738): uid=1002(bluetooth) BluetoothAvrcpH identical 4 lines
+11-22 13:38:54.128 E/bt_btif ( 1738): register_notification_rsp: Avrcp device is not connected, handle: 0x0
+11-22 13:38:54.128 I/OMXMaster( 1482): makeComponentInstance(OMX.google.mp3.decoder) in omx@1.0-service process
+11-22 13:38:54.128 D/NuPlayerDriver( 1477): start(0xf2a99a80), state is 10, eos is 0
+11-22 13:38:54.129 E/OMXNodeInstance( 1482): setConfig(0xf562c960:google.mp3.decoder, ConfigPriority(0x6f800002)) ERROR: Undefined(0x80001001)
+11-22 13:38:54.129 I/ACodec  ( 1477): codec does not support config priority (err -2147483648)
+11-22 13:38:54.129 E/OMXNodeInstance( 1482): getConfig(0xf562c960:google.mp3.decoder, ConfigAndroidVendorExtension(0x6f100004)) ERROR: Undefined(0x80001001)
+11-22 13:38:54.130 I/MediaCodec( 1477): MediaCodec will operate in async mode
+11-22 13:38:54.131 W/AshmemAllocator( 1433): ashmem_create_region(8192) returning hidl_memory(0x76391702c100, 8192)
+11-22 13:38:54.131 I/chatty  ( 1433): uid=1000(system) allocator@1.0-s identical 2 lines
+11-22 13:38:54.131 W/AshmemAllocator( 1433): ashmem_create_region(8192) returning hidl_memory(0x76391702c100, 8192)
+11-22 13:38:54.132 W/AshmemAllocator( 1433): ashmem_create_region(9216) returning hidl_memory(0x76391702c100, 9216)
+11-22 13:38:54.132 I/chatty  ( 1433): uid=1000(system) allocator@1.0-s identical 1 line
+11-22 13:38:54.132 W/AshmemAllocator( 1433): ashmem_create_region(9216) returning hidl_memory(0x76391702c100, 9216)
+11-22 13:38:54.132 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 113
+11-22 13:38:54.133 W/AshmemAllocator( 1433): ashmem_create_region(9216) returning hidl_memory(0x76391702c100, 9216)
+11-22 13:38:54.133 D/cocos2d-x debug info(26515): init scene, spawn points count(3)
+11-22 13:38:54.133 D/cocos2d-x debug info(26515): spawnpoint 111101@(15, 0) added
+11-22 13:38:54.133 D/cocos2d-x debug info(26515): SpawnpointMainView: 1
+11-22 13:38:54.134 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (4, 0, 0, -1), loop setting(0, 1)
+11-22 13:38:54.135 W/AudioFlinger( 1457): createTrack_l(): mismatch between requested flags (00000008) and output flags (00000002)
+11-22 13:38:54.135 D/AudioFlinger( 1457): Client defaulted notificationFrames to 3760 for frameCount 11280
+11-22 13:38:54.136 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (6, 0, 0, -1), loop setting(0, 1)
+11-22 13:38:54.139 D/cocos2d-x debug info(26515): spawnpoint 111301@(31, 1) added
+11-22 13:38:54.139 D/cocos2d-x debug info(26515): SpawnpointMainView: 2
+11-22 13:38:54.143 D/cocos2d-x debug info(26515): spawnpoint 111402@(47, 0) added
+11-22 13:38:54.143 D/cocos2d-x debug info(26515): SpawnpointMainView: 3
+11-22 13:38:54.145 D/cocos2d-x debug info(26515): gatherpoint 101101,0@(51, 10) added
+11-22 13:38:54.145 D/cocos2d-x debug info(26515): gatherpoint 101101,0 added in view
+11-22 13:38:54.147 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 117
+11-22 13:38:54.147 D/cocos2d-x debug info(26515): got packet, seq = 3, cmd = 982
+11-22 13:38:54.147 D/cocos2d-x debug info(26515): loading end, m_depth = 13
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 178
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 5, cmd = 658
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 530
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 659
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 6, cmd = 1
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 538
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 10, cmd = 882
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): loading end, m_depth = 12
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 11, cmd = 849
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): loading end, m_depth = 11
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 12, cmd = 1
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 13, cmd = 1
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): loading end, m_depth = 10
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 14, cmd = 1282
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): loading end, m_depth = 9
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 15, cmd = 1410
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 16, cmd = 1346
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): loading end, m_depth = 8
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 194
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 18, cmd = 191
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 19, cmd = 1922
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): loading end, m_depth = 7
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 88
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 21, cmd = 2114
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): loading end, m_depth = 6
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 2116
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 306
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): list active skill learn 60101
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): list active skill learn 60201
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): got packet, seq = 24, cmd = 91
+11-22 13:38:54.149 D/cocos2d-x debug info(26515): loading end, m_depth = 5
+11-22 13:38:54.150 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 1506
+11-22 13:38:54.150 D/cocos2d-x debug info(26515): got packet, seq = 26, cmd = 1
+11-22 13:38:54.150 D/cocos2d-x debug info(26515): loading end, m_depth = 4
+11-22 13:38:54.150 D/cocos2d-x debug info(26515): got packet, seq = 27, cmd = 502
+11-22 13:38:54.150 D/cocos2d-x debug info(26515): loading end, m_depth = 3
+11-22 13:38:54.150 D/cocos2d-x debug info(26515): got packet, seq = 28, cmd = 210
+11-22 13:38:54.166 D/cocos2d-x debug info(26515): set accept effect
+11-22 13:38:54.167 D/cocos2d-x debug info(26515): got packet, seq = 29, cmd = 849
+11-22 13:38:54.167 D/cocos2d-x debug info(26515): loading end, m_depth = 2
+11-22 13:38:54.167 D/cocos2d-x debug info(26515): got packet, seq = 30, cmd = 690
+11-22 13:38:54.167 D/cocos2d-x debug info(26515): loading end, m_depth = 1
+11-22 13:38:54.174 D/cocos2d-x debug info(26515): no handler for cmd -220
+11-22 13:38:54.174 D/cocos2d-x debug info(26515): got packet, seq = 31, cmd = 1154
+11-22 13:38:54.174 D/cocos2d-x debug info(26515): loading end, m_depth = 0
+11-22 13:38:54.195 D/cocos2d-x debug info(26515): got packet, seq = 0, cmd = 1266
+11-22 13:38:54.397 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:38:54.655 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:38:55.050 I/appproc (26577): app_process main with argv: /system/bin com.android.commands.input.Input tap 800 405 
+11-22 13:38:55.050 D/AndroidRuntime(26577): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:55.052 E/cutils-trace(26577): Error opening trace file: No such file or directory (2)
+11-22 13:38:55.058 V/libnb   (26577): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:55.063 I/libnb   (26577): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:55.074 I/app_process(26577): The ClassLoaderContext is a special shared library.
+11-22 13:38:55.074 W/app_process(26577): Could not create mount namespace.
+11-22 13:38:55.074 D/nativebridge(26577): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:55.074 W/nativebridge(26577): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:55.074 W/nativebridge(26577): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:55.074 D/nativebridge(26577): call UnloadNativeBridge! state=2
+11-22 13:38:55.071 I/main    (26577): type=1400 audit(0.0:7691): avc: denied { open } for path="/data/local/cfg-haehn/app_xpt" dev="sdb2" ino=393360 scontext=u:r:shell:s0 tcontext=u:object_r:system_data_file:s0 tclass=file permissive=1
+11-22 13:38:55.081 D/AndroidRuntime(26577): Calling main entry com.android.commands.input.Input
+11-22 13:38:55.082 I/Input   (26577): injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=800.0, y[0]=405.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8732806, downTime=8732806, deviceId=3, source=0x1002 }
+11-22 13:38:55.085 I/InputDispatcher( 1603): type=1400 audit(0.0:7693): avc: denied { call } for scontext=u:r:system_server:s0 tcontext=u:r:init:s0 tclass=binder permissive=1
+11-22 13:38:55.089 I/Input   (26577): injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=800.0, y[0]=405.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8732806, downTime=8732806, deviceId=3, source=0x1002 }
+11-22 13:38:55.103 D/AndroidRuntime(26577): Shutting down VM
+11-22 13:38:55.113 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:55.113 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 19 lines
+11-22 13:38:55.113 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:55.432 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:38:56.104 I/appproc (26587): app_process main with argv: /system/bin com.android.commands.input.Input keyevent KEYCODE_MOVE_END 
+11-22 13:38:56.104 D/AndroidRuntime(26587): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:56.105 E/cutils-trace(26587): Error opening trace file: No such file or directory (2)
+11-22 13:38:56.111 V/libnb   (26587): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:56.118 I/libnb   (26587): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:56.128 I/app_process(26587): The ClassLoaderContext is a special shared library.
+11-22 13:38:56.128 W/app_process(26587): Could not create mount namespace.
+11-22 13:38:56.128 D/nativebridge(26587): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:56.128 W/nativebridge(26587): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:56.128 W/nativebridge(26587): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:56.128 D/nativebridge(26587): call UnloadNativeBridge! state=2
+11-22 13:38:56.135 D/AndroidRuntime(26587): Calling main entry com.android.commands.input.Input
+11-22 13:38:56.135 I/Input   (26587): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_MOVE_END, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8733860, downTime=8733860, deviceId=-1, source=0x101 }
+11-22 13:38:56.143 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:56.143 I/Input   (26587): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_MOVE_END, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8733860, downTime=8733860, deviceId=-1, source=0x101 }
+11-22 13:38:56.149 D/AndroidRuntime(26587): Shutting down VM
+11-22 13:38:56.747 I/appproc (26597): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:56.747 D/AndroidRuntime(26597): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:56.748 E/cutils-trace(26597): Error opening trace file: No such file or directory (2)
+11-22 13:38:56.754 V/libnb   (26597): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:56.761 I/libnb   (26597): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:56.772 I/app_process(26597): The ClassLoaderContext is a special shared library.
+11-22 13:38:56.772 W/app_process(26597): Could not create mount namespace.
+11-22 13:38:56.772 D/nativebridge(26597): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:56.772 W/nativebridge(26597): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:56.772 W/nativebridge(26597): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:56.772 D/nativebridge(26597): call UnloadNativeBridge! state=2
+11-22 13:38:56.779 D/AndroidRuntime(26597): Calling main entry com.android.commands.input.Input
+11-22 13:38:56.779 I/Input   (26597): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8734504, downTime=8734504, deviceId=-1, source=0x101 }
+11-22 13:38:56.785 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:56.786 I/Input   (26597): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8734504, downTime=8734504, deviceId=-1, source=0x101 }
+11-22 13:38:56.792 D/AndroidRuntime(26597): Shutting down VM
+11-22 13:38:56.986 I/appproc (26607): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:56.986 D/AndroidRuntime(26607): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:56.988 E/cutils-trace(26607): Error opening trace file: No such file or directory (2)
+11-22 13:38:56.994 V/libnb   (26607): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:57.000 I/libnb   (26607): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:57.011 I/app_process(26607): The ClassLoaderContext is a special shared library.
+11-22 13:38:57.011 W/app_process(26607): Could not create mount namespace.
+11-22 13:38:57.011 D/nativebridge(26607): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:57.012 W/nativebridge(26607): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:57.012 W/nativebridge(26607): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:57.012 D/nativebridge(26607): call UnloadNativeBridge! state=2
+11-22 13:38:57.019 D/AndroidRuntime(26607): Calling main entry com.android.commands.input.Input
+11-22 13:38:57.020 I/Input   (26607): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8734744, downTime=8734744, deviceId=-1, source=0x101 }
+11-22 13:38:57.027 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:57.027 I/Input   (26607): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8734744, downTime=8734744, deviceId=-1, source=0x101 }
+11-22 13:38:57.034 D/AndroidRuntime(26607): Shutting down VM
+11-22 13:38:57.235 I/appproc (26617): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:57.235 D/AndroidRuntime(26617): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:57.236 E/cutils-trace(26617): Error opening trace file: No such file or directory (2)
+11-22 13:38:57.243 V/libnb   (26617): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:57.248 I/libnb   (26617): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:57.259 I/app_process(26617): The ClassLoaderContext is a special shared library.
+11-22 13:38:57.259 W/app_process(26617): Could not create mount namespace.
+11-22 13:38:57.259 D/nativebridge(26617): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:57.260 W/nativebridge(26617): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:57.260 W/nativebridge(26617): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:57.260 D/nativebridge(26617): call UnloadNativeBridge! state=2
+11-22 13:38:57.266 D/AndroidRuntime(26617): Calling main entry com.android.commands.input.Input
+11-22 13:38:57.267 I/Input   (26617): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8734991, downTime=8734991, deviceId=-1, source=0x101 }
+11-22 13:38:57.274 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:57.274 I/Input   (26617): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8734991, downTime=8734991, deviceId=-1, source=0x101 }
+11-22 13:38:57.281 D/AndroidRuntime(26617): Shutting down VM
+11-22 13:38:57.302 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:57.302 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 22 lines
+11-22 13:38:57.302 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:57.375 D/cocos2d-x debug info(26515): memory warning received, remove unused textures ...
+11-22 13:38:57.481 I/appproc (26627): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:57.481 D/AndroidRuntime(26627): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:57.482 E/cutils-trace(26627): Error opening trace file: No such file or directory (2)
+11-22 13:38:57.489 V/libnb   (26627): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:57.495 I/libnb   (26627): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:57.506 I/app_process(26627): The ClassLoaderContext is a special shared library.
+11-22 13:38:57.506 W/app_process(26627): Could not create mount namespace.
+11-22 13:38:57.506 D/nativebridge(26627): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:57.506 W/nativebridge(26627): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:57.506 W/nativebridge(26627): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:57.506 D/nativebridge(26627): call UnloadNativeBridge! state=2
+11-22 13:38:57.513 D/AndroidRuntime(26627): Calling main entry com.android.commands.input.Input
+11-22 13:38:57.513 I/Input   (26627): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8735238, downTime=8735238, deviceId=-1, source=0x101 }
+11-22 13:38:57.520 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:57.520 I/Input   (26627): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8735238, downTime=8735238, deviceId=-1, source=0x101 }
+11-22 13:38:57.526 D/AndroidRuntime(26627): Shutting down VM
+11-22 13:38:57.716 I/appproc (26637): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:57.717 D/AndroidRuntime(26637): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:57.718 E/cutils-trace(26637): Error opening trace file: No such file or directory (2)
+11-22 13:38:57.724 V/libnb   (26637): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:57.730 I/libnb   (26637): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:57.741 I/app_process(26637): The ClassLoaderContext is a special shared library.
+11-22 13:38:57.741 W/app_process(26637): Could not create mount namespace.
+11-22 13:38:57.741 D/nativebridge(26637): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:57.741 W/nativebridge(26637): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:57.741 W/nativebridge(26637): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:57.741 D/nativebridge(26637): call UnloadNativeBridge! state=2
+11-22 13:38:57.748 D/AndroidRuntime(26637): Calling main entry com.android.commands.input.Input
+11-22 13:38:57.749 I/Input   (26637): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8735473, downTime=8735473, deviceId=-1, source=0x101 }
+11-22 13:38:57.756 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:57.756 I/Input   (26637): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8735473, downTime=8735473, deviceId=-1, source=0x101 }
+11-22 13:38:57.762 D/AndroidRuntime(26637): Shutting down VM
+11-22 13:38:57.953 I/appproc (26647): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:57.953 D/AndroidRuntime(26647): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:57.954 E/cutils-trace(26647): Error opening trace file: No such file or directory (2)
+11-22 13:38:57.961 V/libnb   (26647): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:57.967 I/libnb   (26647): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:57.980 I/app_process(26647): The ClassLoaderContext is a special shared library.
+11-22 13:38:57.980 W/app_process(26647): Could not create mount namespace.
+11-22 13:38:57.980 D/nativebridge(26647): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:57.981 W/nativebridge(26647): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:57.981 W/nativebridge(26647): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:57.981 D/nativebridge(26647): call UnloadNativeBridge! state=2
+11-22 13:38:57.987 D/AndroidRuntime(26647): Calling main entry com.android.commands.input.Input
+11-22 13:38:57.987 I/Input   (26647): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8735712, downTime=8735712, deviceId=-1, source=0x101 }
+11-22 13:38:57.994 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:57.994 I/Input   (26647): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8735712, downTime=8735712, deviceId=-1, source=0x101 }
+11-22 13:38:58.000 D/AndroidRuntime(26647): Shutting down VM
+11-22 13:38:58.195 I/appproc (26657): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:58.195 D/AndroidRuntime(26657): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:58.196 E/cutils-trace(26657): Error opening trace file: No such file or directory (2)
+11-22 13:38:58.203 V/libnb   (26657): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:58.209 I/libnb   (26657): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:58.220 I/app_process(26657): The ClassLoaderContext is a special shared library.
+11-22 13:38:58.220 W/app_process(26657): Could not create mount namespace.
+11-22 13:38:58.220 D/nativebridge(26657): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:58.221 W/nativebridge(26657): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:58.221 W/nativebridge(26657): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:58.221 D/nativebridge(26657): call UnloadNativeBridge! state=2
+11-22 13:38:58.228 D/AndroidRuntime(26657): Calling main entry com.android.commands.input.Input
+11-22 13:38:58.228 I/Input   (26657): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8735952, downTime=8735952, deviceId=-1, source=0x101 }
+11-22 13:38:58.235 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:58.235 I/Input   (26657): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8735952, downTime=8735952, deviceId=-1, source=0x101 }
+11-22 13:38:58.242 D/AndroidRuntime(26657): Shutting down VM
+11-22 13:38:58.305 W/System  ( 2483): A resource failed to call close. 
+11-22 13:38:58.305 W/System  ( 2483): A resource failed to call close. 
+11-22 13:38:58.433 I/appproc (26667): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:58.433 D/AndroidRuntime(26667): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:58.434 E/cutils-trace(26667): Error opening trace file: No such file or directory (2)
+11-22 13:38:58.440 V/libnb   (26667): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:58.446 I/libnb   (26667): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:58.457 I/app_process(26667): The ClassLoaderContext is a special shared library.
+11-22 13:38:58.457 W/app_process(26667): Could not create mount namespace.
+11-22 13:38:58.457 D/nativebridge(26667): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:58.458 W/nativebridge(26667): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:58.458 W/nativebridge(26667): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:58.458 D/nativebridge(26667): call UnloadNativeBridge! state=2
+11-22 13:38:58.464 D/AndroidRuntime(26667): Calling main entry com.android.commands.input.Input
+11-22 13:38:58.464 I/Input   (26667): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8736189, downTime=8736189, deviceId=-1, source=0x101 }
+11-22 13:38:58.478 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:58.478 I/Input   (26667): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8736189, downTime=8736189, deviceId=-1, source=0x101 }
+11-22 13:38:58.485 D/AndroidRuntime(26667): Shutting down VM
+11-22 13:38:58.492 V/libnb   (26515): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesMove, trampoline_addr 0xf2f750d0
+11-22 13:38:58.511 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:58.511 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 21 lines
+11-22 13:38:58.511 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:58.560 D/cocos2d-x debug info(26515): call cmd = 182, seq = 35
+11-22 13:38:58.560 D/cocos2d-x debug info(26515): loading begin, m_depth = 1
+11-22 13:38:58.560 D/cocos2d-x debug info(26515): run to npc 20001 @ scene 101
+11-22 13:38:58.560 D/cocos2d-x debug info(26515): running, fight set speed = 0.070000
+11-22 13:38:58.560 D/cocos2d-x debug info(26515): memory warning received, remove unused textures ...
+11-22 13:38:58.560 D/cocos2d-x debug info(26515): dest reached
+11-22 13:38:58.676 I/appproc (26677): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:58.676 D/AndroidRuntime(26677): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:58.677 E/cutils-trace(26677): Error opening trace file: No such file or directory (2)
+11-22 13:38:58.683 V/libnb   (26677): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:58.691 I/libnb   (26677): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:58.702 I/app_process(26677): The ClassLoaderContext is a special shared library.
+11-22 13:38:58.702 W/app_process(26677): Could not create mount namespace.
+11-22 13:38:58.702 D/nativebridge(26677): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:58.703 W/nativebridge(26677): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:58.703 W/nativebridge(26677): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:58.703 D/nativebridge(26677): call UnloadNativeBridge! state=2
+11-22 13:38:58.709 D/AndroidRuntime(26677): Calling main entry com.android.commands.input.Input
+11-22 13:38:58.710 I/Input   (26677): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8736434, downTime=8736434, deviceId=-1, source=0x101 }
+11-22 13:38:58.716 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:58.716 I/Input   (26677): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8736434, downTime=8736434, deviceId=-1, source=0x101 }
+11-22 13:38:58.723 D/AndroidRuntime(26677): Shutting down VM
+11-22 13:38:58.906 I/appproc (26687): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:58.906 D/AndroidRuntime(26687): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:58.907 E/cutils-trace(26687): Error opening trace file: No such file or directory (2)
+11-22 13:38:58.913 V/libnb   (26687): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:58.919 I/libnb   (26687): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:58.930 I/app_process(26687): The ClassLoaderContext is a special shared library.
+11-22 13:38:58.930 W/app_process(26687): Could not create mount namespace.
+11-22 13:38:58.930 D/nativebridge(26687): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:58.930 W/nativebridge(26687): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:58.930 W/nativebridge(26687): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:58.930 D/nativebridge(26687): call UnloadNativeBridge! state=2
+11-22 13:38:58.937 D/AndroidRuntime(26687): Calling main entry com.android.commands.input.Input
+11-22 13:38:58.937 I/Input   (26687): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8736662, downTime=8736662, deviceId=-1, source=0x101 }
+11-22 13:38:58.943 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:58.943 I/Input   (26687): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8736662, downTime=8736662, deviceId=-1, source=0x101 }
+11-22 13:38:58.949 D/AndroidRuntime(26687): Shutting down VM
+11-22 13:38:59.113 D/cocos2d-x debug info(26515): loading end, m_depth = 0
+11-22 13:38:59.113 D/cocos2d-x debug info(26515): query server capability failed: -2
+11-22 13:38:59.140 I/appproc (26697): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:59.140 D/AndroidRuntime(26697): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:59.141 E/cutils-trace(26697): Error opening trace file: No such file or directory (2)
+11-22 13:38:59.148 V/libnb   (26697): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:59.153 I/libnb   (26697): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:59.164 I/app_process(26697): The ClassLoaderContext is a special shared library.
+11-22 13:38:59.164 W/app_process(26697): Could not create mount namespace.
+11-22 13:38:59.164 D/nativebridge(26697): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:59.164 W/nativebridge(26697): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:59.164 W/nativebridge(26697): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:59.164 D/nativebridge(26697): call UnloadNativeBridge! state=2
+11-22 13:38:59.170 D/AndroidRuntime(26697): Calling main entry com.android.commands.input.Input
+11-22 13:38:59.170 I/Input   (26697): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8736895, downTime=8736895, deviceId=-1, source=0x101 }
+11-22 13:38:59.177 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:59.177 I/Input   (26697): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8736895, downTime=8736895, deviceId=-1, source=0x101 }
+11-22 13:38:59.182 D/AndroidRuntime(26697): Shutting down VM
+11-22 13:38:59.379 I/appproc (26707): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:59.379 D/AndroidRuntime(26707): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:59.380 E/cutils-trace(26707): Error opening trace file: No such file or directory (2)
+11-22 13:38:59.385 V/libnb   (26707): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:59.391 I/libnb   (26707): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:59.402 I/app_process(26707): The ClassLoaderContext is a special shared library.
+11-22 13:38:59.402 W/app_process(26707): Could not create mount namespace.
+11-22 13:38:59.402 D/nativebridge(26707): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:59.402 W/nativebridge(26707): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:59.402 W/nativebridge(26707): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:59.402 D/nativebridge(26707): call UnloadNativeBridge! state=2
+11-22 13:38:59.409 D/AndroidRuntime(26707): Calling main entry com.android.commands.input.Input
+11-22 13:38:59.409 I/Input   (26707): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8737133, downTime=8737133, deviceId=-1, source=0x101 }
+11-22 13:38:59.416 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:59.416 I/Input   (26707): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8737133, downTime=8737133, deviceId=-1, source=0x101 }
+11-22 13:38:59.422 D/AndroidRuntime(26707): Shutting down VM
+11-22 13:38:59.618 I/appproc (26717): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:59.618 D/AndroidRuntime(26717): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:59.619 E/cutils-trace(26717): Error opening trace file: No such file or directory (2)
+11-22 13:38:59.625 V/libnb   (26717): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:59.631 I/libnb   (26717): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:59.642 I/app_process(26717): The ClassLoaderContext is a special shared library.
+11-22 13:38:59.642 W/app_process(26717): Could not create mount namespace.
+11-22 13:38:59.642 D/nativebridge(26717): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:59.642 W/nativebridge(26717): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:59.642 W/nativebridge(26717): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:59.642 D/nativebridge(26717): call UnloadNativeBridge! state=2
+11-22 13:38:59.648 D/AndroidRuntime(26717): Calling main entry com.android.commands.input.Input
+11-22 13:38:59.648 I/Input   (26717): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8737373, downTime=8737373, deviceId=-1, source=0x101 }
+11-22 13:38:59.655 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:59.656 I/Input   (26717): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8737373, downTime=8737373, deviceId=-1, source=0x101 }
+11-22 13:38:59.663 D/AndroidRuntime(26717): Shutting down VM
+11-22 13:38:59.684 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:59.684 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 17 lines
+11-22 13:38:59.684 W/System  ( 1603): A resource failed to call close. 
+11-22 13:38:59.854 I/appproc (26727): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:38:59.854 D/AndroidRuntime(26727): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:38:59.855 E/cutils-trace(26727): Error opening trace file: No such file or directory (2)
+11-22 13:38:59.861 V/libnb   (26727): enter native_bridge2_isCompatibleWith 3
+11-22 13:38:59.867 I/libnb   (26727): Found /system/lib64/libhoudini.so version 3
+11-22 13:38:59.877 I/app_process(26727): The ClassLoaderContext is a special shared library.
+11-22 13:38:59.878 W/app_process(26727): Could not create mount namespace.
+11-22 13:38:59.878 D/nativebridge(26727): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:38:59.878 W/nativebridge(26727): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:38:59.878 W/nativebridge(26727): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:38:59.878 D/nativebridge(26727): call UnloadNativeBridge! state=2
+11-22 13:38:59.884 D/AndroidRuntime(26727): Calling main entry com.android.commands.input.Input
+11-22 13:38:59.884 I/Input   (26727): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8737609, downTime=8737609, deviceId=-1, source=0x101 }
+11-22 13:38:59.891 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:38:59.891 I/Input   (26727): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8737609, downTime=8737609, deviceId=-1, source=0x101 }
+11-22 13:38:59.897 D/AndroidRuntime(26727): Shutting down VM
+11-22 13:38:59.931 D/cocos2d-x debug info(26515): running, fight set speed = 0.070000
+11-22 13:38:59.934 D/cocos2d-x debug info(26515): end sit, state = 2
+11-22 13:39:00.097 I/appproc (26737): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:00.097 D/AndroidRuntime(26737): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:00.098 E/cutils-trace(26737): Error opening trace file: No such file or directory (2)
+11-22 13:39:00.104 V/libnb   (26737): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:00.111 I/libnb   (26737): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:00.122 I/app_process(26737): The ClassLoaderContext is a special shared library.
+11-22 13:39:00.122 W/app_process(26737): Could not create mount namespace.
+11-22 13:39:00.122 D/nativebridge(26737): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:00.122 W/nativebridge(26737): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:00.122 W/nativebridge(26737): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:00.122 D/nativebridge(26737): call UnloadNativeBridge! state=2
+11-22 13:39:00.129 D/AndroidRuntime(26737): Calling main entry com.android.commands.input.Input
+11-22 13:39:00.129 I/Input   (26737): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8737853, downTime=8737853, deviceId=-1, source=0x101 }
+11-22 13:39:00.136 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:00.136 I/Input   (26737): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8737853, downTime=8737853, deviceId=-1, source=0x101 }
+11-22 13:39:00.141 D/AndroidRuntime(26737): Shutting down VM
+11-22 13:39:00.330 I/appproc (26747): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:00.330 D/AndroidRuntime(26747): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:00.331 E/cutils-trace(26747): Error opening trace file: No such file or directory (2)
+11-22 13:39:00.338 V/libnb   (26747): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:00.344 I/libnb   (26747): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:00.355 I/app_process(26747): The ClassLoaderContext is a special shared library.
+11-22 13:39:00.355 W/app_process(26747): Could not create mount namespace.
+11-22 13:39:00.355 D/nativebridge(26747): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:00.355 W/nativebridge(26747): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:00.355 W/nativebridge(26747): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:00.355 D/nativebridge(26747): call UnloadNativeBridge! state=2
+11-22 13:39:00.362 D/AndroidRuntime(26747): Calling main entry com.android.commands.input.Input
+11-22 13:39:00.362 I/Input   (26747): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8738086, downTime=8738086, deviceId=-1, source=0x101 }
+11-22 13:39:00.369 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:00.369 I/Input   (26747): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8738086, downTime=8738086, deviceId=-1, source=0x101 }
+11-22 13:39:00.376 D/AndroidRuntime(26747): Shutting down VM
+11-22 13:39:00.407 D/cocos2d-x debug info(26515): got packet, seq = 36, cmd = 116
+11-22 13:39:00.407 D/cocos2d-x debug info(26515): no handler for cmd 116
+11-22 13:39:00.564 I/appproc (26757): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:00.564 D/AndroidRuntime(26757): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:00.565 E/cutils-trace(26757): Error opening trace file: No such file or directory (2)
+11-22 13:39:00.571 V/libnb   (26757): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:00.577 I/libnb   (26757): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:00.588 I/app_process(26757): The ClassLoaderContext is a special shared library.
+11-22 13:39:00.588 W/app_process(26757): Could not create mount namespace.
+11-22 13:39:00.588 D/nativebridge(26757): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:00.588 W/nativebridge(26757): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:00.588 W/nativebridge(26757): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:00.588 D/nativebridge(26757): call UnloadNativeBridge! state=2
+11-22 13:39:00.596 D/AndroidRuntime(26757): Calling main entry com.android.commands.input.Input
+11-22 13:39:00.596 I/Input   (26757): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8738321, downTime=8738321, deviceId=-1, source=0x101 }
+11-22 13:39:00.604 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:00.604 I/Input   (26757): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8738321, downTime=8738321, deviceId=-1, source=0x101 }
+11-22 13:39:00.613 D/AndroidRuntime(26757): Shutting down VM
+11-22 13:39:00.712 D/cocos2d-x debug info(26515): dest reached
+11-22 13:39:00.712 D/cocos2d-x debug info(26515): start sit, state = 0
+11-22 13:39:00.800 I/appproc (26767): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:00.800 D/AndroidRuntime(26767): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:00.801 E/cutils-trace(26767): Error opening trace file: No such file or directory (2)
+11-22 13:39:00.807 V/libnb   (26767): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:00.813 I/libnb   (26767): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:00.823 I/app_process(26767): The ClassLoaderContext is a special shared library.
+11-22 13:39:00.823 W/app_process(26767): Could not create mount namespace.
+11-22 13:39:00.823 D/nativebridge(26767): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:00.824 W/nativebridge(26767): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:00.824 W/nativebridge(26767): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:00.824 D/nativebridge(26767): call UnloadNativeBridge! state=2
+11-22 13:39:00.830 D/AndroidRuntime(26767): Calling main entry com.android.commands.input.Input
+11-22 13:39:00.831 I/Input   (26767): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8738555, downTime=8738555, deviceId=-1, source=0x101 }
+11-22 13:39:00.837 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:00.838 I/Input   (26767): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8738555, downTime=8738555, deviceId=-1, source=0x101 }
+11-22 13:39:00.845 D/AndroidRuntime(26767): Shutting down VM
+11-22 13:39:00.860 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:00.860 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 17 lines
+11-22 13:39:00.860 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:01.038 I/appproc (26777): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:01.038 D/AndroidRuntime(26777): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:01.039 E/cutils-trace(26777): Error opening trace file: No such file or directory (2)
+11-22 13:39:01.046 V/libnb   (26777): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:01.052 I/libnb   (26777): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:01.063 I/app_process(26777): The ClassLoaderContext is a special shared library.
+11-22 13:39:01.063 W/app_process(26777): Could not create mount namespace.
+11-22 13:39:01.063 D/nativebridge(26777): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:01.063 W/nativebridge(26777): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:01.063 W/nativebridge(26777): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:01.063 D/nativebridge(26777): call UnloadNativeBridge! state=2
+11-22 13:39:01.070 D/AndroidRuntime(26777): Calling main entry com.android.commands.input.Input
+11-22 13:39:01.070 I/Input   (26777): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8738794, downTime=8738794, deviceId=-1, source=0x101 }
+11-22 13:39:01.076 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:01.076 I/Input   (26777): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8738794, downTime=8738794, deviceId=-1, source=0x101 }
+11-22 13:39:01.081 D/AndroidRuntime(26777): Shutting down VM
+11-22 13:39:01.271 I/appproc (26787): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:01.271 D/AndroidRuntime(26787): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:01.272 E/cutils-trace(26787): Error opening trace file: No such file or directory (2)
+11-22 13:39:01.277 V/libnb   (26787): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:01.284 I/libnb   (26787): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:01.298 I/app_process(26787): The ClassLoaderContext is a special shared library.
+11-22 13:39:01.298 W/app_process(26787): Could not create mount namespace.
+11-22 13:39:01.298 D/nativebridge(26787): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:01.298 W/nativebridge(26787): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:01.298 W/nativebridge(26787): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:01.298 D/nativebridge(26787): call UnloadNativeBridge! state=2
+11-22 13:39:01.304 D/AndroidRuntime(26787): Calling main entry com.android.commands.input.Input
+11-22 13:39:01.304 I/Input   (26787): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8739029, downTime=8739029, deviceId=-1, source=0x101 }
+11-22 13:39:01.310 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:01.311 I/Input   (26787): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8739029, downTime=8739029, deviceId=-1, source=0x101 }
+11-22 13:39:01.316 D/AndroidRuntime(26787): Shutting down VM
+11-22 13:39:01.508 I/appproc (26797): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:01.508 D/AndroidRuntime(26797): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:01.509 E/cutils-trace(26797): Error opening trace file: No such file or directory (2)
+11-22 13:39:01.515 V/libnb   (26797): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:01.521 I/libnb   (26797): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:01.541 I/app_process(26797): The ClassLoaderContext is a special shared library.
+11-22 13:39:01.542 W/app_process(26797): Could not create mount namespace.
+11-22 13:39:01.542 D/nativebridge(26797): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:01.542 W/nativebridge(26797): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:01.542 W/nativebridge(26797): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:01.542 D/nativebridge(26797): call UnloadNativeBridge! state=2
+11-22 13:39:01.548 D/AndroidRuntime(26797): Calling main entry com.android.commands.input.Input
+11-22 13:39:01.549 I/Input   (26797): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8739273, downTime=8739273, deviceId=-1, source=0x101 }
+11-22 13:39:01.555 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:01.555 I/Input   (26797): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8739273, downTime=8739273, deviceId=-1, source=0x101 }
+11-22 13:39:01.562 D/AndroidRuntime(26797): Shutting down VM
+11-22 13:39:01.750 I/appproc (26807): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:01.750 D/AndroidRuntime(26807): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:01.751 E/cutils-trace(26807): Error opening trace file: No such file or directory (2)
+11-22 13:39:01.757 V/libnb   (26807): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:01.763 I/libnb   (26807): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:01.774 I/app_process(26807): The ClassLoaderContext is a special shared library.
+11-22 13:39:01.774 W/app_process(26807): Could not create mount namespace.
+11-22 13:39:01.774 D/nativebridge(26807): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:01.774 W/nativebridge(26807): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:01.774 W/nativebridge(26807): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:01.774 D/nativebridge(26807): call UnloadNativeBridge! state=2
+11-22 13:39:01.780 D/AndroidRuntime(26807): Calling main entry com.android.commands.input.Input
+11-22 13:39:01.780 I/Input   (26807): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8739505, downTime=8739505, deviceId=-1, source=0x101 }
+11-22 13:39:01.787 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:01.788 I/Input   (26807): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8739505, downTime=8739505, deviceId=-1, source=0x101 }
+11-22 13:39:01.794 D/AndroidRuntime(26807): Shutting down VM
+11-22 13:39:01.990 I/appproc (26817): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:01.990 D/AndroidRuntime(26817): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:01.991 E/cutils-trace(26817): Error opening trace file: No such file or directory (2)
+11-22 13:39:01.998 V/libnb   (26817): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:02.004 I/libnb   (26817): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:02.016 I/app_process(26817): The ClassLoaderContext is a special shared library.
+11-22 13:39:02.016 W/app_process(26817): Could not create mount namespace.
+11-22 13:39:02.016 D/nativebridge(26817): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:02.016 W/nativebridge(26817): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:02.016 W/nativebridge(26817): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:02.016 D/nativebridge(26817): call UnloadNativeBridge! state=2
+11-22 13:39:02.022 D/AndroidRuntime(26817): Calling main entry com.android.commands.input.Input
+11-22 13:39:02.022 I/Input   (26817): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8739747, downTime=8739747, deviceId=-1, source=0x101 }
+11-22 13:39:02.030 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:02.030 I/Input   (26817): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8739747, downTime=8739747, deviceId=-1, source=0x101 }
+11-22 13:39:02.037 D/AndroidRuntime(26817): Shutting down VM
+11-22 13:39:02.060 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:02.060 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 19 lines
+11-22 13:39:02.060 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:02.226 I/appproc (26827): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:02.226 D/AndroidRuntime(26827): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:02.227 E/cutils-trace(26827): Error opening trace file: No such file or directory (2)
+11-22 13:39:02.233 V/libnb   (26827): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:02.241 I/libnb   (26827): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:02.251 I/app_process(26827): The ClassLoaderContext is a special shared library.
+11-22 13:39:02.251 W/app_process(26827): Could not create mount namespace.
+11-22 13:39:02.251 D/nativebridge(26827): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:02.251 W/nativebridge(26827): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:02.251 W/nativebridge(26827): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:02.251 D/nativebridge(26827): call UnloadNativeBridge! state=2
+11-22 13:39:02.258 D/AndroidRuntime(26827): Calling main entry com.android.commands.input.Input
+11-22 13:39:02.258 I/Input   (26827): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8739983, downTime=8739983, deviceId=-1, source=0x101 }
+11-22 13:39:02.264 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:02.265 I/Input   (26827): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8739983, downTime=8739983, deviceId=-1, source=0x101 }
+11-22 13:39:02.271 D/AndroidRuntime(26827): Shutting down VM
+11-22 13:39:02.464 I/appproc (26837): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:02.464 D/AndroidRuntime(26837): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:02.465 E/cutils-trace(26837): Error opening trace file: No such file or directory (2)
+11-22 13:39:02.472 V/libnb   (26837): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:02.478 I/libnb   (26837): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:02.491 I/app_process(26837): The ClassLoaderContext is a special shared library.
+11-22 13:39:02.492 W/app_process(26837): Could not create mount namespace.
+11-22 13:39:02.492 D/nativebridge(26837): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:02.492 W/nativebridge(26837): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:02.492 W/nativebridge(26837): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:02.492 D/nativebridge(26837): call UnloadNativeBridge! state=2
+11-22 13:39:02.499 D/AndroidRuntime(26837): Calling main entry com.android.commands.input.Input
+11-22 13:39:02.499 I/Input   (26837): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740224, downTime=8740224, deviceId=-1, source=0x101 }
+11-22 13:39:02.505 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:02.506 I/Input   (26837): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740224, downTime=8740224, deviceId=-1, source=0x101 }
+11-22 13:39:02.512 D/AndroidRuntime(26837): Shutting down VM
+11-22 13:39:03.112 I/appproc (26847): app_process main with argv: /system/bin com.android.commands.input.Input text test001 
+11-22 13:39:03.112 D/AndroidRuntime(26847): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:03.113 E/cutils-trace(26847): Error opening trace file: No such file or directory (2)
+11-22 13:39:03.118 V/libnb   (26847): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:03.124 I/libnb   (26847): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:03.135 I/app_process(26847): The ClassLoaderContext is a special shared library.
+11-22 13:39:03.135 W/app_process(26847): Could not create mount namespace.
+11-22 13:39:03.135 D/nativebridge(26847): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:03.135 W/nativebridge(26847): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:03.135 W/nativebridge(26847): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:03.135 D/nativebridge(26847): call UnloadNativeBridge! state=2
+11-22 13:39:03.142 D/AndroidRuntime(26847): Calling main entry com.android.commands.input.Input
+11-22 13:39:03.142 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.150 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:03.150 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.156 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_E, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.163 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:03.163 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_E, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.169 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_S, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.176 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:03.177 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_S, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.184 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.191 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:03.191 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.199 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_0, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.205 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:03.206 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_0, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.207 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:03.207 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 18 lines
+11-22 13:39:03.207 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:03.212 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_0, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.218 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:03.218 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_0, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.223 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_1, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.229 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:03.229 I/Input   (26847): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_1, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8740867, downTime=8740867, deviceId=-1, source=0x101 }
+11-22 13:39:03.235 D/AndroidRuntime(26847): Shutting down VM
+11-22 13:39:03.541 D/cocos2d-x debug info(26515): loading end, m_depth = 0
+11-22 13:39:04.125 D/cocos2d-x debug info(26515): got packet, seq = 37, cmd = 4
+11-22 13:39:04.125 D/cocos2d-x debug info(26515): no handler for cmd 4
+11-22 13:39:04.139 I/appproc (26857): app_process main with argv: /system/bin com.android.commands.input.Input tap 800 484 
+11-22 13:39:04.139 D/AndroidRuntime(26857): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:04.140 E/cutils-trace(26857): Error opening trace file: No such file or directory (2)
+11-22 13:39:04.146 V/libnb   (26857): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:04.152 I/libnb   (26857): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:04.163 I/app_process(26857): The ClassLoaderContext is a special shared library.
+11-22 13:39:04.163 W/app_process(26857): Could not create mount namespace.
+11-22 13:39:04.163 D/nativebridge(26857): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:04.163 W/nativebridge(26857): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:04.163 W/nativebridge(26857): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:04.163 D/nativebridge(26857): call UnloadNativeBridge! state=2
+11-22 13:39:04.169 D/AndroidRuntime(26857): Calling main entry com.android.commands.input.Input
+11-22 13:39:04.171 I/Input   (26857): injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=800.0, y[0]=484.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8741894, downTime=8741894, deviceId=3, source=0x1002 }
+11-22 13:39:04.179 I/Input   (26857): injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=800.0, y[0]=484.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8741894, downTime=8741894, deviceId=3, source=0x1002 }
+11-22 13:39:04.186 D/AndroidRuntime(26857): Shutting down VM
+11-22 13:39:04.193 D/cocos2d-x debug info(26515): running, fight set speed = 0.070000
+11-22 13:39:04.193 D/cocos2d-x debug info(26515): end sit, state = 2
+11-22 13:39:04.520 D/cocos2d-x debug info(26515): got packet, seq = 38, cmd = 116
+11-22 13:39:04.520 D/cocos2d-x debug info(26515): no handler for cmd 116
+11-22 13:39:04.663 D/cocos2d-x debug info(26515): dest reached
+11-22 13:39:04.664 D/cocos2d-x debug info(26515): start sit, state = 0
+11-22 13:39:05.187 I/appproc (26867): app_process main with argv: /system/bin com.android.commands.input.Input keyevent KEYCODE_MOVE_END 
+11-22 13:39:05.187 D/AndroidRuntime(26867): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:05.189 E/cutils-trace(26867): Error opening trace file: No such file or directory (2)
+11-22 13:39:05.195 V/libnb   (26867): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:05.201 I/libnb   (26867): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:05.212 I/app_process(26867): The ClassLoaderContext is a special shared library.
+11-22 13:39:05.212 W/app_process(26867): Could not create mount namespace.
+11-22 13:39:05.212 D/nativebridge(26867): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:05.212 W/nativebridge(26867): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:05.212 W/nativebridge(26867): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:05.212 D/nativebridge(26867): call UnloadNativeBridge! state=2
+11-22 13:39:05.219 D/AndroidRuntime(26867): Calling main entry com.android.commands.input.Input
+11-22 13:39:05.220 I/Input   (26867): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_MOVE_END, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8742944, downTime=8742944, deviceId=-1, source=0x101 }
+11-22 13:39:05.226 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:05.227 I/Input   (26867): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_MOVE_END, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8742944, downTime=8742944, deviceId=-1, source=0x101 }
+11-22 13:39:05.233 D/AndroidRuntime(26867): Shutting down VM
+11-22 13:39:05.261 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:05.261 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 23 lines
+11-22 13:39:05.261 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:05.834 I/appproc (26877): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:05.834 D/AndroidRuntime(26877): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:05.835 E/cutils-trace(26877): Error opening trace file: No such file or directory (2)
+11-22 13:39:05.841 V/libnb   (26877): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:05.847 I/libnb   (26877): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:05.858 I/app_process(26877): The ClassLoaderContext is a special shared library.
+11-22 13:39:05.858 W/app_process(26877): Could not create mount namespace.
+11-22 13:39:05.858 D/nativebridge(26877): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:05.858 W/nativebridge(26877): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:05.858 W/nativebridge(26877): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:05.858 D/nativebridge(26877): call UnloadNativeBridge! state=2
+11-22 13:39:05.865 D/AndroidRuntime(26877): Calling main entry com.android.commands.input.Input
+11-22 13:39:05.865 I/Input   (26877): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8743590, downTime=8743590, deviceId=-1, source=0x101 }
+11-22 13:39:05.873 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:05.873 I/Input   (26877): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8743590, downTime=8743590, deviceId=-1, source=0x101 }
+11-22 13:39:05.880 D/AndroidRuntime(26877): Shutting down VM
+11-22 13:39:06.069 I/appproc (26887): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:06.069 D/AndroidRuntime(26887): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:06.070 E/cutils-trace(26887): Error opening trace file: No such file or directory (2)
+11-22 13:39:06.076 V/libnb   (26887): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:06.082 I/libnb   (26887): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:06.093 I/app_process(26887): The ClassLoaderContext is a special shared library.
+11-22 13:39:06.093 W/app_process(26887): Could not create mount namespace.
+11-22 13:39:06.093 D/nativebridge(26887): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:06.093 W/nativebridge(26887): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:06.093 W/nativebridge(26887): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:06.093 D/nativebridge(26887): call UnloadNativeBridge! state=2
+11-22 13:39:06.100 D/AndroidRuntime(26887): Calling main entry com.android.commands.input.Input
+11-22 13:39:06.100 I/Input   (26887): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8743825, downTime=8743825, deviceId=-1, source=0x101 }
+11-22 13:39:06.107 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:06.108 I/Input   (26887): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8743825, downTime=8743825, deviceId=-1, source=0x101 }
+11-22 13:39:06.114 D/AndroidRuntime(26887): Shutting down VM
+11-22 13:39:06.306 I/appproc (26897): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:06.306 D/AndroidRuntime(26897): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:06.307 E/cutils-trace(26897): Error opening trace file: No such file or directory (2)
+11-22 13:39:06.314 V/libnb   (26897): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:06.320 I/libnb   (26897): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:06.331 I/app_process(26897): The ClassLoaderContext is a special shared library.
+11-22 13:39:06.332 W/app_process(26897): Could not create mount namespace.
+11-22 13:39:06.332 D/nativebridge(26897): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:06.332 W/nativebridge(26897): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:06.332 W/nativebridge(26897): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:06.332 D/nativebridge(26897): call UnloadNativeBridge! state=2
+11-22 13:39:06.339 D/AndroidRuntime(26897): Calling main entry com.android.commands.input.Input
+11-22 13:39:06.339 I/Input   (26897): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8744064, downTime=8744064, deviceId=-1, source=0x101 }
+11-22 13:39:06.346 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:06.346 I/Input   (26897): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8744064, downTime=8744064, deviceId=-1, source=0x101 }
+11-22 13:39:06.353 D/AndroidRuntime(26897): Shutting down VM
+11-22 13:39:06.544 I/appproc (26907): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:06.544 D/AndroidRuntime(26907): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:06.546 E/cutils-trace(26907): Error opening trace file: No such file or directory (2)
+11-22 13:39:06.552 V/libnb   (26907): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:06.558 I/libnb   (26907): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:06.570 I/app_process(26907): The ClassLoaderContext is a special shared library.
+11-22 13:39:06.570 W/app_process(26907): Could not create mount namespace.
+11-22 13:39:06.570 D/nativebridge(26907): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:06.570 W/nativebridge(26907): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:06.570 W/nativebridge(26907): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:06.570 D/nativebridge(26907): call UnloadNativeBridge! state=2
+11-22 13:39:06.577 D/AndroidRuntime(26907): Calling main entry com.android.commands.input.Input
+11-22 13:39:06.577 I/Input   (26907): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8744302, downTime=8744302, deviceId=-1, source=0x101 }
+11-22 13:39:06.584 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:06.585 I/Input   (26907): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8744302, downTime=8744302, deviceId=-1, source=0x101 }
+11-22 13:39:06.591 D/AndroidRuntime(26907): Shutting down VM
+11-22 13:39:06.786 I/appproc (26917): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:06.786 D/AndroidRuntime(26917): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:06.788 E/cutils-trace(26917): Error opening trace file: No such file or directory (2)
+11-22 13:39:06.795 V/libnb   (26917): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:06.802 I/libnb   (26917): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:06.814 I/app_process(26917): The ClassLoaderContext is a special shared library.
+11-22 13:39:06.814 W/app_process(26917): Could not create mount namespace.
+11-22 13:39:06.814 D/nativebridge(26917): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:06.815 W/nativebridge(26917): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:06.815 W/nativebridge(26917): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:06.815 D/nativebridge(26917): call UnloadNativeBridge! state=2
+11-22 13:39:06.822 D/AndroidRuntime(26917): Calling main entry com.android.commands.input.Input
+11-22 13:39:06.822 I/Input   (26917): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8744547, downTime=8744547, deviceId=-1, source=0x101 }
+11-22 13:39:06.830 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:06.830 I/Input   (26917): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8744547, downTime=8744547, deviceId=-1, source=0x101 }
+11-22 13:39:06.840 D/AndroidRuntime(26917): Shutting down VM
+11-22 13:39:06.865 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:06.865 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 18 lines
+11-22 13:39:06.865 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:07.036 I/appproc (26927): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:07.036 D/AndroidRuntime(26927): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:07.037 E/cutils-trace(26927): Error opening trace file: No such file or directory (2)
+11-22 13:39:07.045 V/libnb   (26927): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:07.052 I/libnb   (26927): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:07.064 I/app_process(26927): The ClassLoaderContext is a special shared library.
+11-22 13:39:07.064 W/app_process(26927): Could not create mount namespace.
+11-22 13:39:07.064 D/nativebridge(26927): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:07.064 W/nativebridge(26927): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:07.064 W/nativebridge(26927): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:07.064 D/nativebridge(26927): call UnloadNativeBridge! state=2
+11-22 13:39:07.071 D/AndroidRuntime(26927): Calling main entry com.android.commands.input.Input
+11-22 13:39:07.071 I/Input   (26927): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8744796, downTime=8744796, deviceId=-1, source=0x101 }
+11-22 13:39:07.078 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:07.078 I/Input   (26927): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8744796, downTime=8744796, deviceId=-1, source=0x101 }
+11-22 13:39:07.085 D/AndroidRuntime(26927): Shutting down VM
+11-22 13:39:07.281 I/appproc (26937): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:07.281 D/AndroidRuntime(26937): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:07.283 E/cutils-trace(26937): Error opening trace file: No such file or directory (2)
+11-22 13:39:07.289 V/libnb   (26937): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:07.295 I/libnb   (26937): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:07.307 I/app_process(26937): The ClassLoaderContext is a special shared library.
+11-22 13:39:07.307 W/app_process(26937): Could not create mount namespace.
+11-22 13:39:07.307 D/nativebridge(26937): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:07.308 W/nativebridge(26937): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:07.308 W/nativebridge(26937): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:07.308 D/nativebridge(26937): call UnloadNativeBridge! state=2
+11-22 13:39:07.316 D/AndroidRuntime(26937): Calling main entry com.android.commands.input.Input
+11-22 13:39:07.317 I/Input   (26937): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8745041, downTime=8745041, deviceId=-1, source=0x101 }
+11-22 13:39:07.323 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:07.324 I/Input   (26937): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8745041, downTime=8745041, deviceId=-1, source=0x101 }
+11-22 13:39:07.330 D/AndroidRuntime(26937): Shutting down VM
+11-22 13:39:07.528 I/appproc (26947): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:07.528 D/AndroidRuntime(26947): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:07.529 E/cutils-trace(26947): Error opening trace file: No such file or directory (2)
+11-22 13:39:07.536 V/libnb   (26947): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:07.542 I/libnb   (26947): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:07.554 I/app_process(26947): The ClassLoaderContext is a special shared library.
+11-22 13:39:07.554 W/app_process(26947): Could not create mount namespace.
+11-22 13:39:07.554 D/nativebridge(26947): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:07.554 W/nativebridge(26947): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:07.554 W/nativebridge(26947): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:07.554 D/nativebridge(26947): call UnloadNativeBridge! state=2
+11-22 13:39:07.562 D/AndroidRuntime(26947): Calling main entry com.android.commands.input.Input
+11-22 13:39:07.562 I/Input   (26947): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8745286, downTime=8745286, deviceId=-1, source=0x101 }
+11-22 13:39:07.568 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:07.569 I/Input   (26947): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8745286, downTime=8745286, deviceId=-1, source=0x101 }
+11-22 13:39:07.574 D/AndroidRuntime(26947): Shutting down VM
+11-22 13:39:07.657 D/cocos2d-x debug info(26515): running, fight set speed = 0.070000
+11-22 13:39:07.657 D/cocos2d-x debug info(26515): end sit, state = 2
+11-22 13:39:07.760 I/appproc (26957): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:07.760 D/AndroidRuntime(26957): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:07.761 E/cutils-trace(26957): Error opening trace file: No such file or directory (2)
+11-22 13:39:07.767 V/libnb   (26957): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:07.773 I/libnb   (26957): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:07.784 I/app_process(26957): The ClassLoaderContext is a special shared library.
+11-22 13:39:07.784 W/app_process(26957): Could not create mount namespace.
+11-22 13:39:07.784 D/nativebridge(26957): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:07.784 W/nativebridge(26957): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:07.784 W/nativebridge(26957): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:07.784 D/nativebridge(26957): call UnloadNativeBridge! state=2
+11-22 13:39:07.791 D/AndroidRuntime(26957): Calling main entry com.android.commands.input.Input
+11-22 13:39:07.791 I/Input   (26957): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8745516, downTime=8745516, deviceId=-1, source=0x101 }
+11-22 13:39:07.798 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:07.798 I/Input   (26957): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8745516, downTime=8745516, deviceId=-1, source=0x101 }
+11-22 13:39:07.805 D/AndroidRuntime(26957): Shutting down VM
+11-22 13:39:07.996 I/appproc (26967): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:07.996 D/AndroidRuntime(26967): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:07.997 E/cutils-trace(26967): Error opening trace file: No such file or directory (2)
+11-22 13:39:08.004 V/libnb   (26967): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:08.010 I/libnb   (26967): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:08.021 I/app_process(26967): The ClassLoaderContext is a special shared library.
+11-22 13:39:08.021 W/app_process(26967): Could not create mount namespace.
+11-22 13:39:08.021 D/nativebridge(26967): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:08.022 W/nativebridge(26967): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:08.022 W/nativebridge(26967): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:08.022 D/nativebridge(26967): call UnloadNativeBridge! state=2
+11-22 13:39:08.028 D/AndroidRuntime(26967): Calling main entry com.android.commands.input.Input
+11-22 13:39:08.028 I/Input   (26967): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8745753, downTime=8745753, deviceId=-1, source=0x101 }
+11-22 13:39:08.037 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:08.037 I/Input   (26967): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8745753, downTime=8745753, deviceId=-1, source=0x101 }
+11-22 13:39:08.045 D/AndroidRuntime(26967): Shutting down VM
+11-22 13:39:08.061 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:08.061 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 16 lines
+11-22 13:39:08.061 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:08.116 D/cocos2d-x debug info(26515): dest reached
+11-22 13:39:08.116 D/cocos2d-x debug info(26515): start sit, state = 0
+11-22 13:39:08.140 D/cocos2d-x debug info(26515): got packet, seq = 39, cmd = 116
+11-22 13:39:08.140 D/cocos2d-x debug info(26515): no handler for cmd 116
+11-22 13:39:08.235 I/appproc (26977): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:08.235 D/AndroidRuntime(26977): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:08.236 E/cutils-trace(26977): Error opening trace file: No such file or directory (2)
+11-22 13:39:08.243 V/libnb   (26977): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:08.250 I/libnb   (26977): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:08.261 I/app_process(26977): The ClassLoaderContext is a special shared library.
+11-22 13:39:08.261 W/app_process(26977): Could not create mount namespace.
+11-22 13:39:08.261 D/nativebridge(26977): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:08.262 W/nativebridge(26977): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:08.262 W/nativebridge(26977): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:08.262 D/nativebridge(26977): call UnloadNativeBridge! state=2
+11-22 13:39:08.269 D/AndroidRuntime(26977): Calling main entry com.android.commands.input.Input
+11-22 13:39:08.269 I/Input   (26977): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8745994, downTime=8745994, deviceId=-1, source=0x101 }
+11-22 13:39:08.275 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:08.275 I/Input   (26977): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8745994, downTime=8745994, deviceId=-1, source=0x101 }
+11-22 13:39:08.281 D/AndroidRuntime(26977): Shutting down VM
+11-22 13:39:08.473 I/appproc (26987): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:08.473 D/AndroidRuntime(26987): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:08.474 E/cutils-trace(26987): Error opening trace file: No such file or directory (2)
+11-22 13:39:08.480 V/libnb   (26987): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:08.486 I/libnb   (26987): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:08.497 I/app_process(26987): The ClassLoaderContext is a special shared library.
+11-22 13:39:08.497 W/app_process(26987): Could not create mount namespace.
+11-22 13:39:08.497 D/nativebridge(26987): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:08.497 W/nativebridge(26987): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:08.497 W/nativebridge(26987): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:08.497 D/nativebridge(26987): call UnloadNativeBridge! state=2
+11-22 13:39:08.504 D/AndroidRuntime(26987): Calling main entry com.android.commands.input.Input
+11-22 13:39:08.504 I/Input   (26987): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8746229, downTime=8746229, deviceId=-1, source=0x101 }
+11-22 13:39:08.511 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:08.512 I/Input   (26987): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8746229, downTime=8746229, deviceId=-1, source=0x101 }
+11-22 13:39:08.518 D/AndroidRuntime(26987): Shutting down VM
+11-22 13:39:08.706 I/appproc (26997): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:08.706 D/AndroidRuntime(26997): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:08.707 E/cutils-trace(26997): Error opening trace file: No such file or directory (2)
+11-22 13:39:08.713 V/libnb   (26997): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:08.719 I/libnb   (26997): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:08.730 I/app_process(26997): The ClassLoaderContext is a special shared library.
+11-22 13:39:08.730 W/app_process(26997): Could not create mount namespace.
+11-22 13:39:08.730 D/nativebridge(26997): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:08.730 W/nativebridge(26997): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:08.730 W/nativebridge(26997): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:08.730 D/nativebridge(26997): call UnloadNativeBridge! state=2
+11-22 13:39:08.737 D/AndroidRuntime(26997): Calling main entry com.android.commands.input.Input
+11-22 13:39:08.737 I/Input   (26997): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8746462, downTime=8746462, deviceId=-1, source=0x101 }
+11-22 13:39:08.744 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:08.744 I/Input   (26997): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8746462, downTime=8746462, deviceId=-1, source=0x101 }
+11-22 13:39:08.751 D/AndroidRuntime(26997): Shutting down VM
+11-22 13:39:08.942 I/appproc (27007): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:08.942 D/AndroidRuntime(27007): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:08.944 E/cutils-trace(27007): Error opening trace file: No such file or directory (2)
+11-22 13:39:08.950 V/libnb   (27007): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:08.956 I/libnb   (27007): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:08.969 I/app_process(27007): The ClassLoaderContext is a special shared library.
+11-22 13:39:08.969 W/app_process(27007): Could not create mount namespace.
+11-22 13:39:08.969 D/nativebridge(27007): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:08.970 W/nativebridge(27007): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:08.970 W/nativebridge(27007): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:08.970 D/nativebridge(27007): call UnloadNativeBridge! state=2
+11-22 13:39:08.976 D/AndroidRuntime(27007): Calling main entry com.android.commands.input.Input
+11-22 13:39:08.976 I/Input   (27007): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8746701, downTime=8746701, deviceId=-1, source=0x101 }
+11-22 13:39:08.984 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:08.984 I/Input   (27007): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8746701, downTime=8746701, deviceId=-1, source=0x101 }
+11-22 13:39:08.991 D/AndroidRuntime(27007): Shutting down VM
+11-22 13:39:09.177 I/appproc (27017): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:09.178 D/AndroidRuntime(27017): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:09.179 E/cutils-trace(27017): Error opening trace file: No such file or directory (2)
+11-22 13:39:09.185 V/libnb   (27017): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:09.191 I/libnb   (27017): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:09.201 I/app_process(27017): The ClassLoaderContext is a special shared library.
+11-22 13:39:09.201 W/app_process(27017): Could not create mount namespace.
+11-22 13:39:09.201 D/nativebridge(27017): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:09.201 W/nativebridge(27017): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:09.201 W/nativebridge(27017): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:09.201 D/nativebridge(27017): call UnloadNativeBridge! state=2
+11-22 13:39:09.209 D/AndroidRuntime(27017): Calling main entry com.android.commands.input.Input
+11-22 13:39:09.209 I/Input   (27017): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8746934, downTime=8746934, deviceId=-1, source=0x101 }
+11-22 13:39:09.216 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:09.217 I/Input   (27017): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8746934, downTime=8746934, deviceId=-1, source=0x101 }
+11-22 13:39:09.231 D/AndroidRuntime(27017): Shutting down VM
+11-22 13:39:09.247 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:09.247 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 19 lines
+11-22 13:39:09.247 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:09.430 I/appproc (27027): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:09.430 D/AndroidRuntime(27027): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:09.431 E/cutils-trace(27027): Error opening trace file: No such file or directory (2)
+11-22 13:39:09.437 V/libnb   (27027): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:09.443 I/libnb   (27027): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:09.454 I/app_process(27027): The ClassLoaderContext is a special shared library.
+11-22 13:39:09.454 W/app_process(27027): Could not create mount namespace.
+11-22 13:39:09.454 D/nativebridge(27027): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:09.454 W/nativebridge(27027): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:09.454 W/nativebridge(27027): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:09.454 D/nativebridge(27027): call UnloadNativeBridge! state=2
+11-22 13:39:09.460 D/AndroidRuntime(27027): Calling main entry com.android.commands.input.Input
+11-22 13:39:09.460 I/Input   (27027): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8747185, downTime=8747185, deviceId=-1, source=0x101 }
+11-22 13:39:09.466 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:09.466 I/Input   (27027): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8747185, downTime=8747185, deviceId=-1, source=0x101 }
+11-22 13:39:09.472 D/AndroidRuntime(27027): Shutting down VM
+11-22 13:39:09.660 I/appproc (27037): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:09.660 D/AndroidRuntime(27037): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:09.661 E/cutils-trace(27037): Error opening trace file: No such file or directory (2)
+11-22 13:39:09.667 V/libnb   (27037): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:09.673 I/libnb   (27037): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:09.684 I/app_process(27037): The ClassLoaderContext is a special shared library.
+11-22 13:39:09.684 W/app_process(27037): Could not create mount namespace.
+11-22 13:39:09.684 D/nativebridge(27037): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:09.684 W/nativebridge(27037): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:09.684 W/nativebridge(27037): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:09.684 D/nativebridge(27037): call UnloadNativeBridge! state=2
+11-22 13:39:09.691 D/AndroidRuntime(27037): Calling main entry com.android.commands.input.Input
+11-22 13:39:09.691 I/Input   (27037): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8747416, downTime=8747416, deviceId=-1, source=0x101 }
+11-22 13:39:09.697 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:09.698 I/Input   (27037): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8747416, downTime=8747416, deviceId=-1, source=0x101 }
+11-22 13:39:09.704 D/AndroidRuntime(27037): Shutting down VM
+11-22 13:39:09.894 I/appproc (27047): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:09.894 D/AndroidRuntime(27047): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:09.895 E/cutils-trace(27047): Error opening trace file: No such file or directory (2)
+11-22 13:39:09.902 V/libnb   (27047): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:09.907 I/libnb   (27047): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:09.918 I/app_process(27047): The ClassLoaderContext is a special shared library.
+11-22 13:39:09.918 W/app_process(27047): Could not create mount namespace.
+11-22 13:39:09.918 D/nativebridge(27047): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:09.918 W/nativebridge(27047): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:09.918 W/nativebridge(27047): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:09.918 D/nativebridge(27047): call UnloadNativeBridge! state=2
+11-22 13:39:09.925 D/AndroidRuntime(27047): Calling main entry com.android.commands.input.Input
+11-22 13:39:09.925 I/Input   (27047): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8747650, downTime=8747650, deviceId=-1, source=0x101 }
+11-22 13:39:09.932 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:09.932 I/Input   (27047): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8747650, downTime=8747650, deviceId=-1, source=0x101 }
+11-22 13:39:09.938 D/AndroidRuntime(27047): Shutting down VM
+11-22 13:39:10.128 I/appproc (27057): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:10.128 D/AndroidRuntime(27057): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:10.129 E/cutils-trace(27057): Error opening trace file: No such file or directory (2)
+11-22 13:39:10.135 V/libnb   (27057): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:10.140 I/libnb   (27057): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:10.152 I/app_process(27057): The ClassLoaderContext is a special shared library.
+11-22 13:39:10.152 W/app_process(27057): Could not create mount namespace.
+11-22 13:39:10.152 D/nativebridge(27057): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:10.152 W/nativebridge(27057): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:10.152 W/nativebridge(27057): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:10.152 D/nativebridge(27057): call UnloadNativeBridge! state=2
+11-22 13:39:10.158 D/AndroidRuntime(27057): Calling main entry com.android.commands.input.Input
+11-22 13:39:10.159 I/Input   (27057): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8747883, downTime=8747883, deviceId=-1, source=0x101 }
+11-22 13:39:10.166 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:10.166 I/Input   (27057): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8747883, downTime=8747883, deviceId=-1, source=0x101 }
+11-22 13:39:10.172 D/AndroidRuntime(27057): Shutting down VM
+11-22 13:39:10.364 I/appproc (27067): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:10.364 D/AndroidRuntime(27067): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:10.366 E/cutils-trace(27067): Error opening trace file: No such file or directory (2)
+11-22 13:39:10.372 V/libnb   (27067): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:10.378 I/libnb   (27067): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:10.389 I/app_process(27067): The ClassLoaderContext is a special shared library.
+11-22 13:39:10.389 W/app_process(27067): Could not create mount namespace.
+11-22 13:39:10.389 D/nativebridge(27067): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:10.389 W/nativebridge(27067): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:10.389 W/nativebridge(27067): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:10.389 D/nativebridge(27067): call UnloadNativeBridge! state=2
+11-22 13:39:10.397 D/AndroidRuntime(27067): Calling main entry com.android.commands.input.Input
+11-22 13:39:10.397 I/Input   (27067): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8748122, downTime=8748122, deviceId=-1, source=0x101 }
+11-22 13:39:10.404 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:10.405 I/Input   (27067): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8748122, downTime=8748122, deviceId=-1, source=0x101 }
+11-22 13:39:10.412 D/AndroidRuntime(27067): Shutting down VM
+11-22 13:39:10.432 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:10.432 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 18 lines
+11-22 13:39:10.432 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:10.603 I/appproc (27077): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:10.603 D/AndroidRuntime(27077): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:10.604 E/cutils-trace(27077): Error opening trace file: No such file or directory (2)
+11-22 13:39:10.610 V/libnb   (27077): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:10.618 I/libnb   (27077): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:10.629 I/app_process(27077): The ClassLoaderContext is a special shared library.
+11-22 13:39:10.629 W/app_process(27077): Could not create mount namespace.
+11-22 13:39:10.629 D/nativebridge(27077): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:10.629 W/nativebridge(27077): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:10.629 W/nativebridge(27077): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:10.629 D/nativebridge(27077): call UnloadNativeBridge! state=2
+11-22 13:39:10.638 D/AndroidRuntime(27077): Calling main entry com.android.commands.input.Input
+11-22 13:39:10.638 I/Input   (27077): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8748363, downTime=8748363, deviceId=-1, source=0x101 }
+11-22 13:39:10.644 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:10.645 I/Input   (27077): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8748363, downTime=8748363, deviceId=-1, source=0x101 }
+11-22 13:39:10.651 D/AndroidRuntime(27077): Shutting down VM
+11-22 13:39:10.842 I/appproc (27087): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:10.842 D/AndroidRuntime(27087): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:10.843 E/cutils-trace(27087): Error opening trace file: No such file or directory (2)
+11-22 13:39:10.849 V/libnb   (27087): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:10.856 I/libnb   (27087): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:10.867 I/app_process(27087): The ClassLoaderContext is a special shared library.
+11-22 13:39:10.867 W/app_process(27087): Could not create mount namespace.
+11-22 13:39:10.867 D/nativebridge(27087): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:10.867 W/nativebridge(27087): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:10.867 W/nativebridge(27087): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:10.867 D/nativebridge(27087): call UnloadNativeBridge! state=2
+11-22 13:39:10.874 D/AndroidRuntime(27087): Calling main entry com.android.commands.input.Input
+11-22 13:39:10.874 I/Input   (27087): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8748599, downTime=8748599, deviceId=-1, source=0x101 }
+11-22 13:39:10.880 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:10.880 I/Input   (27087): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8748599, downTime=8748599, deviceId=-1, source=0x101 }
+11-22 13:39:10.887 D/AndroidRuntime(27087): Shutting down VM
+11-22 13:39:11.081 I/appproc (27097): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:11.081 D/AndroidRuntime(27097): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:11.082 E/cutils-trace(27097): Error opening trace file: No such file or directory (2)
+11-22 13:39:11.088 V/libnb   (27097): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:11.094 I/libnb   (27097): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:11.106 I/app_process(27097): The ClassLoaderContext is a special shared library.
+11-22 13:39:11.106 W/app_process(27097): Could not create mount namespace.
+11-22 13:39:11.106 D/nativebridge(27097): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:11.106 W/nativebridge(27097): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:11.106 W/nativebridge(27097): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:11.106 D/nativebridge(27097): call UnloadNativeBridge! state=2
+11-22 13:39:11.113 D/AndroidRuntime(27097): Calling main entry com.android.commands.input.Input
+11-22 13:39:11.113 I/Input   (27097): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8748838, downTime=8748838, deviceId=-1, source=0x101 }
+11-22 13:39:11.120 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:11.121 I/Input   (27097): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8748838, downTime=8748838, deviceId=-1, source=0x101 }
+11-22 13:39:11.127 D/AndroidRuntime(27097): Shutting down VM
+11-22 13:39:11.317 I/appproc (27107): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:11.317 D/AndroidRuntime(27107): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:11.318 E/cutils-trace(27107): Error opening trace file: No such file or directory (2)
+11-22 13:39:11.325 V/libnb   (27107): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:11.331 I/libnb   (27107): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:11.342 I/app_process(27107): The ClassLoaderContext is a special shared library.
+11-22 13:39:11.342 W/app_process(27107): Could not create mount namespace.
+11-22 13:39:11.342 D/nativebridge(27107): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:11.342 W/nativebridge(27107): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:11.342 W/nativebridge(27107): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:11.342 D/nativebridge(27107): call UnloadNativeBridge! state=2
+11-22 13:39:11.349 D/AndroidRuntime(27107): Calling main entry com.android.commands.input.Input
+11-22 13:39:11.349 I/Input   (27107): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749073, downTime=8749073, deviceId=-1, source=0x101 }
+11-22 13:39:11.356 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:11.356 I/Input   (27107): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749073, downTime=8749073, deviceId=-1, source=0x101 }
+11-22 13:39:11.362 D/AndroidRuntime(27107): Shutting down VM
+11-22 13:39:11.552 I/appproc (27117): app_process main with argv: /system/bin com.android.commands.input.Input keyevent 67 
+11-22 13:39:11.552 D/AndroidRuntime(27117): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:11.554 E/cutils-trace(27117): Error opening trace file: No such file or directory (2)
+11-22 13:39:11.560 V/libnb   (27117): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:11.566 I/libnb   (27117): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:11.577 I/app_process(27117): The ClassLoaderContext is a special shared library.
+11-22 13:39:11.577 W/app_process(27117): Could not create mount namespace.
+11-22 13:39:11.577 D/nativebridge(27117): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:11.577 W/nativebridge(27117): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:11.577 W/nativebridge(27117): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:11.577 D/nativebridge(27117): call UnloadNativeBridge! state=2
+11-22 13:39:11.585 D/AndroidRuntime(27117): Calling main entry com.android.commands.input.Input
+11-22 13:39:11.585 I/Input   (27117): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749310, downTime=8749310, deviceId=-1, source=0x101 }
+11-22 13:39:11.598 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:11.598 I/Input   (27117): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DEL, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749310, downTime=8749310, deviceId=-1, source=0x101 }
+11-22 13:39:11.607 D/AndroidRuntime(27117): Shutting down VM
+11-22 13:39:11.618 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:11.619 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 18 lines
+11-22 13:39:11.619 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:12.216 I/appproc (27127): app_process main with argv: /system/bin com.android.commands.input.Input text 123456 
+11-22 13:39:12.217 D/AndroidRuntime(27127): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:12.218 E/cutils-trace(27127): Error opening trace file: No such file or directory (2)
+11-22 13:39:12.225 V/libnb   (27127): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:12.231 I/libnb   (27127): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:12.243 I/app_process(27127): The ClassLoaderContext is a special shared library.
+11-22 13:39:12.243 W/app_process(27127): Could not create mount namespace.
+11-22 13:39:12.243 D/nativebridge(27127): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:12.243 W/nativebridge(27127): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:12.243 W/nativebridge(27127): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:12.243 D/nativebridge(27127): call UnloadNativeBridge! state=2
+11-22 13:39:12.250 D/AndroidRuntime(27127): Calling main entry com.android.commands.input.Input
+11-22 13:39:12.251 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_1, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.258 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:12.258 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_1, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.265 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_2, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.271 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:12.271 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_2, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.277 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_3, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.282 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:12.282 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_3, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.289 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_4, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.294 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:12.295 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_4, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.301 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_5, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.306 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:12.306 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_5, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.313 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_6, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.320 D/mhxj    (26515): in MHXJ.onKeyDown
+11-22 13:39:12.321 I/Input   (27127): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_6, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=8749976, downTime=8749976, deviceId=-1, source=0x101 }
+11-22 13:39:12.329 D/AndroidRuntime(27127): Shutting down VM
+11-22 13:39:12.334 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:12.334 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 18 lines
+11-22 13:39:12.334 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:13.219 E/cutils-trace(27137): Error opening trace file: No such file or directory (2)
+11-22 13:39:13.219 D/vndksupport(27137): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-22 13:39:13.219 D/vndksupport(27137): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-22 13:39:13.215 I/Binder:1459_4( 1459): type=1400 audit(0.0:7694): avc: denied { read write } for path="/dev/fastpipe" dev="tmpfs" ino=4146 scontext=u:r:shell:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:39:13.218 I/screencap(27137): type=1400 audit(0.0:7695): avc: denied { open } for path="/dev/fastpipe" dev="tmpfs" ino=4146 scontext=u:r:shell:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:39:13.224 I/        (27137): fastpipe: Connect success
+11-22 13:39:13.225 I/        (27137): fastpipe: Connect success
+11-22 13:39:13.225 D/HostConnection(27137): HostRPC::connect sucess: app=screencap, pid=27137, tid=27137, this=0x763893ee4540
+11-22 13:39:13.225 D/HostConnection(27137): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-22 13:39:13.420 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:39:13.420 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:39:13.420 D/MediaScannerReceiver( 2333): action: android.intent.action.MEDIA_SCANNER_SCAN_FILE path: /storage/emulated/0/p1_filled.png
+11-22 13:39:13.739 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:39:13.828 I/appproc (27146): app_process main with argv: /system/bin com.android.commands.input.Input tap 673 575 
+11-22 13:39:13.828 D/AndroidRuntime(27146): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:13.829 E/cutils-trace(27146): Error opening trace file: No such file or directory (2)
+11-22 13:39:13.836 V/libnb   (27146): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:13.842 I/libnb   (27146): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:13.854 I/app_process(27146): The ClassLoaderContext is a special shared library.
+11-22 13:39:13.854 W/app_process(27146): Could not create mount namespace.
+11-22 13:39:13.854 D/nativebridge(27146): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:13.854 W/nativebridge(27146): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:13.854 W/nativebridge(27146): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:13.854 D/nativebridge(27146): call UnloadNativeBridge! state=2
+11-22 13:39:13.860 D/AndroidRuntime(27146): Calling main entry com.android.commands.input.Input
+11-22 13:39:13.861 I/Input   (27146): injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=673.0, y[0]=575.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8751585, downTime=8751585, deviceId=3, source=0x1002 }
+11-22 13:39:13.868 I/Input   (27146): injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=673.0, y[0]=575.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8751585, downTime=8751585, deviceId=3, source=0x1002 }
+11-22 13:39:13.875 D/AndroidRuntime(27146): Shutting down VM
+11-22 13:39:14.001 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:39:14.135 D/cocos2d-x debug info(26515): got packet, seq = 40, cmd = 4
+11-22 13:39:14.135 D/cocos2d-x debug info(26515): no handler for cmd 4
+11-22 13:39:17.761 I/writer  ( 1436): type=1400 audit(0.0:7697): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6867 scontext=u:r:hal_audio_default:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:39:18.130 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:39:19.936 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:39:22.259 E/cutils-trace(27156): Error opening trace file: No such file or directory (2)
+11-22 13:39:22.259 D/vndksupport(27156): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-22 13:39:22.259 D/vndksupport(27156): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-22 13:39:22.263 I/        (27156): fastpipe: Connect success
+11-22 13:39:22.264 I/        (27156): fastpipe: Connect success
+11-22 13:39:22.264 D/HostConnection(27156): HostRPC::connect sucess: app=screencap, pid=27156, tid=27156, this=0x763893ee4540
+11-22 13:39:22.265 D/HostConnection(27156): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-22 13:39:22.450 D/MediaScannerReceiver( 2333): action: android.intent.action.MEDIA_SCANNER_SCAN_FILE path: /storage/emulated/0/p2_after_login.png
+11-22 13:39:22.860 I/appproc (27165): app_process main with argv: /system/bin com.android.commands.input.Input tap 755 573 
+11-22 13:39:22.860 D/AndroidRuntime(27165): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:39:22.863 E/cutils-trace(27165): Error opening trace file: No such file or directory (2)
+11-22 13:39:22.869 V/libnb   (27165): enter native_bridge2_isCompatibleWith 3
+11-22 13:39:22.874 I/libnb   (27165): Found /system/lib64/libhoudini.so version 3
+11-22 13:39:22.885 I/app_process(27165): The ClassLoaderContext is a special shared library.
+11-22 13:39:22.885 W/app_process(27165): Could not create mount namespace.
+11-22 13:39:22.885 D/nativebridge(27165): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:39:22.886 W/nativebridge(27165): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:39:22.886 W/nativebridge(27165): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:39:22.886 D/nativebridge(27165): call UnloadNativeBridge! state=2
+11-22 13:39:22.893 D/AndroidRuntime(27165): Calling main entry com.android.commands.input.Input
+11-22 13:39:22.893 I/Input   (27165): injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=755.0, y[0]=573.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8760618, downTime=8760618, deviceId=3, source=0x1002 }
+11-22 13:39:22.903 I/Input   (27165): injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=755.0, y[0]=573.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8760618, downTime=8760618, deviceId=3, source=0x1002 }
+11-22 13:39:22.906 D/cocos2d-x debug info(26515): running, fight set speed = 0.070000
+11-22 13:39:22.906 D/cocos2d-x debug info(26515): end sit, state = 1
+11-22 13:39:22.910 D/AndroidRuntime(27165): Shutting down VM
+11-22 13:39:22.937 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:22.937 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 21 lines
+11-22 13:39:22.937 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:23.044 D/cocos2d-x debug info(26515): dest reached
+11-22 13:39:23.044 D/cocos2d-x debug info(26515): start sit, state = 0
+11-22 13:39:23.161 I/HwBinder:1447_2( 1447): type=1400 audit(0.0:7698): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6867 scontext=u:r:hal_graphics_composer_default:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:38:53.336 I/chatty  ( 2187): uid=1000(system) com.android.coreservice identical 3 lines
+11-22 13:38:53.340 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:39:23.957 E/storaged( 1480): getDiskStats failed with result NOT_SUPPORTED and size 0
+11-22 13:39:24.154 D/cocos2d-x debug info(26515): got packet, seq = 41, cmd = 4
+11-22 13:39:24.154 D/cocos2d-x debug info(26515): no handler for cmd 4
+11-22 13:39:26.658 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:39:26.991 I/ldinit  ( 1456): type=1400 audit(0.0:7699): avc: denied { read } for name="partitions" dev="proc" ino=4026532046 scontext=u:r:ldinit:s0 tcontext=u:object_r:proc:s0 tclass=file permissive=1
+11-22 13:39:28.717 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:39:34.171 D/cocos2d-x debug info(26515): got packet, seq = 42, cmd = 4
+11-22 13:39:34.171 D/cocos2d-x debug info(26515): no handler for cmd 4
+11-22 13:39:34.276 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:39:34.276 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:39:37.349 I/System.out(26515): createSoundIdFromPkg forassets/sound/effects/sound8.mp3,soundid=1
+11-22 13:39:37.351 I/OMXClient(26515): IOmx service obtained
+11-22 13:39:37.351 I/OMXMaster( 1482): makeComponentInstance(OMX.google.mp3.decoder) in omx@1.0-service process
+11-22 13:39:37.352 E/OMXNodeInstance( 1482): getConfig(0xf50af000:google.mp3.decoder, ConfigAndroidVendorExtension(0x6f100004)) ERROR: Undefined(0x80001001)
+11-22 13:39:37.352 W/AshmemAllocator( 1433): ashmem_create_region(8192) returning hidl_memory(0x76391702c100, 8192)
+11-22 13:39:37.353 I/chatty  ( 1433): uid=1000(system) allocator@1.0-s identical 2 lines
+11-22 13:39:37.353 W/AshmemAllocator( 1433): ashmem_create_region(8192) returning hidl_memory(0x76391702c100, 8192)
+11-22 13:39:37.354 W/AshmemAllocator( 1433): ashmem_create_region(9216) returning hidl_memory(0x76391702c100, 9216)
+11-22 13:39:37.354 I/chatty  ( 1433): uid=1000(system) allocator@1.0-s identical 2 lines
+11-22 13:39:37.354 W/AshmemAllocator( 1433): ashmem_create_region(9216) returning hidl_memory(0x76391702c100, 9216)
+11-22 13:39:37.354 E/MP3Extractor( 1475): Unable to resync. Signalling end of stream.
+11-22 13:39:37.364 W/AudioFlinger( 1457): createTrack_l(): mismatch between requested flags (00000004) and output flags (00000002)
+11-22 13:39:37.365 W/AudioTrack(26515): AUDIO_OUTPUT_FLAG_FAST denied by server; frameCount 0 -> 21888
+11-22 13:39:39.555 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:39:41.363 I/chatty  ( 1477): uid=1013(media) NuPlayerDriver identical 5 lines
+11-22 13:39:42.652 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:39:44.172 D/cocos2d-x debug info(26515): got packet, seq = 43, cmd = 4
+11-22 13:39:44.172 D/cocos2d-x debug info(26515): no handler for cmd 4
+11-22 13:39:46.009 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:39:49.368 I/system_server( 1603): type=1400 audit(0.0:7702): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6865 scontext=u:r:system_server:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:39:51.977 E/MP3Extractor( 1475): Unable to resync. Signalling end of stream.
+11-22 13:39:54.197 D/cocos2d-x debug info(26515): got packet, seq = 44, cmd = 4
+11-22 13:39:54.197 D/cocos2d-x debug info(26515): no handler for cmd 4
+11-22 13:39:54.558 E/MP3Extractor( 1475): Unable to resync. Signalling end of stream.
+11-22 13:39:54.558 E/MP3Extractor( 1475): Unable to resync. Signalling end of stream.
+11-22 13:39:54.558 I/NuPlayerDecoder( 1477): [audio] saw output EOS
+11-22 13:39:54.732 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:54.732 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 19 lines
+11-22 13:39:54.732 W/System  ( 1603): A resource failed to call close. 
+11-22 13:39:54.815 D/AudioTrack( 1477): stop() called with 1344960 frames delivered
+11-22 13:39:55.143 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (2, 0, 0, -1), loop setting(0, 1)
+11-22 13:39:55.143 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:39:55.145 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (6, 0, 0, -1), loop setting(0, 1)
+11-22 13:39:55.405 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:39:55.922 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:40:04.218 D/cocos2d-x debug info(26515): got packet, seq = 45, cmd = 4
+11-22 13:40:04.218 D/cocos2d-x debug info(26515): no handler for cmd 4
+11-22 13:40:06.905 W/wificond( 1481): Scan already started
+11-22 13:40:07.298 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:40:07.905 D/WificondControl( 1603): Scan result ready event
+11-22 13:40:08.585 D/cocos2d-x debug info(26515): send states to server,cmd(116),state(3)
+11-22 13:40:14.236 D/cocos2d-x debug info(26515): got packet, seq = 47, cmd = 4
+11-22 13:40:14.236 D/cocos2d-x debug info(26515): no handler for cmd 4
+11-22 13:40:16.511 W/System  ( 1603): A resource failed to call close. 
+11-22 13:40:16.511 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 20 lines
+11-22 13:40:16.511 W/System  ( 1603): A resource failed to call close. 
+11-22 13:40:19.903 D/cocos2d-x debug info(26515): send states to server,cmd(116),state(0)
+11-22 13:40:19.903 D/cocos2d-x debug info(26515): running, fight set speed = 0.070000
+11-22 13:40:20.043 D/cocos2d-x debug info(26515): dest reached
+11-22 13:40:20.043 D/cocos2d-x debug info(26515): start sit, state = 0
+11-22 13:40:20.653 D/cocos2d-x debug info(26515): running, fight set speed = 0.070000
+11-22 13:40:20.653 D/cocos2d-x debug info(26515): end sit, state = 2
+11-22 13:40:20.790 D/cocos2d-x debug info(26515): dest reached
+11-22 13:40:20.791 D/cocos2d-x debug info(26515): start sit, state = 0
+11-22 13:40:21.329 D/cocos2d-x debug info(26515): running, fight set speed = 0.070000
+11-22 13:40:21.329 D/cocos2d-x debug info(26515): end sit, state = 1
+11-22 13:40:21.613 D/cocos2d-x debug info(26515): dest reached
+11-22 13:40:21.613 D/cocos2d-x debug info(26515): start sit, state = 0
+11-22 13:40:21.706 D/cocos2d-x debug info(26515): running, fight set speed = 0.070000
+11-22 13:40:21.707 D/cocos2d-x debug info(26515): end sit, state = 1
+11-22 13:40:21.895 D/cocos2d-x debug info(26515): got packet, seq = 49, cmd = 116
+11-22 13:40:21.895 D/cocos2d-x debug info(26515): no handler for cmd 116
+11-22 13:40:22.014 D/cocos2d-x debug info(26515): dest reached
+11-22 13:40:22.014 D/cocos2d-x debug info(26515): start sit, state = 0
+11-22 13:40:22.133 D/cocos2d-x debug info(26515): running, fight set speed = 0.070000
+11-22 13:40:22.133 D/cocos2d-x debug info(26515): end sit, state = 2
+11-22 13:40:22.434 D/cocos2d-x debug info(26515): dest reached
+11-22 13:40:22.434 D/cocos2d-x debug info(26515): start sit, state = 0
+11-22 13:40:23.962 E/storaged( 1480): getDiskStats failed with result NOT_SUPPORTED and size 0
+11-22 13:40:24.250 D/cocos2d-x debug info(26515): got packet, seq = 50, cmd = 4
+11-22 13:40:24.250 D/cocos2d-x debug info(26515): no handler for cmd 4
+11-22 13:40:31.608 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:40:32.383 I/chatty  ( 1477): uid=1013(media) NuPlayerDriver identical 2 lines
+11-22 13:40:32.900 D/NuPlayerDriver( 1477): notifyListener_l(0xf2a99a80), (211, 0, 0, 20), loop setting(0, 1)
+11-22 13:40:34.259 D/cocos2d-x debug info(26515): got packet, seq = 51, cmd = 4
+11-22 13:40:34.259 D/cocos2d-x debug info(26515): no handler for cmd 4
+11-22 13:40:34.376 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:40:34.376 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:40:37.336 D/cocos2d-x debug info(26515): run to npc 20001 @ scene 101
+11-22 13:40:37.338 D/cocos2d-x debug info(26515): running, fight set speed = 0.070000
+11-22 13:40:37.338 D/cocos2d-x debug info(26515): end sit, state = 1
+11-22 13:40:38.014 D/cocos2d-x debug info(26515): got packet, seq = 52, cmd = 116
+11-22 13:40:38.014 D/cocos2d-x debug info(26515): no handler for cmd 116
+11-22 13:40:38.464 D/cocos2d-x debug info(26515): dest reached
+11-22 13:40:38.468 D/cocos2d-x debug info(26515): start sit, state = 0
+11-22 13:40:40.450 E/cutils-trace(27260): Error opening trace file: No such file or directory (2)
+11-22 13:40:40.450 D/vndksupport(27260): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-22 13:40:40.450 D/vndksupport(27260): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-22 13:40:40.445 I/Binder:1459_4( 1459): type=1400 audit(0.0:7703): avc: denied { read write } for path="/dev/fastpipe" dev="tmpfs" ino=4146 scontext=u:r:shell:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:40:40.448 I/screencap(27260): type=1400 audit(0.0:7704): avc: denied { open } for path="/dev/fastpipe" dev="tmpfs" ino=4146 scontext=u:r:shell:s0 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:40:40.455 I/        (27260): fastpipe: Connect success
+11-22 13:40:40.456 I/        (27260): fastpipe: Connect success
+11-22 13:40:40.456 D/HostConnection(27260): HostRPC::connect sucess: app=screencap, pid=27260, tid=27260, this=0x763893ee4540
+11-22 13:40:40.456 D/HostConnection(27260): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-22 13:40:40.688 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:40:40.688 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:40:40.688 D/MediaScannerReceiver( 2333): action: android.intent.action.MEDIA_SCANNER_SCAN_FILE path: /storage/emulated/0/p3_ingame.png
+11-22 13:40:40.868 I/com.kdxx.online(26515): type=1400 audit(0.0:7706): avc: denied { ioctl } for comm=474C54687265616420323239 path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6867 scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1

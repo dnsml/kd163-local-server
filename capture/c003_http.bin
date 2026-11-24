@@ -1,0 +1,106 @@
+GET /meta.xml HTTP/1.1
+User-Agent: Dalvik/2.1.0 (Linux; U; Android 9; 2509FPN0BC Build/PQ3B.190801.11101518)
+Host: 124.223.56.189
+Connection: Keep-Alive
+Accept-Encoding: gzip
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:19 GMT
+Content-Type: application/xml
+Content-Length: 1159292
+Connection: keep-alive
+Cache-Control: no-store
+
+<Md5List>
+<item><path>assets/avatars/1_body.png</path><md5>d974acd7ebbeebb52b95150ed5524ba3</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/1_body.png</uri></item>
+<item><path>assets/avatars/1_head.png</path><md5>f0aa4642d349b29a34729c6ab8b158d2</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/1_head.png</uri></item>
+<item><path>assets/avatars/a_fazun_0_attack.plist</path><md5>f908e1b860fec7b1dcbbecd9b2e95456</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_attack.plist</uri></item>
+<item><path>assets/avatars/a_fazun_0_attack.pvr.ccz</path><md5>c5059795198e5f00b7ee2b19f75f176f</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_attack.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_0_dead.plist</path><md5>b3367027c574d3321e05cb23934dff63</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_dead.plist</uri></item>
+<item><path>assets/avatars/a_fazun_0_dead.pvr.ccz</path><md5>4ab784667e7e74e4c289238592a96381</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_dead.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_0_idle.plist</path><md5>87b4a9fc984344bd4cc7ecfeacd7d774</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_idle.plist</uri></item>
+<item><path>assets/avatars/a_fazun_0_idle.pvr.ccz</path><md5>2dc8c9c6ef048432828cf3db40b5ca29</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_idle.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_0_injured.plist</path><md5>6abb2e8597b6130da82d1c098827d8f2</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_injured.plist</uri></item>
+<item><path>assets/avatars/a_fazun_0_injured.pvr.ccz</path><md5>7f5c346e90f188713def9f4495985af0</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_injured.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_0_ready.plist</path><md5>61c59b182aa3de0155106ec883450433</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_ready.plist</uri></item>
+<item><path>assets/avatars/a_fazun_0_ready.pvr.ccz</path><md5>2a0aba3546686694e54a7019e5256ddb</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_ready.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_0_run.plist</path><md5>c822f71de19e16e0e5dd4e342f8a21e7</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_run.plist</uri></item>
+<item><path>assets/avatars/a_fazun_0_run.pvr.ccz</path><md5>dd050c28434752fdf2cf2ac2d7515a82</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_run.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_0_sit.plist</path><md5>50aa095a526a4ad1ca9a80b6ca78a8a3</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_sit.plist</uri></item>
+<item><path>assets/avatars/a_fazun_0_sit.pvr.ccz</path><md5>1fe11c9d4bf6cffdd676724ced9d3be9</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_sit.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_0_victory.plist</path><md5>fcb850915b2fda472af068f60979774e</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_victory.plist</uri></item>
+<item><path>assets/avatars/a_fazun_0_victory.pvr.ccz</path><md5>7de921e54bcd7d4fd9f67818bf678ae3</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_0_victory.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_1_attack.plist</path><md5>aaed83546883c956827d28624e8e68d6</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_attack.plist</uri></item>
+<item><path>assets/avatars/a_fazun_1_attack.pvr.ccz</path><md5>d72d5eb65c04c4dc9ddb42b523412c4c</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_attack.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_1_dead.plist</path><md5>af61d5ad9e63cad0b6568a4e64a7a02a</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_dead.plist</uri></item>
+<item><path>assets/avatars/a_fazun_1_dead.pvr.ccz</path><md5>6c5bd9ab5d92cb8581fbe02946bb6318</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_dead.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_1_idle.plist</path><md5>3807618a8408f1f96cbea2bc67dac1bf</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_idle.plist</uri></item>
+<item><path>assets/avatars/a_fazun_1_idle.pvr.ccz</path><md5>43fa6d43d82b2459d6d455180c898ba2</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_idle.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_1_injured.plist</path><md5>3bd2ccce9d044e5a953809f0c6561acf</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_injured.plist</uri></item>
+<item><path>assets/avatars/a_fazun_1_injured.pvr.ccz</path><md5>14aa64ffbd33a939f51737c9812318fd</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_injured.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_1_ready.plist</path><md5>d25ca22926fb484b6b3d95154a1ba48c</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_ready.plist</uri></item>
+<item><path>assets/avatars/a_fazun_1_ready.pvr.ccz</path><md5>3270d0fa63c590ca676bae059cbf0042</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_ready.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_1_run.plist</path><md5>e5e8a3a2bf9bfc39fcf76b4be0a49bb1</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_run.plist</uri></item>
+<item><path>assets/avatars/a_fazun_1_run.pvr.ccz</path><md5>e9d944f0c98e4d748a53c2a0cc872de7</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_run.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_1_sit.plist</path><md5>351372db30e8e18ca9e28f60f511af38</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_sit.plist</uri></item>
+<item><path>assets/avatars/a_fazun_1_sit.pvr.ccz</path><md5>0bd0bbd27b0c7b2b684857add0118e50</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_sit.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_fazun_1_victory.plist</path><md5>9c8fcff9901f199741efd2c6ac70b636</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_victory.plist</uri></item>
+<item><path>assets/avatars/a_fazun_1_victory.pvr.ccz</path><md5>67331d0c90a428c664728d5dd4e7da79</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_fazun_1_victory.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_0_attack.plist</path><md5>f97b876c7da5522ef4bc0fb695439072</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_attack.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_0_attack.pvr.ccz</path><md5>b2c830640c19013793e9313a1025dc10</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_attack.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_0_dead.plist</path><md5>b886b00dc05f8783972a4bb9354ac668</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_dead.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_0_dead.pvr.ccz</path><md5>5cdd0f5c6b2dd55036b47148f345f7f2</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_dead.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_0_idle.plist</path><md5>64005bb3b888b4c74d783feffa523b95</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_idle.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_0_idle.pvr.ccz</path><md5>c178215aadd078190adcbde7a9316066</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_idle.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_0_injured.plist</path><md5>12f327b66c942a81f34986bdcc59d2c2</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_injured.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_0_injured.pvr.ccz</path><md5>e1e05b6e0960f2fd8345911c49da8eb6</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_injured.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_0_ready.plist</path><md5>ef463439a478b2ff3772543d3dc201b2</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_ready.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_0_ready.pvr.ccz</path><md5>0f16393c43dbbd1cab1fd3d18b96f3fe</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_ready.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_0_run.plist</path><md5>b31a0d5e6bb67ae52297064cae219d97</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_run.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_0_run.pvr.ccz</path><md5>21dc7c1eacac1957aba9a058f9154659</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_run.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_0_sit.plist</path><md5>cd727db59f2b07ae6470aadb7df5932f</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_sit.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_0_sit.pvr.ccz</path><md5>efd74e7ca4c3b4e6a14160638166b3cb</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_sit.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_0_victory.plist</path><md5>046678d5929bd98d95a44fa6a9e89cc8</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_victory.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_0_victory.pvr.ccz</path><md5>79926b643316c34aff45e675c96b97cd</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_0_victory.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_1_attack.plist</path><md5>c6fa55223e74d903d20c5f81facd39a3</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_attack.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_1_attack.pvr.ccz</path><md5>efa2fb375011c86c9ada54352de057ef</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_attack.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_1_dead.plist</path><md5>ed88ffcb052cd683e4b2fb02a95bcf2b</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_dead.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_1_dead.pvr.ccz</path><md5>9a32c7419214e5862920d96cfc85d258</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_dead.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_1_idle.plist</path><md5>2c17fc8f02bd1bc5c227401548269585</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_idle.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_1_idle.pvr.ccz</path><md5>ed6b351795ffc96ad3648e56f0467b1c</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_idle.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_1_injured.plist</path><md5>3c3b6aa153574a75049c6fc0088547e0</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_injured.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_1_injured.pvr.ccz</path><md5>0a7753445407e2360a09b17944e626fb</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_injured.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_1_ready.plist</path><md5>9b5b71525d578d02babf96c037ac88dc</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_ready.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_1_ready.pvr.ccz</path><md5>6b668e092af19b82668ac0951ac11dce</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_ready.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_1_run.plist</path><md5>cc07037bc3b0c684b813132c27075a83</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_run.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_1_run.pvr.ccz</path><md5>ad00b936f7c5c3215676993b713bb9e2</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_run.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_1_sit.plist</path><md5>351136119b0537b70633629cdf293f8f</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_sit.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_1_sit.pvr.ccz</path><md5>e38f392068344eb1b14e0f277e906f00</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_sit.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_huanyu_1_victory.plist</path><md5>21da84460de34a57cc4d8005b0d2cbce</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_victory.plist</uri></item>
+<item><path>assets/avatars/a_huanyu_1_victory.pvr.ccz</path><md5>b7262da230fde142b87ae10ee92538d5</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_huanyu_1_victory.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_0_attack.plist</path><md5>e624031b6e834c66cea727c9384d7537</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_attack.plist</uri></item>
+<item><path>assets/avatars/a_pojun_0_attack.pvr.ccz</path><md5>55a4ea3c1db0bc5e8008c9617376aaf5</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_attack.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_0_dead.plist</path><md5>e252e53bbf5c81e97f92104e84be549e</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_dead.plist</uri></item>
+<item><path>assets/avatars/a_pojun_0_dead.pvr.ccz</path><md5>f925208b453724f32a0907a3df80cbe0</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_dead.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_0_idle.plist</path><md5>f81a6db488312a870d63d2d8869516b9</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_idle.plist</uri></item>
+<item><path>assets/avatars/a_pojun_0_idle.pvr.ccz</path><md5>00e760413cb8df03a76503600621453d</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_idle.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_0_injured.plist</path><md5>278c40ee6300e1be6059c3c0ebdfdbda</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_injured.plist</uri></item>
+<item><path>assets/avatars/a_pojun_0_injured.pvr.ccz</path><md5>e6eee9664d82dbe55bd40a066f6ecf41</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_injured.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_0_ready.plist</path><md5>111a43208f545ee8cb58166406c985e7</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_ready.plist</uri></item>
+<item><path>assets/avatars/a_pojun_0_ready.pvr.ccz</path><md5>6ec7554e8f802a135eeac98817d5007d</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_ready.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_0_run.plist</path><md5>6ecf14bec155373b55cb4cec8c3bf53c</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_run.plist</uri></item>
+<item><path>assets/avatars/a_pojun_0_run.pvr.ccz</path><md5>8c269c7f6efc01b6728baa0430ebefe8</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_run.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_0_sit.plist</path><md5>a231bff2b2046c4f60efc1084e3a24e4</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_sit.plist</uri></item>
+<item><path>assets/avatars/a_pojun_0_sit.pvr.ccz</path><md5>42bf7f6af72515c60ce4b85d9aa19661</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_sit.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_0_victory.plist</path><md5>aae9a268fb48f0ba6bbdd3a9c711fb74</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_victory.plist</uri></item>
+<item><path>assets/avatars/a_pojun_0_victory.pvr.ccz</path><md5>fdb492a53522550916b4fe009fbf9a8f</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_0_victory.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_1_attack.plist</path><md5>71c1077cad48a965d6e5a0b92896a8c2</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_1_attack.plist</uri></item>
+<item><path>assets/avatars/a_pojun_1_attack.pvr.ccz</path><md5>8f35016a23fe12c0305a10a452473b83</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_1_attack.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_1_dead.plist</path><md5>a157343c73f0d177de4e42d10cd282d0</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_1_dead.plist</uri></item>
+<item><path>assets/avatars/a_pojun_1_dead.pvr.ccz</path><md5>4c20ee4e1906c2dd32ad441f33c6bc8a</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_1_dead.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_1_idle.plist</path><md5>11234b2c87dddba695ca70505c525573</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_1_idle.plist</uri></item>
+<item><path>assets/avatars/a_pojun_1_idle.pvr.ccz</path><md5>6ee0c784cd615e2ca00b43bb7f93a31c</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_1_idle.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_1_injured.plist</path><md5>0e67b4641348a4fd548d65e51ff5f702</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_1_injured.plist</uri></item>
+<item><path>assets/avatars/a_pojun_1_injured.pvr.ccz</path><md5>e542bfdf9aa77c055b9cef7948adf39a</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_1_injured.pvr.ccz</uri></item>
+<item><path>assets/avatars/a_pojun_1_ready.plist</path><md5>d6e5c31d5cba801fa6eb6ad7bdcb39a4</md5><is_file>1</is_file><uri>http://124.223.56.189/assets/avatars/a_pojun_1_ready.plist</uri></item>

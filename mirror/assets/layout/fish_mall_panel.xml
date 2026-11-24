@@ -1,0 +1,32 @@
+<layout height="559" width="905">
+	<layout height="495" margin="2" type="horizontal" width="850" x="28" y="45">
+		<layout background="assets/ui/common/layer3_frame.png" height="495" type="vertical" width="302">
+			<scaleimage height="495" src="assets/ui/common/layer2_frame.png" width="302" />
+			<label color="orange" fontsize="22" text="售价：" x="95" y="62" />
+			<label color="orange" fontsize="22" text="购买数量：" x="10" y="380" />
+			<image src="assets/ui/fish/fish_21.png" x="115" y="440" />
+			<image src="assets/ui/common/shuzik.png" x="160" y="452" />
+			<space height="75" id="1002388" name="good_space" width="75" x="15" y="15" />
+			<label color="beige" fontsize="22" id="1002389" name="good_name" text="灵戒碎片宝盒" x="95" y="15" />
+			<label ax="1" ay="1" color="orange" fontsize="22" id="1002437" name="good_price" text="16鱼币" x="290" y="62" />
+			<label color="white" fontsize="22" id="1002438" name="good_desc" text="" width="288" x="8" y="105" />
+			<label color="white" fontsize="22" id="1002439" name="buy_count" text="1" x="125" y="380" />
+			<button id="1002440" name="btn_buy" normal="assets/ui/fish/fish_13.png" selected="assets/ui/fish/fish_12.png" x="8" y="425" />
+			<label ax="0.5" ay="0.5" color="white" fontsize="22" id="1002441" name="total_price" text="999999" x="225" y="468" />
+			<image id="1002442" name="one_count" src="assets/ui/mall/mall-1.png" x="20" y="310" />
+			<image id="1002443" name="five_count" src="assets/ui/mall/mall-2.png" x="120" y="310" />
+			<image id="1002444" name="ten_count" src="assets/ui/mall/mall-3.png" x="215" y="310" />
+		</layout>
+		<layout height="495" type="vertical" width="545">
+			<layout background="assets/ui/common/layer2_frame.png" height="432" type="vertical" width="545">
+				<listview column="2" height="422" id="1002445" name="good_list" scrollbar="false" vertical="true" width="535" x="5" y="5" />
+			</layout>
+			<layout height="63" type="vertical" width="545">
+				<label color="white" fontsize="20" text="我的鱼币：" x="0" y="0" />
+				<label color="white" fontsize="20" id="1002446" name="my_fortune" text="999999" x="99" y="0" />
+				<label color="white" fontsize="20" text="鱼币可在海边钓鱼的鱼币商城中兑换" x="0" y="23" />
+				<label color="white" fontsize="20" text="累计鱼币保留，按商城标价扣除" x="0" y="45" />
+			</layout>
+		</layout>
+	</layout>
+</layout>

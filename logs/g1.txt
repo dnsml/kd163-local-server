@@ -1,0 +1,20 @@
+[网格扫描守卫]
+  未命中
+=== 服务端 ===
+=== 客户端 ===
+11-22 14:26:45.632 D/cocos2d-x debug info(  910): loading end, m_depth = 0
+11-22 14:26:51.125 D/cocos2d-x debug info(  910): call cmd = 211, seq = 39
+11-22 14:26:51.125 D/cocos2d-x debug info(  910): loading begin, m_depth = 1
+11-22 14:26:51.150 D/cocos2d-x debug info(  910): got packet, seq = 39, cmd = 212
+11-22 14:26:51.150 D/cocos2d-x debug info(  910): loading end, m_depth = 0
+11-22 14:26:56.105 D/cocos2d-x debug info(  910): running, fight set speed = 0.070000
+11-22 14:26:56.108 D/cocos2d-x debug info(  910): end sit, state = 1
+11-22 14:26:56.736 D/cocos2d-x debug info(  910): dest reached
+11-22 14:26:56.736 D/cocos2d-x debug info(  910): start sit, state = 0
+11-22 14:26:59.262 D/cocos2d-x debug info(  910): run to npc 20001 @ scene 101
+11-22 14:26:59.262 D/cocos2d-x debug info(  910): running, fight set speed = 0.070000
+11-22 14:26:59.262 D/cocos2d-x debug info(  910): end sit, state = 2
+11-22 14:26:59.401 D/cocos2d-x debug info(  910): dest reached
+11-22 14:26:59.406 D/cocos2d-x debug info(  910): start sit, state = 0
+=== 进程 ===
+910

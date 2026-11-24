@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<HorseGradeUp>
+<item grade="0" lucky="96" items="20732,2" money="1000" figure="10035"/>
+<item grade="1" lucky="144" items="20732,4" money="1000" figure="10038"/>
+<item grade="2" lucky="232" items="20732,6" money="5000" figure="10039"/>
+<item grade="3" lucky="360" items="20733,4" money="5000" figure="10040"/>
+<item grade="4" lucky="540" items="20733,6" money="5000" figure="10041"/>
+<item grade="5" lucky="960" items="20733,8" money="5000" figure="10042"/>
+<item grade="6" lucky="1440" items="20733,10" money="5000" figure="10043"/>
+<item grade="7" lucky="2180" items="20733,12" money="5000" figure="10044"/>
+<item grade="8" lucky="1" items="0,0" money="0" figure="10044"/>
+</HorseGradeUp>

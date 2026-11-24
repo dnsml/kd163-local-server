@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<DailyMission>
+<item daily_mission_id="1001" daily_mission_name="强化装备" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_4" jump_to="4"/>
+<item daily_mission_id="1002" daily_mission_name="钱多多多多" mission_times="2" reward_item="add_coin_bound,10000" daily_mission_icon="dailymission_48" jump_to="40"/>
+<item daily_mission_id="1003" daily_mission_name="洗洗更健康" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_8" jump_to="5"/>
+<item daily_mission_id="1004" daily_mission_name="仙子演奏抚琴" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_6" jump_to="2"/>
+<item daily_mission_id="1005" daily_mission_name="师门竞技" mission_times="3" reward_item="add_coin_bound,10000" daily_mission_icon="dailymission_51" jump_to="29"/>
+<item daily_mission_id="1006" daily_mission_name="梦幻嘉年华" mission_times="3" reward_item="add_coin,5000" daily_mission_icon="dailymission_49" jump_to="35"/>
+<item daily_mission_id="1007" daily_mission_name="仙法竞技" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_7" jump_to="42"/>
+<item daily_mission_id="1008" daily_mission_name="护送美女" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_36" jump_to="45"/>
+<item daily_mission_id="1009" daily_mission_name="泡泡温泉" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_37" jump_to="42"/>
+<item daily_mission_id="1010" daily_mission_name="合成材料" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="main_72" jump_to="14"/>
+<item daily_mission_id="1011" daily_mission_name="修行任务" mission_times="3" reward_item="add_coin,5000" daily_mission_icon="dailymission_50" jump_to="41"/>
+<item daily_mission_id="1012" daily_mission_name="天降异宝" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_45" jump_to="22"/>
+<item daily_mission_id="1013" daily_mission_name="封魔灭妖" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_35" jump_to="22"/>
+<item daily_mission_id="1014" daily_mission_name="锁妖塔" mission_times="1" reward_item="add_coin_bound,10000" daily_mission_icon="dailymission_46" jump_to="44"/>
+<item daily_mission_id="1015" daily_mission_name="召唤BOSS" mission_times="1" reward_item="add_coin_bound,10000" daily_mission_icon="dailymission_52" jump_to="0"/>
+<item daily_mission_id="1016" daily_mission_name="帮会历练" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_34" jump_to="27"/>
+<item daily_mission_id="1017" daily_mission_name="无尽试炼" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_55" jump_to="43"/>
+<item daily_mission_id="1018" daily_mission_name="七星封魔" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="seven_17" jump_to="27"/>
+<item daily_mission_id="1019" daily_mission_name="守卫天庭" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_61" jump_to="46"/>
+<item daily_mission_id="1020" daily_mission_name="仙法猎命" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_51" jump_to="47"/>
+<item daily_mission_id="1021" daily_mission_name="仙法迷宫" mission_times="1" reward_item="add_coin,5000" daily_mission_icon="dailymission_62" jump_to="48"/>
+</DailyMission>

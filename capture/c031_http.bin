@@ -1,0 +1,16 @@
+GET /server-list.xml HTTP/1.1
+Host: 124.223.56.189
+Accept: */*
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:34 GMT
+Content-Type: application/xml; charset=utf-8
+Content-Length: 182
+Connection: keep-alive
+Cache-Control: no-store
+
+<?xml version="1.0" encoding="utf-8" ?>
+<ServerList>
+<item id="1" name="口袋修仙正式服" tips="" ip="124.223.56.189" port="9000" if_recommend="1" condition="1"/>
+</ServerList>

@@ -1,0 +1,67 @@
+# ============================================================
+# KD163 本地服 —— 传 GitHub 前必须遵守的排除规则
+# 目标：仓库只含「服务端源码 + 配置表 + 文档」，不含证书/存档/日志/大资源
+# ============================================================
+
+# ---- 1. 证书与私钥：绝对不能进仓库 ----
+# exact.pem 是改包 APK 内嵌的信任根，泄露 = 任何人都能伪造成你的服务端。
+# 需要时用 gen_cert_exact.py 重新生成并重打包客户端（见 README）。
+*.pem
+*.key
+
+# ---- 2. 改包产物 / 二进制 ----
+*.apk
+*.dex
+*.so
+*.jar
+patch/
+
+# ---- 3. 玩家存档（含账号、等级、背包、任务进度）----
+player_state*.json
+state_before_probe.json
+
+# ---- 4. 日志与抓包 ----
+# 日志是核心分析资料（真服/他服完整包序），.log 全部保留；
+# 同目录下的截图 / APK / raw.bin 是冗余产物，排除。
+logs/*.png
+logs/*.jpg
+logs/*.apk
+logs/*.bin
+logs/shot*
+logs/*.json
+!logs/*.log
+!logs/*.bak_*
+
+# ---- 5. 本地工作区 ----
+# work/ 里大部分是截图和探针输出（183M），只保留可复用的脚本。
+work/
+!work/*.py
+!work/*.sh
+work/**/*.png
+work/**/*.jpg
+work/**/*.log
+
+# ---- 6. 游戏资源与工具链（3GB，绝不入库）----
+tools/
+srvres/
+builtin/
+res_x/
+res_update/
+res_wing/
+so/
+apk_x/
+mirror/assets/configure/*.mpkg
+
+# ---- 7. 截图 / 临时图 ----
+_*.png
+_*.jpg
+shot*.png
+shot*.jpg
+*.tmp
+
+# ---- 8. Python ----
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/

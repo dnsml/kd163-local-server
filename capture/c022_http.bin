@@ -1,0 +1,20 @@
+GET /assets/layout/quick_chat.xml HTTP/1.1
+Host: 124.223.56.189
+Accept: */*
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:34 GMT
+Content-Type: application/xml
+Content-Length: 1006
+Connection: keep-alive
+Cache-Control: no-store
+
+<layout background="assets/ui/fight/bg_face_quickchat.png" height="500" type="horizontal" width="750">
+	<label color="green" fontsize="18" id="1001917" name="quick_chat_publish_label" text="战斗操作 / 快捷发言" x="24" y="12" />
+	<listview column="5" height="400" id="1001918" name="face_list_view" scrollbar="false" vertical="true" width="400" x="340" y="35" />
+	<listview column="1" height="400" id="1001919" name="quick_chat_list_view" scrollbar="false" vertical="true" width="330" x="10" y="35" />
+	<button id="1001920" label="" label_color="" name="close_btn" normal="assets/ui/common/close_btn.png" selected="assets/ui/common/close_btn_p.png" x="681" y="-43" />
+	<inputbox background="assets/ui/common/editbox_bg.png" fontsize="24" height="50" id="1002902" name="inputbox" type="done" width="400" x="81" y="440" />
+	<button id="1002903" label_color="white" name="btn_send" normal="assets/ui/chat/btn_send_normal.png" selected="assets/ui/chat/btn_send_selected.png" x="509" y="440" />
+</layout>

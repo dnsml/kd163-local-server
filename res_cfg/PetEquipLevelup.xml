@@ -1,0 +1,13 @@
+<PetEquipLevelup>
+<item level="1" greenexp="16" blueexp="32" purpleexp="64" orangeexp="128"/>
+<item level="2" greenexp="32" blueexp="64" purpleexp="128" orangeexp="256"/>
+<item level="3" greenexp="64" blueexp="128" purpleexp="256" orangeexp="512"/>
+<item level="4" greenexp="128" blueexp="256" purpleexp="512" orangeexp="1024"/>
+<item level="5" greenexp="256" blueexp="512" purpleexp="1024" orangeexp="2048"/>
+<item level="6" greenexp="512" blueexp="1024" purpleexp="2048" orangeexp="4096"/>
+<item level="7" greenexp="1024" blueexp="2048" purpleexp="4096" orangeexp="8192"/>
+<item level="8" greenexp="2048" blueexp="4096" purpleexp="8192" orangeexp="16384"/>
+<item level="9" greenexp="4096" blueexp="8192" purpleexp="16384" orangeexp="32768"/>
+<item level="10" greenexp="8192" blueexp="16384" purpleexp="32768" orangeexp="65536"/>
+<item level="11" greenexp="16384" blueexp="32768" purpleexp="65536" orangeexp="131072"/>
+</PetEquipLevelup>

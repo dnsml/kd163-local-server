@@ -1,0 +1,23 @@
+<layout background="" height="515" margin="0" padding="0" type="vertical" width="834">
+	<image rotate="0" src="assets/ui/common/window_frame.png" x="0" y="0" />
+	<layout background="assets/ui/common/layer2_frame.png" height="455" margin="0" padding="0" type="vertical" width="780" x="27" y="45">
+		<image rotate="0" src="assets/ui/images/challenge_bg.png" x="2" y="1" />
+		<label color="orange" fontsize="26" text="点击目标进行挑战" x="558" y="15" />
+		<label color="orange" fontsize="22" text="阅历：" x="110" y="26" />
+		<label color="orange" fontsize="22" text="绑定铜钱：" x="110" y="63" />
+		<label color="white" fontsize="22" id="1000481" name="reward_seen" text="" x="208" y="27" />
+		<label color="white" fontsize="22" id="1000482" name="reward_coin" text="" x="-2048" y="63" />
+		<label color="white" fontsize="22" text="1000" x="208" y="63" />
+		<label color="white" fontsize="20" text="每日18:00后打开自动领取" x="343" y="64" />
+		<space height="280" id="1000897" name="role0" width="145" x="11" y="104" />
+		<space height="280" id="1000898" name="role1" width="145" x="616" y="104" />
+		<space height="280" id="1000899" name="role2" width="145" x="463" y="104" />
+		<space height="280" id="1000900" name="role3" width="145" x="308" y="104" />
+		<space height="280" id="100901" name="role4" width="145" x="158" y="104" />
+		<space height="20" id="1000902" name="rest_count" width="50" x="675" y="409" />
+		<label color="blue" fontsize="26" id="1000909" name="record" text="谁谁谁打败了谁谁谁" x="15" y="415" />
+		<button id="1000903" name="add_btn" normal="assets/ui/challenge/challenge-06.png" selected="assets/ui/challenge/challenge-07.png" x="719" y="400" />
+		<animation delay="0.1" id="1000949" name="reward" nframes="6" plist="assets/effects/e_giftbag" x="-2048" y="3" />
+	</layout>
+	<button id="1000908" label="" label_color="" name="btn_close" normal="assets/ui/common/close_btn.png" selected="assets/ui/common/close_btn_p.png" x="753" y="-22" />
+</layout>

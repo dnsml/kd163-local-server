@@ -1,0 +1,10 @@
+<PetStage>
+<item id="0" potential_need="0" ability="" source="assets/ui/pet_new/pet_35.png" speak="我的主人真厉害！"/>
+<item id="1" potential_need="40" ability="53,300;55,50;5,50;7,100" source="assets/ui/pet_new/pet_36.png" speak="羞羞羞！"/>
+<item id="2" potential_need="80" ability="53,500;55,100;5,100;7,200" source="assets/ui/pet_new/pet_37.png" speak="春天花会开，初恋快回来"/>
+<item id="3" potential_need="120" ability="53,800;55,150;5,150;7,300;13,10;19,10;11,10;9,10" source="assets/ui/pet_new/pet_38.png" speak="you're my superstar！"/>
+<item id="4" potential_need="160" ability="53,1200;55,200;5,200;7,400;13,20;19,20;11,20;9,20" source="assets/ui/pet_new/pet_39.png" speak="传说有通天塔上有个大魔王，会吃人滴，小伙伴们好害怕哦"/>
+<item id="5" potential_need="200" ability="53,1700;55,250;5,250;7,500;13,30;19,30;11,30;9,30" source="assets/ui/pet_new/pet_40.png" speak="明天的明天，你还会送我水晶之恋么~"/>
+<item id="6" potential_need="240" ability="53,2300;55,300;5,300;7,600;13,40;19,40;11,40;9,40" source="assets/ui/pet_new/pet_41.png" speak=""/>
+<item id="7" potential_need="280" ability="53,3000;55,350;5,350;7,700;13,50;19,50;11,50;9,50" source="assets/ui/pet_new/pet_42.png" speak=""/>
+</PetStage>

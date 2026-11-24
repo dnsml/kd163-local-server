@@ -1,0 +1,31 @@
+GET /assets/configure/Horsepill.xml HTTP/1.1
+Host: 124.223.56.189
+Accept: */*
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:28 GMT
+Content-Type: application/xml
+Content-Length: 946
+Connection: keep-alive
+Cache-Control: no-store
+
+<?xml version="1.0" encoding="utf-8" ?>
+<Horsepill>
+<item id="1" condition_des="0阶15级" amount="2"/>
+<item id="2" condition_des="一阶23级" amount="6"/>
+<item id="3" condition_des="一阶28级" amount="9"/>
+<item id="4" condition_des="一阶30级" amount="11"/>
+<item id="5" condition_des="二阶33级" amount="16"/>
+<item id="6" condition_des="二阶37级" amount="19"/>
+<item id="7" condition_des="二阶38级" amount="20"/>
+<item id="8" condition_des="二阶39级" amount="21"/>
+<item id="9" condition_des="二阶40级" amount="23"/>
+<item id="10" condition_des="二阶42级" amount="24"/>
+<item id="11" condition_des="三阶44级" amount="25"/>
+<item id="12" condition_des="三阶48级" amount="26"/>
+<item id="13" condition_des="三阶59级" amount="27"/>
+<item id="14" condition_des="三阶65级" amount="28"/>
+<item id="15" condition_des="三阶68级" amount="29"/>
+<item id="16" condition_des="三阶71级" amount="20"/>
+</Horsepill>

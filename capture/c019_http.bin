@@ -1,0 +1,43 @@
+GET /assets/layout/fairy_blessing_panel.xml HTTP/1.1
+Host: 124.223.56.189
+Accept: */*
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:34 GMT
+Content-Type: application/xml
+Content-Length: 3247
+Connection: keep-alive
+Cache-Control: no-store
+
+<layout background="assets/ui/common/layer2_frame.png" height="455" width="785">
+	<layout background="assets/ui/common/layer2_frame.png" height="440" width="530" x="6" y="6">
+		<image src="assets/ui/fairy_blessing/fairy_blessing_13.png" x="-6" y="-20" />
+		<layout ax="0.5" ay="0.5" height="307" id="1003056" name="turntable" width="307" x="341" y="164">
+			<image ax="0.5" ay="0.5" height="54" id="1003064" name="item0" rotate="0" src="assets/icons/20740.png" width="54" x="154" y="67" />
+			<image ax="0.5" ay="0.5" height="54" id="1003065" name="item1" rotate="40" src="assets/icons/20740.png" width="54" x="209" y="87" />
+			<image ax="0.5" ay="0.5" height="54" id="1003066" name="item2" rotate="80" src="assets/icons/20740.png" width="54" x="239" y="139" />
+			<image ax="0.5" ay="0.5" height="54" id="1003067" name="item3" rotate="120" src="assets/icons/20740.png" width="54" x="228" y="198" />
+			<image ax="0.5" ay="0.5" height="54" id="1003068" name="item4" rotate="160" src="assets/icons/20740.png" width="54" x="184" y="235" />
+			<image ax="0.5" ay="0.5" height="54" id="1003069" name="item5" rotate="200" src="assets/icons/20740.png" width="54" x="124" y="235" />
+			<image ax="0.5" ay="0.5" height="54" id="1003070" name="item6" rotate="240" src="assets/icons/20740.png" width="54" x="79" y="197" />
+			<image ax="0.5" ay="0.5" height="54" id="1003071" name="item7" rotate="280" src="assets/icons/20740.png" width="54" x="68" y="139" />
+			<image ax="0.5" ay="0.5" height="54" id="1003072" name="item8" rotate="320" src="assets/icons/20740.png" width="54" x="97" y="87" />
+			<image ax="0.5" ay="0.5" src="assets/ui/fairy_blessing/fairy_blessing_15.png" x="153.5" y="153.5" />
+		</layout>
+		<image src="assets/ui/fairy_blessing/fairy_blessing_14.png" x="286" y="105" />
+		<richlabel color="green" fontsize="22" id="1003057" name="direction" text="转盘说明" x="5" y="292" />
+		<image src="assets/ui/fairy_blessing/fairy_blessing_16.png" x="0" y="320" />
+		<listview column="1" height="110" id="1003058" name="history_list" vertical="true" width="520" x="4" y="322" />
+	</layout>
+	<layout background="assets/ui/common/layer2_frame.png" height="440" width="240" x="536" y="5">
+		<button id="1003059" name="btn_charge" normal="assets/ui/fish/fish_13.png" selected="assets/ui/fish/fish_12.png" x="69" y="18" />
+		<button id="1003060" name="btn_treasure" normal="assets/ui/fairy_blessing/fairy_blessing_17.png" selected="assets/ui/fairy_blessing/fairy_blessing_18.png" x="61" y="160" />
+		<button id="1003061" name="btn_go" normal="assets/ui/fairy_blessing/fairy_blessing_11.png" selected="assets/ui/fairy_blessing/fairy_blessing_12.png" x="60" y="281" />
+		<label color="beige" fontsize="20" text="点击上方购买祝福，奖池与概率见转盘说明。" width="230" x="6" y="84" />
+		<label color="orange" fontsize="24" id="1003062" name="blessing_name" text="白薇祝福：" x="21" y="240" />
+		<label color="white" fontsize="24" id="1003063" name="blessing_count" text="x" x="156" y="239" />
+		<line length="240" x="1" y="224" />
+		<button id="1003421" name="btn_go5times" normal="assets/ui/fairy_blessing/fairy_blessing_19.png" selected="assets/ui/fairy_blessing/fairy_blessing_20.png" x="60" y="368" />
+	</layout>
+</layout>

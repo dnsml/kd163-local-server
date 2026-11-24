@@ -1,0 +1,66 @@
+--------- beginning of main
+11-22 13:35:54.479 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon expire 21 lines
+11-22 13:35:54.479 W/System  ( 1603): A resource failed to call close. 
+11-22 13:35:58.913 I/appproc (26395): app_process main with argv: /system/bin com.android.commands.input.Input tap 755 573 
+11-22 13:35:58.913 D/AndroidRuntime(26395): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-22 13:35:58.914 E/cutils-trace(26395): Error opening trace file: No such file or directory (2)
+11-22 13:35:58.921 V/libnb   (26395): enter native_bridge2_isCompatibleWith 3
+11-22 13:35:58.928 I/libnb   (26395): Found /system/lib64/libhoudini.so version 3
+11-22 13:35:58.940 I/app_process(26395): The ClassLoaderContext is a special shared library.
+11-22 13:35:58.940 W/app_process(26395): Could not create mount namespace.
+11-22 13:35:58.940 D/nativebridge(26395): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-22 13:35:58.940 W/nativebridge(26395): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-22 13:35:58.940 W/nativebridge(26395): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-22 13:35:58.940 D/nativebridge(26395): call UnloadNativeBridge! state=2
+11-22 13:35:58.946 D/AndroidRuntime(26395): Calling main entry com.android.commands.input.Input
+11-22 13:35:58.948 I/Input   (26395): injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=755.0, y[0]=573.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8556671, downTime=8556671, deviceId=3, source=0x1002 }
+11-22 13:35:58.957 I/Input   (26395): injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=755.0, y[0]=573.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=8556671, downTime=8556671, deviceId=3, source=0x1002 }
+11-22 13:35:58.959 V/libnb   (25239): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesBegin, trampoline_addr 0xf2f750a0
+11-22 13:35:58.965 D/AndroidRuntime(26395): Shutting down VM
+11-22 13:35:58.983 V/libnb   (25239): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesEnd, trampoline_addr 0xf2f750b0
+11-22 13:35:59.029 D/cocos2d-x debug info(25239): setLastLoginServerId id = 1
+11-22 13:35:59.030 D/cocos2d-x debug info(25239): server id = 1
+11-22 13:35:59.030 D/cocos2d-x debug info(25239): call cmd = 17, seq = 2
+11-22 13:35:59.030 D/cocos2d-x debug info(25239): no handler for cmd -100
+11-22 13:36:04.011 D/cocos2d-x debug info(25239): no handler for cmd -101
+11-22 13:36:04.012 D/cocos2d-x debug info(25239): no handler for cmd -101
+11-22 13:36:04.025 D/cocos2d-x debug info(25239): getLastLoginServeId id=1
+11-22 13:36:04.027 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:36:04.030 D/cocos2d-x debug info(25239): getLastLoginServeId id=1
+11-22 13:36:04.032 D/cocos2d-x debug info(25239): no handler for cmd -202
+11-22 13:36:04.035 D/cocos2d-x debug info(25239): getLastLoginServeId id=1
+11-22 13:36:04.037 D/cocos2d-x debug info(25239): getLastLoginServeId id=1
+11-22 13:36:04.040 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:36:04.049 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 1 line
+11-22 13:36:04.050 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:36:04.050 D/SurfaceFlinger( 1459): duplicate layer name: changing com.kdxx.online/com.aiyou.mhsj.GameActivity to com.kdxx.online/com.aiyou.mhsj.GameActivity#1
+11-22 13:36:04.050 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:36:04.059 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:36:04.060 D/SurfaceFlinger( 1459): duplicate layer name: changing com.kdxx.online/com.aiyou.mhsj.GameActivity to com.kdxx.online/com.aiyou.mhsj.GameActivity#2
+11-22 13:36:04.067 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:36:04.150 I/chatty  ( 1754): uid=10024(com.android.systemui) identical 4 lines
+11-22 13:36:04.168 V/StatusBar( 1754): setLightsOn(true)
+11-22 13:36:14.514 W/System  ( 1603): A resource failed to call close. 
+--------- beginning of system
+11-22 13:35:28.716 I/chatty  ( 2187): uid=1000(system) com.android.coreservice expire 3 lines
+11-22 13:35:28.723 W/ContextImpl( 2187): Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1531 android.content.ContextWrapper.startService:664 android.content.ContextWrapper.startService:664 com.android.coreservice.CoreBroadcastReceiver.onReceive:70 android.app.ActivityThread.handleReceiver:3424 
+11-22 13:36:23.955 E/storaged( 1480): getDiskStats failed with result NOT_SUPPORTED and size 0
+11-22 13:36:14.514 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 22 lines
+11-22 13:36:14.514 W/System  ( 1603): A resource failed to call close. 
+11-22 13:36:34.051 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:36:34.051 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:36:36.261 I/RenderThread( 1754): type=1400 audit(0.0:7650): avc: denied { ioctl } for path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6867 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:36:54.541 W/System  ( 1603): A resource failed to call close. 
+11-22 13:36:54.541 I/chatty  ( 1603): uid=1000(system) FinalizerDaemon identical 18 lines
+11-22 13:36:54.541 W/System  ( 1603): A resource failed to call close. 
+11-22 13:37:00.003 E/memtrack( 1603): Couldn't load memtrack module
+11-22 13:37:00.003 W/android.os.Debug( 1603): failed to get memory consumption info: -1
+11-22 13:37:16.489 E/cutils-trace(26489): Error opening trace file: No such file or directory (2)
+11-22 13:37:16.489 D/vndksupport(26489): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-22 13:37:16.489 D/vndksupport(26489): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-22 13:37:16.491 I/        (26489): fastpipe: Connect success
+11-22 13:37:16.492 I/        (26489): fastpipe: Connect success
+11-22 13:37:16.492 D/HostConnection(26489): HostRPC::connect sucess: app=screencap, pid=26489, tid=26489, this=0x763893ee4540
+11-22 13:37:16.492 D/HostConnection(26489): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-22 13:37:16.498 I/com.kdxx.online(25239): type=1400 audit(0.0:7651): avc: denied { ioctl } for comm=474C54687265616420323235 path="/dev/fastpipe" dev="tmpfs" ino=4146 ioctlcmd=6867 scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:object_r:device:s0 tclass=chr_file permissive=1
+11-22 13:37:16.914 D/MediaScannerReceiver( 2333): action: android.intent.action.MEDIA_SCANNER_SCAN_FILE path: /storage/emulated/0/k.png

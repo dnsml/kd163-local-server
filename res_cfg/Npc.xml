@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Npc>
+<item npcId
+="20001" name="九天玄女" position="14,9" target_position="16,7" idle_animation="npcs/n_jiutianxuannv_idle,6" title="" title_res="" face="n_jiutianxuannv_face" talk="朋友多了路好走，$player$，多交朋友，组队除妖，百利而无一害哦" btns="" btns_icon="" chat=""/>
+<item npcId
+="20002" name="太虚星君" position="34,9" target_position="35,7" idle_animation="npcs/n_taishanglaojun_idle,6" title="" title_res="" face="n_taishanglaojun_face" talk="神界法术精妙绝伦，$player$，大家都在进步，你可不能掉以轻心啊" btns="" btns_icon="" chat=""/>
+<item npcId
+="20003" name="绿萝仙子" position="23,9" target_position="22,7" idle_animation="npcs/n_zixiaxianzi_idle,6" title="" title_res="tips_23" face="n_zixiaxianzi_face" talk="本仙女偷偷告诉你：在活动开启的时候，每天是可以进2次活动迷宫的！" btns="13:0" btns_icon="npc_talk_19.png,npc_talk_19p.png" chat="0.3,经常来我这里看看哦，或许有活动呢"/>
+<item npcId
+="20004" name="天音童子" position="47,9" target_position="48,7" idle_animation="npcs/n_tianyintongzi_idle,6" title="" title_res="" face="n_tianyintongzi_face" talk="迷宫变化无穷，可不要在里面迷失了自己。" btns="11:22222" btns_icon="npc_talk_18.png,npc_talk_18p.png" chat="0.3,迷宫迷宫，升级轰轰轰"/>
+<item npcId
+="20005" name="小师弟" position="68,9" target_position="67,9" idle_animation="npcs/n_tianyintongzi_idle,6" title="" title_res="" face="n_tianyintongzi_face" talk="$player$，降妖除魔保卫三界是你的使命，我等必鼎力相助。" btns="9:1;10:1" btns_icon="npc_talk_16.png,npc_talk_16p.png,npc_talk_15.png,npc_talk_15p.png" chat=""/>
+<item npcId
+="20006" name="雪姨" position="32,9" target_position="34,9" idle_animation="npcs/n_xueyi_idle,6" title="商店" title_res="tips_26" face="n_xueyi_face" talk="仙宠是我们最好的朋友，好好培养你的仙宠吧。" btns="1:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35;12:1,2,3,4" btns_icon="npc_9.png,npc_9p.png,npc_talk_17.png,npc_talk_17p.png" chat="0.4,强化、洗炼装备，是提升能力最佳途径之一。"/>
+<item npcId
+="20007" name="小雪" position="43,9" target_position="46,9" idle_animation="npcs/n_xiaoxue_idle,6" title="" title_res="" face="n_xiaoxue_face" talk="$player$，你可要努力为神界和平奋斗啊" btns="" btns_icon="" chat=""/>
+<item npcId
+="20008" name="聚宝盆" position="60,9" target_position="43,9" idle_animation="npcs/n_jubaopen_idle,6" title="金砖兑换" title_res="tips_24" face="n_jinbuhuan_face" talk="我的肚子里装着满满的财宝" btns="" btns_icon="" chat=""/>
+<item npcId
+="20009" name="金不换" position="50,9" target_position="52,9" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="仓库" title_res="tips_3" face="n_jinbuhuan_face" talk="浪子回头才发现我这可存放好多东西。不过你还是常看背包，回头多了小心扭着脖子" btns="4:22222" btns_icon="npc_8.png,npc_8p.png" chat=""/>
+<item npcId
+="20010" name="小师妹" position="55,9" target_position="54,9" idle_animation="npcs/n_xiaoxiannv_idle,6" title="" title_res="" face="n_xiaoxiannv_face" talk="谁也不许说我撒娇，哼！" btns="2:22222" btns_icon="npc_talk_5.png,npc_talk_5p.png" chat=""/>
+<item npcId
+="20011" name="御剑首席弟子" position="14,10" target_position="16,9" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="师门第一" title_res="tips_13" face="n_jiutianxuannv_face" talk="乘风御剑，用我的魅力迷晕你~~我身上有很多宝石哦，可值钱了" btns="" btns_icon="" chat=""/>
+<item npcId
+="20012" name="法尊首席弟子" position="23,10" target_position="25,9" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="师门第一" title_res="tips_10" face="n_jiutianxuannv_face" talk="战boss的精卫鸟曾向全神界表示暗恋我法尊哦，我要继续加油变得更强大，嘿嘿" btns="" btns_icon="" chat=""/>
+<item npcId
+="20013" name="幻羽首席弟子" position="32,10" target_position="34,9" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="师门第一" title_res="tips_11" face="n_jiutianxuannv_face" talk="仙境寻宝就像盒子里的朱古力，你永远不知道下一个就是惊喜" btns="" btns_icon="" chat=""/>
+<item npcId
+="20014" name="逍遥首席弟子" position="35,11" target_position="37,9" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="师门第一" title_res="tips_12" face="n_jiutianxuannv_face" talk="无敌鬼魅，神界自当逍遥。让你欲罢不能的毒攻，惹我你就死定了" btns="" btns_icon="" chat=""/>
+<item npcId
+="20015" name="破军首席弟子" position="42,11" target_position="44,9" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="师门第一" title_res="tips_9" face="n_jiutianxuannv_face" talk="打不死的小强，一夫当关万夫莫开就是说咱破军啊，啊哈哈" btns="" btns_icon="" chat=""/>
+<item npcId
+="20016" name="龙女" position="18,11" target_position="20,9" idle_animation="npcs/n_longnv_idle,6" title="" title_res="" face="n_longnv_face" talk="温泉仙境果然吸引人，帅哥靓女集聚之地，还有经验福利，父王，别生气哦" btns="" btns_icon="" chat=""/>
+<item npcId
+="20017" name="龙王" position="25,11" target_position="27,9" idle_animation="npcs/n_longwang_idle,6" title="" title_res="" face="n_longwang_face" talk="太丢脸了，咱珊瑚海的人气竟然比不过小小温泉！哎，这就是经验在作祟啊" btns="" btns_icon="" chat=""/>
+<item npcId
+="20018" name="小仙童" position="25,9" target_position="24,7" idle_animation="npcs/n_tianyintongzi_idle,6" title="" title_res="" face="n_tianyintongzi_face" talk="在不周神山待了这么久，也未见$player$这样有潜力的神仙啊。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20019" name="九天玄女" position="32,9" target_position="34,7" idle_animation="npcs/n_jiutianxuannv_idle,6" title="" title_res="" face="n_jiutianxuannv_face" talk="本玄女最爱伏羲琴，用心调琴、优雅演奏，修为就是这么上去的。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20020" name="太上老君" position="12,9" target_position="14,7" idle_animation="npcs/n_taishanglaojun_idle,6" title="" title_res="tips_23" face="n_taishanglaojun_face" talk="进入仙园即可炼制各类增益丹药，不亚于我的炼丹炉啊" btns="14:301,302,303,304,305,306,307,308,309,310,311,312" btns_icon="npc_talk_20.png,npc_talk_20p.png" chat="0.5,$player$，通过星辰宫守卫的考验，将获得品质石升品装备，大大提高神力。"/>
+<item npcId
+="20021" name="土地公" position="46,9" target_position="48,7" idle_animation="npcs/n_tudigong_idle,6" title="" title_res="" face="n_tudigong_face" talk="作为土地，我实在不忍神界受到妖魔侵扰，封魔灭妖、守卫天庭，保卫神界就是你的使命！" btns="" btns_icon="" chat=""/>
+<item npcId
+="20022" name="判官" position="32,9" target_position="34,7" idle_animation="npcs/n_panguan_idle,6" title="" title_res="" face="n_panguan_face" talk="一套优雅的时装更受欢迎！谁都不会拒绝美，即使在地府。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20023" name="九天玄女" position="32,9" target_position="34,7" idle_animation="npcs/n_jiutianxuannv_idle,6" title="结婚" title_res="" face="n_jiutianxuannv_face" talk="$player$，找到心仪之人就可组队来我这里结婚哦！只需：双方等级满足35级，亲密度满足4000" btns="8:22222" btns_icon="npc_talk_14.png,npc_talk_14p.png" chat="0.5,$player$，找到心仪之人就可组队来我这里结婚哦！"/>
+<item npcId
+="20024" name="锁妖塔" position="40,10" target_position="41,10" idle_animation="npcs/n_suoyaota,6" title="锁妖塔" title_res="tips_17" face="n_linweiyuan_face" talk="镇妖伏魔，舍我其谁。" btns="3:22222" btns_icon="npc_talk_12.png,npc_talk_12p.png" chat="0.2,塔内各种凶残妖邪，$player$一路小心。"/>
+<item npcId
+="20025" name="志玲" position="12,11" target_position="14,9" idle_animation="npcs/n_jiutianxuannv_idle,6" title="护送美女" title_res="tips_18" face="n_zhilin_face" talk="女人都需要安全感哦，所以要想光明正大比肩美女，先让自己变得强大吧" btns="" btns_icon="" chat="0.2,$player$，有高手护送，此行必定精彩！"/>
+<item npcId
+="20026" name="试练使者" position="77,9" target_position="79,9" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="神界试炼" title_res="" face="n_luoshuishoujiang_face" talk="不惧生死艰险，迎战一波又一波怪物，证明你自己的强大" btns="6:22222;6:22222" btns_icon="npc_talk_4.png,npc_talk_4p.png,npc_talk_11.png,npc_talk_11p.png" chat=""/>
+<item npcId
+="20027" name="天庭守护者" position="76,9" target_position="78,9" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="击杀BOSS" title_res="tips_25" face="n_luoshuishoujiang_face" talk="不要吝啬你的实力，来挑战世界boss吧，诚心守护天庭安宁" btns="" btns_icon="" chat=""/>
+<item npcId
+="20028" name="凌波仙子" position="12,9" target_position="14,7" idle_animation="npcs/n_zixiaxianzi_idle,6" title="" title_res="" face="n_zixiaxianzi_face" talk="凌波微步，罗袜生尘。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20029" name="仙园女仆" position="20,5" target_position="22,3" idle_animation="npcs/n_xianyuannvpu,6" title="" title_res="" face="n_xuanyuannvpu_face" talk="主人，我们一起建设美好的仙园吧！" btns="" btns_icon="" chat="0.6,主人珍珠成熟了就来点我收获哦。"/>
+<item npcId
+="20030" name="欧冶子" position="38,9" target_position="40,7" idle_animation="npcs/n_ouyezi_idle,6" title="" title_res="" face="n_ouyezi_face" talk="装备可以升阶、强化、洗炼、镶嵌，大大提升战斗力。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20031" name="太乙真人" position="12,9" target_position="14,7" idle_animation="npcs/n_xiaoyaozi_idle,6" title="" title_res="" face="n_xiaoyaozi_face" talk="修仙之人，当以清心静气为要。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20032" name="逍遥子" position="62,9" target_position="61,9" idle_animation="npcs/n_xiaoyaozi_idle,6" title="" title_res="" face="n_xiaoyaozi_face" talk="不问世事，逍遥自在才是真正的神仙生活。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20033" name="小仙女" position="38,9" target_position="40,7" idle_animation="npcs/n_xiaoxiannv_idle,6" title="" title_res="" face="n_xiaoxiannv_face" talk="你也是来这里寻找伏羲琴的么！" btns="" btns_icon="" chat=""/>
+<item npcId
+="20034" name="哪吒" position="12,9" target_position="14,9" idle_animation="npcs/n_nezha_idle,6" title="" title_res="" face="n_nezha_face" talk="我和龙王算是不打不相识。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20035" name="龙虾大将" position="37,9" target_position="39,9" idle_animation="npcs/n_xiabing_idle,6" title="" title_res="" face="n_xiabing_face" talk="别看俺长得丑，心里可温柔了。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20036" name="托塔天王" position="24,9" target_position="26,9" idle_animation="npcs/n_tuotatianwang_idle,6" title="" title_res="" face="n_tuotatianwang_face" talk="邪不胜正，让我们一起守卫天庭，赶走妖兽。" btns="" btns_icon="" chat="0.2,拨开迷雾，发现人生的真谛吧"/>
+<item npcId
+="20037" name="土地公" position="12,9" target_position="14,7" idle_animation="npcs/n_tudigong_idle,6" title="" title_res="" face="n_tudigong_face" talk="做个小小的土地公，虽然没有飞黄腾达，倒也不愁吃穿。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20038" name="颛顼" position="46,9" target_position="48,7" idle_animation="npcs/n_zhuanxu_idle,6" title="" title_res="" face="n_zhuanxu_face" talk="你的技能有秘籍了么，没有秘籍的技能不是好技能。" btns="" btns_icon="" chat="0.2,明夜那颗璀璨的星光还在吗？"/>
+<item npcId
+="20039" name="莫邪" position="12,9" target_position="14,7" idle_animation="npcs/n_moye_idle,6" title="" title_res="" face="n_moye_face" talk="干将莫邪，情比金坚，你有生死与共的伴侣了吗？" btns="" btns_icon="" chat=""/>
+<item npcId
+="20040" name="守护剑灵" position="32,9" target_position="34,7" idle_animation="npcs/n_shouhujianling_idle,6" title="" title_res="" face="n_shouhujianling_face" talk="轩辕剑乃上古神器，我们誓死捍卫神器的尊严。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20041" name="钟馗" position="12,9" target_position="14,7" idle_animation="npcs/n_zhongkui_idle,6" title="" title_res="" face="n_zhongkui_face" talk="我乃赐福镇宅圣君，虽然我其貌不扬，但才华横溢，经纶满腹。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20042" name="孟婆" position="39,9" target_position="41,7" idle_animation="npcs/n_mengpo_idle,6" title="" title_res="" face="n_mengpo_face" talk="来，喝一碗汤吧，让你忘记所有烦恼。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20043" name="天妖皇" position="12,9" target_position="14,7" idle_animation="npcs/n_tianyaohuang_idle,6" title="" title_res="" face="n_tianyaohuang_face" talk="镇守天界，一夫当关万夫莫开。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20044" name="地妖皇" position="46,9" target_position="48,7" idle_animation="npcs/n_diyaohuang_idle,6" title="" title_res="" face="n_diyaohuang_face" talk="天妖皇不过是徒有虚名，真正实力且看我地妖皇！" btns="" btns_icon="" chat=""/>
+<item npcId
+="20045" name="浮云" position="32,9" target_position="34,7" idle_animation="npcs/n_fuyun_idle,6" title="" title_res="" face="n_fuyun_face" talk="你好，我是浮云，神马已离我而去。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20046" name="蓬莱仙子" position="43,10" target_position="44,7" idle_animation="npcs/n_zixiaxianzi_idle,6" title="" title_res="" face="n_zixiaxianzi_face" talk="蓬莱岛下花多少， 清旷亭前仙子生。行走三界，别忘回来看看。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20047" name="哪吒" position="35,9" target_position="14,7" idle_animation="npcs/n_nezha_idle,6" title="" title_res="" face="n_nezha_face" talk="小毛贼竟然侵犯神界，看我三太子的厉害。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20048" name="镇魔先锋" position="23,9" target_position="25,9" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="" title_res="" face="n_luoshuishoujiang_face" talk="妖魔入侵洛水城，我辈青年必当先锋，斩妖除魔。" btns="2:20801" btns_icon="" chat=""/>
+<item npcId
+="20049" name="炼丹炉" position="35,11" target_position="37,9" idle_animation="npcs/n_liandanlu,6" title="" title_res="" face="n_luoshuishoujiang_face" talk="想要长生不老？来问我要点儿仙丹吧！" btns="" btns_icon="" chat=""/>
+<item npcId
+="20050" name="哪吒" position="14,9" target_position="16,7" idle_animation="npcs/n_nezha_idle,6" title="" title_res="" face="n_nezha_face" talk="浮云生神马，神马出浮云" btns="" btns_icon="" chat=""/>
+<item npcId
+="20051" name="凌波仙子" position="14,9" target_position="16,7" idle_animation="npcs/n_zixiaxianzi_idle,6" title="" title_res="" face="n_zixiaxianzi_face" talk="神界第一女战神，舍我其谁。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20052" name="太上老君" position="23,9" target_position="25,7" idle_animation="npcs/n_taishanglaojun_idle,6" title="" title_res="" face="n_taishanglaojun_face" talk="三界众生的命运就落在你身上了。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20053" name="伏羲掌门" position="55,10" target_position="53,9" idle_animation="npcs/n_yuboya_idle,6" title="" title_res="" face="n_yuboya_face" talk="伏羲琴之音，乃三界独有，琴弦境界的提升能给你相应的能力。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20054" name="仙园仓库" position="31,13" target_position="33,11" idle_animation="npcs/n_xianyuancangku,6" title="" title_res="" face="n_ouyezi_face" talk="仙园仓库" btns="" btns_icon="" chat="0.5,别再叫我仓老师了。"/>
+<item npcId
+="20055" name="炼丹炉" position="36,13" target_position="38,11" idle_animation="npcs/n_liandanlu,6" title="" title_res="" face="n_ouyezi_face" talk="炼丹炉" btns="" btns_icon="" chat="0.5,炼丹是提升战力的好方法。"/>
+<item npcId
+="20056" name="留言板" position="42,1" target_position="42,2" idle_animation="npcs/n_xianyuanpaizi,1" title="" title_res="" face="n_ouyezi_face" talk="仙园留言板" btns="" btns_icon="" chat=""/>
+<item npcId
+="20057" name="托塔天王" position="12,9" target_position="14,7" idle_animation="npcs/n_tuotatianwang_idle,6" title="" title_res="" face="n_tuotatianwang_face" talk="守护好小仙女是我对老友的诺言。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20058" name="太上老君" position="22,9" target_position="24,7" idle_animation="npcs/n_taishanglaojun_idle,6" title="" title_res="" face="n_taishanglaojun_face" talk="三界既定，歌舞升平；龙姿凤章，熠熠生光。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20059" name="苍老师" position="12,9" target_position="14,9" idle_animation="npcs/n_xianyuannvpu,6" title="" title_res="tips_3" face="n_xuanyuannvpu_face" talk="好东西都可以存到我这里哦，终生免费滴。" btns="4:2222" btns_icon="npc_8.png,npc_8p.png" chat=""/>
+<item npcId
+="20060" name="托塔天王" position="12,9" target_position="14,7" idle_animation="npcs/n_tuotatianwang_idle,6" title="" title_res="" face="n_tuotatianwang_face" talk="守护好小仙女是我对老友的诺言。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20061" name="跨服比武使者" position="32,9" target_position="34,9" idle_animation="npcs/n_lingweiyang_idle,6" title="" title_res="" face="n_lingweiyang_face" talk="$player$，快来跨服比武和各界仙友进行战术切磋吧。" btns="15:2222" btns_icon="npc_talk_21.png,npc_talk_21p.png" chat=""/>
+<item npcId
+="20062" name="南天重楼王" position="36,9" target_position="38,9" idle_animation="npcs/n_lingweiyang_idle,6" title="" title_res="" face="n_lingweiyang_face" talk="$player$，重楼赐予你力量，好好修炼你的法宝吧！" btns="16:2222" btns_icon="npc_talk_22.png,npc_talk_22p.png" chat="0.5,$player$，重楼赐予你力量，好好修炼你的法宝吧！"/>
+<item npcId
+="20063" name="酒剑仙" position="14,8" target_position="16,4" idle_animation="npcs/n_yuboya_idle,6" title="" title_res="" face="n_yuboya_face" talk="好酒！好酒！" btns="" btns_icon="" chat=""/>
+<item npcId
+="20064" name="师父" position="50,9" target_position="51,9" idle_animation="npcs/n_xiaoyaozi_idle,6" title="" title_res="" face="n_xiaoyaozi_face" talk="好为人师，谆谆善诱。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20065" name="龙太子" position="52,11" target_position="52,12" idle_animation="npcs/n_lingweiyang_idle,6" title="" title_res="" face="n_lingweiyang_face" talk="身为太子，未来的责任可太重大了。" btns="" btns_icon="" chat=""/>
+<item npcId
+="20066" name="紫薇仙子" position="15,8" target_position="18,4" idle_animation="npcs/n_jiutianxuannv_idle,6" title="" title_res="" face="n_jiutianxuannv_face" talk="天之痕的事情让人惆怅，我又怎么笑得出来呢？" btns="" btns_icon="" chat=""/>
+<item npcId
+="20067" name="织梦仙子" position="39,9" target_position="38,9" idle_animation="npcs/n_zixiaxianzi_idle,6" title="" title_res="" face="n_zixiaxianzi_face" talk="开动我的织布机，为你织一件梦的衣裳。" btns="" btns_icon="" chat=""/>
+<item npcId
+="2110101" name="帮会管理员" position="39,13" target_position="41,11" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="" title_res="tips_22" face="n_luoshuishoujiang_face" talk="七星封魔、帮会供奉。用你的诚意建设帮会吧" btns="2:1013" btns_icon="npc_talk_5.png,npc_talk_5p.png" chat="0.7,这位仙友，我看你气宇轩昂，可敢进来与各路人马较量较量？"/>
+<item npcId
+="2110102" name="帮战使者" position="30,13" target_position="32,11" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="" title_res="tips_22" face="n_luoshuishoujiang_face" talk="胆敢进犯我帮者，虽远必殊！每周一、三、五、七，20:30—21:00，守卫我帮就靠你了。" btns="5:666;7:6666" btns_icon="npc_talk_9.png,npc_talk_9p.png,npc_talk_8.png,npc_talk_8p.png" chat="0.3,胆敢进犯我帮者，虽远必殊！"/>
+<item npcId
+="2110103" name="帮战商人" position="21,13" target_position="23,11" idle_animation="npcs/n_luoshuishoujiang_idle,6" title="" title_res="tips_22" face="n_luoshuishoujiang_face" talk="帮战积分换取珍贵道具，此所谓一分耕耘一分收获" btns="1:168,169,170,171,172" btns_icon="npc_talk_10.png,npc_talk_10p.png" chat="0.3,快来用帮战积分换护符啦！！"/>
+</Npc>

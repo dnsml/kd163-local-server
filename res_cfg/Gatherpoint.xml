@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Gatherpoint>
+<item id="101101" idle_animation="gather/g_zanghonghua,10" locations_2="51,10" name="朱果" gather_type="1"/>
+<item id="10201" idle_animation="gather/g_lingbaotianshu,10" locations_2="18,10" name="神秘宝图" gather_type="1"/>
+<item id="102101" idle_animation="gather/g_huanhuncao,10" locations_2="40,11" name="还魂草" gather_type="1"/>
+<item id="102102" idle_animation="gather/g_10801,6" locations_2="47,10" name="天降奇石" gather_type="1"/>
+<item id="103101" idle_animation="gather/g_wanlingcao,10" locations_2="38,9" name="万灵草" gather_type="1"/>
+<item id="104101" idle_animation="gather/g_qingxincao,10" locations_2="43,11" name="清心草" gather_type="1"/>
+<item id="105101" idle_animation="gather/g_huanhuncao,10" locations_2="18,11" name="还魂草" gather_type="1"/>
+<item id="106101" idle_animation="gather/g_shiluodeshenjian,1" locations_2="20,9" name="失落的神剑" gather_type="1"/>
+<item id="106102" idle_animation="gather/g_zanghonghua,10" locations_2="45,14;57,13;63,14" name="藏红花" gather_type="1"/>
+<item id="107101" idle_animation="gather/g_qiguaideshixiang,1" locations_2="18,11" name="奇怪的石像" gather_type="1"/>
+<item id="107102" idle_animation="gather/g_renshenhua,10" locations_2="37,11" name="人参花" gather_type="1"/>
+<item id="108101" idle_animation="gather/g_mengpotang,1" locations_2="20,11" name="孟婆汤" gather_type="1"/>
+<item id="108102" idle_animation="gather/g_tianshanxuelian,10" locations_2="29,12" name="天山雪莲" gather_type="1"/>
+<item id="102001" idle_animation="gather/g_10801,6" locations_2="" name="天降奇石" gather_type="2"/>
+<item id="102002" idle_animation="gather/g_10801,6" locations_2="" name="天降奇石" gather_type="2"/>
+<item id="102003" idle_animation="gather/g_10801,6" locations_2="" name="天降奇石" gather_type="2"/>
+<item id="102004" idle_animation="gather/g_10201,6" locations_2="31,8" name="千年神宠蛋" gather_type="1"/>
+<item id="102005" idle_animation="gather/g_wanlingcao,10" locations_2="24,10" name="万年灵芝" gather_type="1"/>
+<item id="102006" idle_animation="gather/g_10801,6" locations_2="27,7" name="五色神石" gather_type="1"/>
+<item id="102007" idle_animation="gather/g_tianshanxuelian,10" locations_2="48,11" name="神海冰莲" gather_type="1"/>
+<item id="102008" idle_animation="gather/g_shiluodeshenjian,1" locations_2="48,10" name="神剑精魂" gather_type="1"/>
+</Gatherpoint>

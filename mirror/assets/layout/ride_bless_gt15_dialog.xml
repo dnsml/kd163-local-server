@@ -1,0 +1,21 @@
+<layout background="assets/ui/common/tips_frame.png" height="250" width="400" x="0" y="0">
+	<layout height="250" width="400" x="0" y="0">
+		<richlabel ax="1" ay="1" color="orange" fontsize="26" text="当前祝福：[color=white]每天领" x="250" y="45" />
+		<image height="30" id="1003223" name="blessing_icon" src="assets/icons/20741.png" width="30" x="255" y="48" />
+		<label color="white" fontsize="26" text="×" x="287" y="45" />
+		<label color="white" fontsize="26" id="1003190" name="cur_blessing_count" text="99" x="310" y="45" />
+	</layout>
+	<layout height="250" id="1003345" name="next_blessing_layout" width="400" x="0" y="0">
+		<richlabel ax="1" ay="1" color="orange" fontsize="26" text="下级祝福：[color=white]每天领" x="250" y="85" />
+		<image height="30" src="assets/icons/20741.png" width="30" x="255" y="88" />
+		<label color="white" fontsize="26" text="×" x="287" y="85" />
+		<label color="white" fontsize="26" id="1003191" name="next_blessing_count" text="99" x="310" y="85" />
+	</layout>
+	<layout height="250" id="1003346" name="upgrade_condition_layout" width="400" x="0" y="0">
+		<richlabel ax="1" ay="1" color="orange" fontsize="26" text="升级条件：[color=white]坐骑达" x="250" y="125" />
+		<label color="blue" fontsize="26" id="1003192" name="upgrade_condition" x="255" y="125" />
+	</layout>
+	<label color="red" fontsize="26" id="1003224" name="have_obtained" text="已领取" x="162" y="192" />
+	<button id="1003225" name="btn_obtain" normal="assets/ui/ride/button_obtain_normal.png" selected="assets/ui/ride/button_obtain_press.png" x="155" y="189" />
+	<button id="1003226" name="btn_close" normal="assets/ui/common/close_btn.png" selected="assets/ui/common/close_btn_p.png" x="350" y="-23" />
+</layout>

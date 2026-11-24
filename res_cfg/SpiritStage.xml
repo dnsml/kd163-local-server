@@ -1,0 +1,13 @@
+<SpiritStage>
+<item id="0" name="" potential_need="0" ability="" source="assets/ui/pet_18.png"/>
+<item id="1" name="人琴合一" potential_need="6" ability="add_attack,70;add_defense,70;add_hp_max,350;add_mp_max,175;add_wuxing_defense,70;add_hit,0;add_dodge,0;add_crit,0" source="assets/ui/pet_19.png"/>
+<item id="2" name="高山流水" potential_need="12" ability="add_attack,100;add_defense,100;add_hp_max,500;add_mp_max,250;add_wuxing_defense,100;add_hit,0;add_dodge,0;add_crit,0" source="assets/ui/pet_20.png"/>
+<item id="3" name="气势如虹" potential_need="24" ability="add_attack,140;add_defense,140;add_hp_max,700;add_mp_max,350;add_wuxing_defense,140;add_hit,0;add_dodge,0;add_crit,0" source="assets/ui/pet_21.png"/>
+<item id="4" name="炉火纯青" potential_need="36" ability="add_attack,180;add_defense,180;add_hp_max,900;add_mp_max,450;add_wuxing_defense,180;add_hit,0;add_dodge,0;add_crit,0" source="assets/ui/pet_22.png"/>
+<item id="5" name="登峰造极" potential_need="48" ability="add_attack,230;add_defense,230;add_hp_max,1150;add_mp_max,575;add_hit,10;add_dodge,10;add_crit,10;add_wuxing_defense,230" source="assets/ui/pet_23.png"/>
+<item id="6" name="响彻天地" potential_need="60" ability="add_attack,280;add_defense,280;add_hp_max,1400;add_mp_max,700;add_hit,20;add_dodge,20;add_crit,20;add_wuxing_defense,280" source="assets/ui/pet_24.png"/>
+<item id="7" name="玄妙入神" potential_need="72" ability="add_attack,340;add_defense,340;add_hp_max,1700;add_mp_max,850;add_hit,30;add_dodge,30;add_crit,30;add_wuxing_defense,340" source="assets/ui/pet_25.png"/>
+<item id="8" name="出神入化" potential_need="84" ability="add_attack,400;add_defense,400;add_hp_max,2000;add_mp_max,1000;add_hit,50;add_dodge,50;add_crit,50;add_wuxing_defense,400" source="assets/ui/pet_25.png"/>
+<item id="9" name="超凡入圣" potential_need="96" ability="add_attack,470;add_defense,470;add_hp_max,2000;add_mp_max,1000;add_hit,60;add_dodge,60;add_crit,60;add_wuxing_defense,470" source="assets/ui/pet_25.png"/>
+<item id="10" name="伯牙再世" potential_need="100" ability="add_attack,540;add_defense,540;add_hp_max,2700;add_mp_max,1400;add_hit,70;add_dodge,70;add_crit,70;add_wuxing_defense,540" source="assets/ui/pet_25.png"/>
+</SpiritStage>

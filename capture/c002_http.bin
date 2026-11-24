@@ -1,0 +1,14 @@
+GET /assets.txt HTTP/1.1
+Host: 124.223.56.189
+Connection: Keep-Alive
+User-Agent: Apache-HttpClient/UNAVAILABLE (java 1.4)
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:19 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 269
+Connection: keep-alive
+Cache-Control: no-store
+
+assets_md5=5efc42ed36978e860f135a96bd93c85a&assets_md5_2=5efc42ed36978e860f135a96bd93c85a&assets_url=http://124.223.56.189:80/mhsj_res.zip&assets_url_2=http://124.223.56.189:80/mhsj_res.zip&meta=http://124.223.56.189:80/meta.xml&meta_2=http://124.223.56.189:80/meta.xml

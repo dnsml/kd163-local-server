@@ -1,0 +1,46 @@
+GET /assets/layout/world_boss_cumulative_rank.xml HTTP/1.1
+Host: 124.223.56.189
+Accept: */*
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 22 Nov 2026 03:18:34 GMT
+Content-Type: application/xml
+Content-Length: 3740
+Connection: keep-alive
+Cache-Control: no-store
+
+<layout background="assets/ui/BOSS_1.png" width="940" height="666">
+<label id="1008220" color="white" fontsize="24" align="center" width="260" x="530" y="260" text="" />
+<label color="beige" fontsize="20" align="center" width="55" x="222" y="416" text="排名" />
+<label color="beige" fontsize="20" align="center" width="160" x="280" y="416" text="仙友" />
+<label color="beige" fontsize="20" align="center" width="160" x="442" y="416" text="累计伤害" />
+<label color="beige" fontsize="20" align="center" width="96" x="605" y="416" text="占比" />
+<label color="beige" fontsize="20" align="center" width="149" x="705" y="416" text="挑战/剩余" />
+<label id="1008000" name="rank_0_0" color="white" fontsize="18" align="center" width="55" x="222" y="451" text="" />
+<label id="1008001" name="rank_0_1" color="white" fontsize="18" align="center" width="160" x="280" y="451" text="" />
+<label id="1008002" name="rank_0_2" color="white" fontsize="18" align="center" width="160" x="442" y="451" text="" />
+<label id="1008004" name="rank_0_4" color="white" fontsize="18" align="center" width="96" x="605" y="451" text="" />
+<label id="1008003" name="rank_0_3" color="white" fontsize="18" align="center" width="149" x="705" y="451" text="" />
+<label id="1008010" name="rank_1_0" color="white" fontsize="18" align="center" width="55" x="222" y="480" text="" />
+<label id="1008011" name="rank_1_1" color="white" fontsize="18" align="center" width="160" x="280" y="480" text="" />
+<label id="1008012" name="rank_1_2" color="white" fontsize="18" align="center" width="160" x="442" y="480" text="" />
+<label id="1008014" name="rank_1_4" color="white" fontsize="18" align="center" width="96" x="605" y="480" text="" />
+<label id="1008013" name="rank_1_3" color="white" fontsize="18" align="center" width="149" x="705" y="480" text="" />
+<label id="1008020" name="rank_2_0" color="white" fontsize="18" align="center" width="55" x="222" y="509" text="" />
+<label id="1008021" name="rank_2_1" color="white" fontsize="18" align="center" width="160" x="280" y="509" text="" />
+<label id="1008022" name="rank_2_2" color="white" fontsize="18" align="center" width="160" x="442" y="509" text="" />
+<label id="1008024" name="rank_2_4" color="white" fontsize="18" align="center" width="96" x="605" y="509" text="" />
+<label id="1008023" name="rank_2_3" color="white" fontsize="18" align="center" width="149" x="705" y="509" text="" />
+<label id="1008030" name="rank_3_0" color="white" fontsize="18" align="center" width="55" x="222" y="538" text="" />
+<label id="1008031" name="rank_3_1" color="white" fontsize="18" align="center" width="160" x="280" y="538" text="" />
+<label id="1008032" name="rank_3_2" color="white" fontsize="18" align="center" width="160" x="442" y="538" text="" />
+<label id="1008034" name="rank_3_4" color="white" fontsize="18" align="center" width="96" x="605" y="538" text="" />
+<label id="1008033" name="rank_3_3" color="white" fontsize="18" align="center" width="149" x="705" y="538" text="" />
+<label id="1008040" name="rank_4_0" color="white" fontsize="18" align="center" width="55" x="222" y="567" text="" />
+<label id="1008041" name="rank_4_1" color="white" fontsize="18" align="center" width="160" x="280" y="567" text="" />
+<label id="1008042" name="rank_4_2" color="white" fontsize="18" align="center" width="160" x="442" y="567" text="" />
+<label id="1008044" name="rank_4_4" color="white" fontsize="18" align="center" width="96" x="605" y="567" text="" />
+<label id="1008043" name="rank_4_3" color="white" fontsize="18" align="center" width="149" x="705" y="567" text="" />
+<label id="1008203" color="beige" fontsize="18" align="center" width="620" x="220" y="595" text="" />
+</layout>
