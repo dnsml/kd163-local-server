@@ -58,6 +58,8 @@ logs/server_prev*.log
 logs/server_run.out
 
 # ---- 5. 本地工作区 ----
+# 存档快照（save_state 每 10 分钟一份）是玩家数据，不是代码，绝不进库。
+backups/
 # 注意必须写 work/*（而不是 work/）：整目录被排除时，子项的 ! 例外不生效，
 # 会导致 README 里引用的探针脚本在 clone 后根本不存在。
 # 这里只保留可复用的脚本，截图/输出/log 全部排除。
