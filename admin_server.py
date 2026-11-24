@@ -60,12 +60,17 @@ def tail(path, n=60):
 
 
 def state_payload():
-    """数值以 player_state.json 为准（游戏服每次改动都会落盘），
-    status.json 只用来拿「在线人数 / 更新时间」—— 它只在连接进出时刷新，
-    直接拿它当数值来源会看到旧值（GM 改完元宝还显示老的）。"""
+    """优先用 logs/status.json（游戏服每次变动都写，且是「当前在线角色」）。
+
+    ★ 2026-11-25：以前拿 player_state.json 当数值源，多账号时那是主号/初始化文件，
+      面板上的等级、元宝、背包全是别人的（实际角色 Lv43 面板显示 Lv45）。
+      现在 status.json 有 level+bag 就直接用它，只有它缺字段时才回退 player_state.json。
+    """
     st = read_json(STATUS, {})
     ps = read_json(STATE, {})
-    bag = ps.get("bag") or st.get("bag", {})
+    if st.get("level") and st.get("bag"):
+        ps = st
+    bag = ps.get("bag") or {}
     names = {}
     for v in bag.values():
         try:
@@ -75,14 +80,14 @@ def state_payload():
     return {
         "online": st.get("online", 0),
         "time": st.get("time", ""),
-        "level": ps.get("level", st.get("level", 0)),
-        "exp": ps.get("exp", st.get("exp", 0)),
-        "need": ps.get("need", st.get("need", 1)),
-        "yuanbao": ps.get("yuanbao", st.get("yuanbao", 0)),
-        "bind_yuanbao": ps.get("bind_yuanbao", st.get("bind_yuanbao", 0)),
-        "tongqian": ps.get("tongqian", st.get("tongqian", 0)),
-        "bind_coin": ps.get("coin", st.get("bind_coin", 0)),
-        "yueli": ps.get("yueli", st.get("yueli", 0)),
+        "level": ps.get("level", 0),
+        "exp": ps.get("exp", 0),
+        "need": ps.get("need", 1),
+        "yuanbao": ps.get("yuanbao", 0),
+        "bind_yuanbao": ps.get("bind_yuanbao", 0),
+        "tongqian": ps.get("tongqian", 0),
+        "bind_coin": ps.get("bind_coin", ps.get("coin", 0)),
+        "yueli": ps.get("yueli", 0),
         "bag": bag,
         "names": names,
     }
