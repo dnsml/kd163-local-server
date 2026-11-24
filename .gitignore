@@ -33,13 +33,13 @@ logs/*.json
 !logs/*.bak_*
 
 # ---- 5. 本地工作区 ----
-# work/ 里大部分是截图和探针输出（183M），只保留可复用的脚本。
-work/
+# 注意必须写 work/*（而不是 work/）：整目录被排除时，子项的 ! 例外不生效，
+# 会导致 README 里引用的探针脚本在 clone 后根本不存在。
+# 这里只保留可复用的脚本，截图/输出/log 全部排除。
+work/*
 !work/*.py
 !work/*.sh
-work/**/*.png
-work/**/*.jpg
-work/**/*.log
+!work/*.md
 
 # ---- 6. 游戏资源与工具链（3GB，绝不入库）----
 tools/
