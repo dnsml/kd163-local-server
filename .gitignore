@@ -58,6 +58,10 @@ logs/server_prev*.log
 logs/server_run.out
 # 回归脚本临时把测试输出重定向到这里（t_exit.out / admin_probe.out 之类），属临时产物。
 logs/*.out
+# 排查后台时 curl 落下来的响应头/页面副本（h.txt、admin_index.html 等）
+logs/h.txt
+logs/*.html
+logs/*.txt
 
 # ---- 5. 本地工作区 ----
 # 存档快照（save_state 每 10 分钟一份）是玩家数据，不是代码，绝不进库。

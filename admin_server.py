@@ -188,9 +188,11 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     srv = ThreadingHTTPServer((HOST, PORT), Handler)
     shown = "127.0.0.1" if HOST in ("0.0.0.0", "::") else HOST
-    print("后台已启动: http://%s:%d  (Ctrl+C 退出)" % (shown, PORT))
+    # flush：cmd 窗口重定向时 python 会缓冲，没这行要等很久才看到「已启动」
+    print("后台已启动: http://%s:%d  (Ctrl+C 退出)" % (shown, PORT), flush=True)
     if HOST in ("0.0.0.0", "::"):
-        print("已对局域网开放，同网段设备用本机内网 IP 访问，如 http://192.168.x.x:%d" % PORT)
+        print("已对局域网开放，同网段设备用本机内网 IP 访问，如 http://192.168.x.x:%d" % PORT,
+              flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
