@@ -1,0 +1,11 @@
+# 证书必须逐字节一致，禁止任何行尾转换（否则 clone 后 md5 变化、甚至 PEM 解析异常）
+patch/*.pem -text
+patch/*.key -text
+
+# 抓包样本 / 二进制同理：hex 文本按原样存，bin 一律当二进制
+samples/**/*.hex -text
+*.bin -text
+
+# Python / 文档走自动行尾
+*.py text
+*.md text
