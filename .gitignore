@@ -52,12 +52,31 @@ so/
 apk_x/
 mirror/assets/configure/*.mpkg
 
-# ---- 7. 截图 / 临时图 ----
-_*.png
-_*.jpg
-shot*.png
-shot*.jpg
-*.tmp
+# ---- 7. 截图（调试过程产物，不入库；本地保留）----
+/*.png
+/*.jpg
+/*.jpeg
+截图_*.jpg
+s_*.png
+screen*.png
+b.png
+b_s.png
+e.png
+e_s.png
+f.png
+
+# ---- 7b. 一次性残留（grep 输出、资源索引、uiautomator dump 等）----
+/S
+/b6.bin
+/live.idx
+/ui.xml
+/proxy.log
+/dex_strings.txt
+*.bak
+*.bak_*
+*.bak2
+/*.py.bak*
+player_state*.json.bak*
 
 # ---- 8. Python ----
 __pycache__/
