@@ -43561,3 +43561,5 @@ cmd=1）
 [20:19:42] c002 <- cmd=4      seq=246  len=5  hex=ce6b0580dd
 [20:19:52] c002 <- cmd=4      seq=247  len=5  hex=ce6b0580e7
 [20:20:02] c002 <- cmd=4      seq=248  len=5  hex=ce6b0580f1
+[20:20:12] c002 <- cmd=4      seq=249  len=5  hex=ce6b0580fb
+[20:20:22] c002 <- cmd=4      seq=250  len=5  hex=ce6b058105
