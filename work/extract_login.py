@@ -4,7 +4,7 @@ import json
 import re
 import sys
 
-RE = re.compile(r"^\[(\d\d:\d\d:\d\d)\] (C->S|S->C) cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)(?: hex=(\S*))?")
+RE = re.compile(r"^\[(?:20\d\d-\d\d-\d\d )?(\d\d:\d\d:\d\d)\] (C->S|S->C) cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)(?: hex=(\S*))?")
 
 
 def main(path, stamp, out):

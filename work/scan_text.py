@@ -6,7 +6,7 @@ import re
 import sys
 
 BS = chr(92)
-PAT = re.compile(r"\[(" + BS + "d" + BS + "d:" + BS + "d" + BS + "d:" + BS + "d" + BS + "d" + r")\]"
+PAT = re.compile(r"\[(?:20\d\d-\d\d-\d\d )?(" + BS + "d" + BS + "d:" + BS + "d" + BS + "d:" + BS + "d" + BS + "d" + r")\]"
                  r"\s+(C->S|S->C)\s+cmd=(" + BS + "d+)\s+seq=(" + BS + "d+)"
                  r"\s+len=(" + BS + "d+)\s+hex=([0-9a-fA-F]*)")
 

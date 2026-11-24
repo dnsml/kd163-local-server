@@ -1,6 +1,6 @@
 import re
 _D = chr(92) + "d"
-PAT = re.compile(r"\[(" + _D + _D + ":" + _D + _D + ":" + _D + _D + r")\]"
+PAT = re.compile(r"\[(?:20\d\d-\d\d-\d\d )?(" + _D + _D + ":" + _D + _D + ":" + _D + _D + r")\]"
                  + chr(92) + "s+(C->S|S->C)" + chr(92) + "s+cmd=(" + _D + "+)"
                  + chr(92) + "s+seq=(" + _D + "+)" + chr(92) + "s+len=(" + _D + "+)"
                  + chr(92) + "s+hex=([0-9a-fA-F]*)")

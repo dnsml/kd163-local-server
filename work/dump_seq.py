@@ -10,7 +10,7 @@ import os
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = os.path.join(HERE, "logs", "relay.log")
-REC = re.compile(r"\[(\d\d:\d\d:\d\d)\]\s+(C->S|S->C)\s+cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)\s+hex=([0-9a-f]*)")
+REC = re.compile(r"\[(?:20\d\d-\d\d-\d\d )?(\d\d:\d\d:\d\d)\]\s+(C->S|S->C)\s+cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)\s+hex=([0-9a-f]*)")
 
 
 def vread(b, i):

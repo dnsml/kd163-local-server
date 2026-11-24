@@ -23,7 +23,7 @@ _seq_no = [0]
 
 
 def log(msg):
-    line = "[%s] %s" % (time.strftime("%H:%M:%S"), msg)
+    line = "[%s] %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), msg)
     with _lock:
         try:
             print(line, flush=True)

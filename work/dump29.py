@@ -26,7 +26,7 @@ def dec(p):
     return out
 
 
-PAT = re.compile(r"\[(\d\d:\d\d:\d\d)\] S->C cmd=29\s+seq=\d+\s+len=\d+\s+hex=(\S+)")
+PAT = re.compile(r"\[(?:20\d\d-\d\d-\d\d )?(\d\d:\d\d:\d\d)\] S->C cmd=29\s+seq=\d+\s+len=\d+\s+hex=(\S+)")
 
 
 def main():

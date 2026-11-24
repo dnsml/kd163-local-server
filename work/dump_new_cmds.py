@@ -23,7 +23,7 @@ with open(LOG, encoding="utf-8", errors="ignore") as f:
 if not only_all:
     data = data[-lines:]
 
-pat = re.compile(r'\[(\d\d:\d\d:\d\d)\]\s+c(\d+)\s+<-\s+cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)(?:\s+hex=([0-9a-f]*))?')
+pat = re.compile(r'\[(?:20\d\d-\d\d-\d\d )?(\d\d:\d\d:\d\d)\]\s+c(\d+)\s+<-\s+cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)(?:\s+hex=([0-9a-f]*))?')
 for ln in data:
     m = pat.search(ln)
     if not m:

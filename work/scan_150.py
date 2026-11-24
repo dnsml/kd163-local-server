@@ -7,7 +7,7 @@
 import re, sys, collections
 
 LOG = sys.argv[1] if len(sys.argv) > 1 else r"D:\66666\kd163\logs\relay.log"
-pat = re.compile(r"\[(\d\d:\d\d:\d\d)\] S->C cmd=150\s+seq=\d+\s+len=(\d+)\s+hex=([0-9a-f]*)")
+pat = re.compile(r"\[(?:20\d\d-\d\d-\d\d )?(\d\d:\d\d:\d\d)\] S->C cmd=150\s+seq=\d+\s+len=(\d+)\s+hex=([0-9a-f]*)")
 
 
 def rd_var(b, i):

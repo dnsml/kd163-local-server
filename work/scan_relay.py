@@ -4,7 +4,7 @@ import re
 import sys
 
 PAT = re.compile(
-    r"\[(\d\d:\d\d:\d\d)\]\s+(C->S|S->C)\s+cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)\s+hex=([0-9a-fA-F]*)"
+    r"\[(?:20\d\d-\d\d-\d\d )?(\d\d:\d\d:\d\d)\]\s+(C->S|S->C)\s+cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)\s+hex=([0-9a-fA-F]*)"
 )
 
 

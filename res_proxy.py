@@ -23,7 +23,7 @@ ORIGIN_PORT = 80
 
 def log(msg):
     import datetime
-    print('[%s] %s' % (datetime.datetime.now().strftime('%H:%M:%S'), msg), flush=True)
+    print('[%s] %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), msg), flush=True)
 
 
 def cache_path(urlpath):

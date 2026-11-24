@@ -3,8 +3,8 @@
 import re, sys, collections
 
 LOG = sys.argv[1] if len(sys.argv) > 1 else r"D:\66666\kd163\logs\relay.log"
-cp = re.compile(r"\[(\d\d:\d\d:\d\d)\] C->S cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)\s+hex=([0-9a-f]*)")
-sp = re.compile(r"\[(\d\d:\d\d:\d\d)\] S->C cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)\s+hex=([0-9a-f]*)")
+cp = re.compile(r"\[(?:20\d\d-\d\d-\d\d )?(\d\d:\d\d:\d\d)\] C->S cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)\s+hex=([0-9a-f]*)")
+sp = re.compile(r"\[(?:20\d\d-\d\d-\d\d )?(\d\d:\d\d:\d\d)\] S->C cmd=(\d+)\s+seq=(\d+)\s+len=(\d+)\s+hex=([0-9a-f]*)")
 
 cs = collections.Counter(); cs_len = collections.defaultdict(set)
 sc = collections.Counter(); sc_len = collections.defaultdict(set)
