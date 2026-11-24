@@ -72,8 +72,33 @@ python patch_coexist.py           # 把新公钥内嵌进 APK 并重新签名（
 | `res_x/`、`srvres/` | 资源解包产物（126MB×2） | 只有想自己重新打资源包/查 UI 布局时才需要；**平时跑服不需要** |
 
 **随仓库提供的**：`res_cfg/`（4.3MB 配置表）、`mirror/`（3.9MB，含 `assets/configure/*.xml`、
-`meta.xml`、`server-list.xml`、`assets.txt`）、`logs/`（14.6MB 真服/他服抓包，分析用）。
+`meta.xml`、`server-list.xml`、`assets.txt`）、`logs/`（6.6MB，35 个文件：抓包 + 本地服运行日志）。
 服务端和资源服启动时直接读这些，不需要额外解包。
+
+### `logs/` 里哪一份才是数据源
+
+抓包和运行日志都是**追加写**的，所以「改代码前 cp 一份」会留下大量重复副本。清点结论：
+
+| 文件 | 是什么 | 能不能当数据源 |
+|---|---|---|
+| `relay.log` | 抓包中转（`capture_proxy.py`）的**唯一主日志**，7 次会话、约 11-22 14:47 ~ 11-24 18:49 | ✅ 引用真服/他服原始包一律看这份 |
+| `server.log` | 本地服运行日志（回放序列、推送、战斗结算），追加写，跨多次重启 | ✅ 查本服行为 |
+| 其余 `*.log` / `*.txt` | 单次现场片段：`login_*.log` 登录、`f2_*.log` 建角、`flow_*.log` 场景、`tomb*.txt` 崩溃栈 | 只在追某次具体故障时用 |
+
+下面 7 个是**重复副本**，已移出版本库（本地文件仍在，`.gitignore` 已加规则）：
+
+| 文件 | 来历 | 为什么是重复 |
+|---|---|---|
+| `relay.log.bak_1233` | 11-24 12:33 重启中转前 `cp` 的保险副本 | 内容 = `relay.log` 前 19,688 行，逐字节相同 |
+| `relay_out.log` | 13:48 那次会话把输出重定向到另一个文件 | 整份被 `relay.log` 包含 |
+| `relay_out.txt`、`relay_run.out`、`relay_19001.log` | 启动脚本报错 / 启动一行记录 / 19001 备用端口记录 | 各 1 行，均在 `relay.log` 里 |
+| `server_before_fix.log`、`server_prev_1124.log` | 改代码前 cp 的 `server.log` 快照 | 均被 `server.log` 完整包含 |
+
+判据可复现（改文件名即可验其它几个）：
+
+```bash
+python -c "m=open('logs/relay.log','rb').read();b=open('logs/relay.log.bak_1233','rb').read();print('是前缀副本:',m.startswith(b))"
+```
 
 ---
 

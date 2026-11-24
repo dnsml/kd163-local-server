@@ -32,6 +32,21 @@ logs/*.json
 !logs/*.log
 !logs/*.bak_*
 
+# 抓包日志的冗余副本（2026-11-24 核查：以下文件的内容都能在 relay.log 里
+# 原样找到——bak_1233 是它前 19688 行的前缀副本，relay_out.log 是 13:48 会话的
+# 重定向副本，其余两个只有一行启动记录）。判据可复现：
+#   python -c "m=open('logs/relay.log','rb').read();print(open('logs/relay.log.bak_1233','rb').read() in m)"
+# 文件本地保留，只是不进版本库，免得「14MB 抓包」里混着 3.5MB 重复。
+logs/relay.log.bak_*
+logs/relay_out.log
+logs/relay_out.txt
+logs/relay_run.out
+logs/relay_19001.log
+# 同理：server_before_fix / server_prev_* 都是「改代码前 cp 一份」的产物，
+# server.log 是追加写的，这些快照被它完整包含（md5/包含关系已核）。
+logs/server_before*.log
+logs/server_prev*.log
+
 # ---- 5. 本地工作区 ----
 # 注意必须写 work/*（而不是 work/）：整目录被排除时，子项的 ! 例外不生效，
 # 会导致 README 里引用的探针脚本在 clone 后根本不存在。
