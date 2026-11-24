@@ -34,6 +34,8 @@ GM_CMD = os.path.join(HERE, "logs", "gm.cmd")
 SERVER_LOG = os.path.join(HERE, "logs", "server.log")
 HTML = os.path.join(HERE, "admin.html")
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8899
+# 默认只给本机开。要让局域网里别人也能看，设环境变量 KD163_ADMIN_HOST=0.0.0.0
+HOST = os.environ.get("KD163_ADMIN_HOST", "127.0.0.1") or "127.0.0.1"
 
 
 def read_json(path, default):
@@ -184,8 +186,11 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-    print("后台已启动: http://127.0.0.1:%d  (Ctrl+C 退出)" % PORT)
+    srv = ThreadingHTTPServer((HOST, PORT), Handler)
+    shown = "127.0.0.1" if HOST in ("0.0.0.0", "::") else HOST
+    print("后台已启动: http://%s:%d  (Ctrl+C 退出)" % (shown, PORT))
+    if HOST in ("0.0.0.0", "::"):
+        print("已对局域网开放，同网段设备用本机内网 IP 访问，如 http://192.168.x.x:%d" % PORT)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

@@ -35,6 +35,7 @@
   .card .num{font-size:26px;font-weight:600;margin:6px 0 10px;font-variant-numeric:tabular-nums;
              color:var(--gold2);word-break:break-all}
   .row{display:flex;gap:6px;flex-wrap:wrap}
+  .hint{color:var(--muted);font-size:12px;line-height:1.6;margin:8px 0}
   button{cursor:pointer;font-family:inherit;font-size:12px;border-radius:7px;padding:5px 9px;
          background:#242938;color:var(--text);border:1px solid #333a4d;transition:.15s}
   button:hover{background:#2d3346;border-color:#46506a}
@@ -120,6 +121,19 @@
       <button data-gm="铜钱 +1000000">铜钱 +100万</button>
       <button data-gm="阅历 +10000">阅历 +1万</button>
       <button class="danger" data-gm="清包">清空背包</button>
+    </div>
+
+    <h2 style="margin-top:18px">测试加速</h2>
+    <div class="row">
+      <button data-gm="伤害">查伤害倍率</button>
+      <button data-gm="伤害 3">伤害 ×3</button>
+      <button class="gold" data-gm="伤害 5">伤害 ×5</button>
+      <button data-gm="伤害 10">伤害 ×10</button>
+      <button data-gm="伤害 1">恢复 ×1</button>
+    </div>
+    <p class="hint">倍率只放大服务端折算的每回合伤害，让一场战斗 1~2 回合结束；角色面板攻击力不变，属正常。下一场战斗生效。塔里出不来时点下面这个。</p>
+    <div class="row">
+      <button data-gm="出塔">出塔 / 离开副本</button>
     </div>
   </section>
 

@@ -398,7 +398,7 @@ class BattleSession(object):
     """一场战斗。服务端算两边真实血量，客户端只负责把血条演出来。"""
 
     def __init__(self, mob_id, tables, cls=1, lv=2, hp_ratio=1.0, pet=None,
-                 name=None, attrs=None):
+                 name=None, attrs=None, dmg_mult=1.0):
         self.tables = tables
         self.pet = pet or None
         self.player_name = name
@@ -434,7 +434,10 @@ class BattleSession(object):
         atk_avg = (atk_min + atk_max) / 2.0
         self.crit_mult = 1.0 + min(0.30, crit / 400.0)
         _gain = 1.0 if self.panel_based else (1.0 + DMG_LEVEL_GAIN * self.lv)
-        self.base_deal = max(1.0, atk_avg * _gain * self.crit_mult)
+        # dmg_mult：GM「伤害」倍率（测试用，只影响服务端折算的回合数，
+        # 不动面板 29、不动 151 的血量公式）。倍率越大 → rounds_to_kill 越小。
+        self.dmg_mult = max(0.01, float(dmg_mult or 1.0))
+        self.base_deal = max(1.0, atk_avg * _gain * self.crit_mult * self.dmg_mult)
         self.gap = max(GAP_MIN, min(GAP_MAX,
                                     1.0 + GAP_SLOPE * (self.mob_lv - self.lv)))
         self.mit = dfn / (dfn + 120.0) if dfn else 0.0
