@@ -117,3 +117,6 @@ venv/
 # 不能靠 gen_cert_exact.py 现生成（现生成的与 APK 不匹配，客户端照样连不上）。
 !patch/exact.pem
 !patch/exact.key
+
+# 运行日志，不入库（每跑一次 +1000 行，纯噪音）
+logs/server.log
