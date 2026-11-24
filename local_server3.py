@@ -675,14 +675,17 @@ def apply_gm(line):
     if line.startswith("刷怪") or line.startswith("spawn"):
         parts = line.split()
         ids = []
+        # 当前地图从角色档里取（Player.scene）。以前写的是裸名 cur_map，
+        # 那是主循环的局部变量，GM 线程里根本不存在 → 无参「刷怪」必 NameError。
+        _cm = int(cur().scene or DEFAULT_SCENE)
         if len(parts) > 1 and parts[1].strip().isdigit():
             ids = [int(parts[1].strip())]
         else:
-            d = SCENES.get(cur_map) or {}
+            d = SCENES.get(_cm) or {}
             ids = [int(t) for t in (d.get("spawn_points") or "").split(",")
                    if t.strip().isdigit()]
         if not ids:
-            return False, "当前场景 %s(%d) 没有刷怪点" % (scene_name(cur_map), cur_map)
+            return False, "当前场景 %s(%d) 没有刷怪点" % (scene_name(_cm), _cm)
         with GAME_LOCK:
             items = list(GAME_CONNS.items())
         for cid, conn in items:
