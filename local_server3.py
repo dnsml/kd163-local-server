@@ -541,8 +541,17 @@ CONN_PLAYERS = {}                                  # cid -> Player（每个连�
 # cid -> battle.BattleSession。战斗会话必须挂在这儿：GM（另一个线程）也要能开战，
 # 而 146/149 的应答在主循环里读。以前只放主循环局部变量 → GM 推的 151 收不到回合。
 BATTLE_SESS = {}
+# 测试用伤害倍率（GM「伤害 3」/ 网页后台）。只作用在服务端折算的回合数上：
+# base_deal × 倍率 → rounds_to_kill 变小 → 一场战斗 1~2 回合结束。
+# 不改面板 29、不改 151 的血量公式，所以不会出现「面板数字和打出来的不符」。
+DMG_MULT = float(os.environ.get("KD163_DMG_MULT", "1") or 1)
+# 账号 -> (进塔前的场景, x, y)。cmd=132「离开副本」时原路送回；
+# 重启/换号丢了就按真服样本回洛水城 (55,5)。
+TOWER_BACK = {}
 GAME_LOCK = threading.Lock()
-GM_CMD = os.path.join(HERE, "logs", "gm.cmd")
+# GM 指令文件。测试脚本用 KD163_GM_CMD 指到临时文件，避免和正在跑的服抢同一条指令
+# （两个进程盯同一个 gm.cmd 时，谁先扫到谁执行，回执也就落在各自的日志里）。
+GM_CMD = os.environ.get("KD163_GM_CMD") or os.path.join(HERE, "logs", "gm.cmd")
 STATUS_JSON = os.path.join(HERE, "logs", "status.json")
 
 GM_ALIAS = {
@@ -650,7 +659,7 @@ def spirit_pick_for_slot(slot):
 
 def apply_gm(line):
     """执行一条 GM 指令，返回 (成功?, 说明)。"""
-    pass  # [player] 状态走 cur()，无需 global
+    global DMG_MULT     # 伤害倍率是本进程级开关（角色状态走 cur()，不需要 global）
     line = line.strip()
     # ---- 建角 / 改名 / 看角色（后台「建角」按钮走这三条）----
     # 用法：`建角 小林 女`、`@1234567 建角 小林 男`、`改名 阿浅`
@@ -748,6 +757,27 @@ def apply_gm(line):
                 % (cid, _jid, scene_name(_cm), scene_name(_tgt), bytes(_pos).hex()))
         return True, "已引路 %s → %s" % (scene_name(_cm), scene_name(_tgt))
 
+    # `出塔` —— 等价于客户端点「离开副本」发 132（回进塔前的场景/坐标）。
+    # 客户端那个退出按钮不灵时用它兜底。
+    if line in ("出塔", "离开副本", "leave"):
+        _key = cur().acct or ""
+        back = TOWER_BACK.get(_key) or (103, 55, 5)
+        bsc, bx, by = int(back[0]), int(back[1]) & 0xFF, int(back[2]) & 0xFF
+        if bsc not in SCENES or SCENES[bsc].get("scene_type") == "3":
+            bsc, bx, by = 103, 55, 5
+        cur().scene = bsc
+        cur().pos_x, cur().pos_y = bx, by
+        body133 = enc_scene(bsc) + bytes([bx, by])
+        with GAME_LOCK:
+            items = list(GAME_CONNS.items())
+        for cid, conn in items:
+            conn.sendall(pack(133, 0, body133))
+            conn.sendall(pack(113, 0, build_113(bsc)))
+            conn.sendall(pack(117, 0, b"\x00"))
+            log("c%03d .. GM 出塔 133 [→ %s(%d) 落点(%d,%d)]"
+                % (cid, scene_name(bsc), bsc, bx, by))
+        return True, "已送出塔：%s(%d) (%d,%d)" % (scene_name(bsc), bsc, bx, by)
+
     # ---- 场景怪物（2026-11-25 纠错：121 的语义以前搞反了）----
     #   `消怪 [id]`  推 121 = 这只怪从场景里消失（真服致死/结算后就是这个包）
     #   `刷怪`       重推 113 + 117 = 让客户端按对象表把怪重新摆出来（GM 专用）
@@ -807,7 +837,7 @@ def apply_gm(line):
             s = battle.BattleSession(
                 mob_id, BT, cur().cls, cur().level,
                 pet=pet_proto.active_pet(cur().pets), name=cur().name,
-                attrs=_ba)
+                attrs=_ba, dmg_mult=DMG_MULT)
             s.player_mp_max = max(0, panel_attr("mp_max"))
             s.player_mp = s.player_mp_max
             BATTLE_SESS[cid] = s
@@ -838,6 +868,26 @@ def apply_gm(line):
             log("c%03d .. GM 发包 cmd=%d len=%d hex=%s"
                 % (cid, _cmd, len(_raw), _raw.hex()))
         return True, "已发 cmd=%d len=%d 给 %d 个连接" % (_cmd, len(_raw), len(items))
+
+    # ---- 测试用伤害倍率（后台「伤害倍率」按钮走这条）----
+    #   伤害           看当前倍率
+    #   伤害 3         打怪伤害 ×3 → 一场 1~2 回合
+    #   伤害 1         恢复原样
+    # 只作用在服务端折算回合数的 base_deal 上；面板 29 与 151 的血量公式都不动，
+    # 所以「面板攻击力没变」是正常的——这个倍率本来就是为了让测试打得快。
+    if line.startswith("伤害") or line.startswith("dmg"):
+        parts = line.split()
+        if len(parts) < 2:
+            return True, ("当前伤害倍率 ×%.2f（`伤害 3` 设 3 倍，`伤害 1` 恢复）"
+                          % DMG_MULT)
+        try:
+            v = float(parts[1])
+        except ValueError:
+            return False, "倍率要写数字，如 `伤害 3`"
+        if v < 0.01 or v > 1000:
+            return False, "倍率范围 0.01 ~ 1000"
+        DMG_MULT = v
+        return True, "伤害倍率已设为 ×%.2f（下一场战斗生效）" % DMG_MULT
 
     if line in ("属性", "attrs", "看属性"):
         a = all_attrs()
@@ -3155,7 +3205,7 @@ def handle_game(conn, cid):
                         battle_sess = battle.BattleSession(
                             mob_id, BT, cur().cls, cur().level,
                             pet=pet_proto.active_pet(cur().pets), name=cur().name,
-                            attrs=_ba)
+                            attrs=_ba, dmg_mult=DMG_MULT)
                         # 151 里的蓝必须与 29 面板同源：客户端是拿「当前法力」跟
                         # Skill.xml 的 consume_mp 比，面板/战斗蓝不一致会出现
                         # 「面板有蓝却提示法力不足」。含 MP_ADD 补偿。
@@ -3328,11 +3378,17 @@ def handle_game(conn, cid):
                         log("c%03d !! 未知锁妖塔 id=%s(hex=%s)，保持 %s(%d)"
                             % (cid, tid, payload.hex(), scene_name(cur_map), cur_map))
                         continue
+                    # 进塔前的位置（离开副本要原路送回）
+                    prev_scr = int(cur().scene or cur_map)
+                    prev_x = int(getattr(cur(), "pos_x", 0) or 0)
+                    prev_y = int(getattr(cur(), "pos_y", 0) or 0)
                     cur_map = tsc
                     cur().scene = tsc
                     # 进塔落点：真服紧接着就是 115 0305，所以记 (3,5)，重登也落在塔门口
                     cur().pos_x, cur().pos_y = 3, 5
                     last_113 = tsc
+                    # 记住「从哪进来的」：cmd=132 离开副本时原路送回
+                    TOWER_BACK[cur().acct or ("c%03d" % cid)] = (prev_scr, prev_x, prev_y)
                     body131 = payload + enc_scene(tsc) + TOWER_131_TAIL
                     conn.sendall(pack(131, seq, body131))
                     log("c%03d -> cmd=131 seq=%d len=%d [进塔 id=%s → %s(%d) %s]"
@@ -3342,6 +3398,36 @@ def handle_game(conn, cid):
                     conn.sendall(pack(117, 0, b"\x00"))
                     conn.sendall(pack(659, 0, TOWER_659))
                     log("c%03d .. push cmd=113/117/659 [进塔后场景对象表]" % cid)
+                    continue
+
+                if cmd == 132:
+                    # 132 = 「离开副本 / 退出锁妖塔」。真服 23:46:17（relay.log）：
+                    #   C->S 132（空 payload）→ S->C 133 = 67 37 05（洛水城 103 的 (55,5)）
+                    #                         → 113(3B 空表) / 117(00)
+                    #                         → C->S 115 3705 → 32513 670000
+                    # 以前没实现 132，塔里点退出就卡住（用户报的「塔里没法退出去」）。
+                    # 从哪进来回哪去：130 时把 (场景,坐标) 记进 TOWER_BACK；
+                    # 没记录（重启过 / 换号）就照真服样本回洛水城 (55,5)。
+                    _key = cur().acct or ("c%03d" % cid)
+                    back = TOWER_BACK.get(_key) or (103, 55, 5)
+                    bsc, bx, by = int(back[0]), int(back[1]) & 0xFF, int(back[2]) & 0xFF
+                    # 记下来的「进塔前」本身就在塔里（登录点在塔内 / 旧档）→ 不能原地送回，
+                    # 统一回真服样本的洛水城 (55,5)，否则玩家会觉得「退出没反应」。
+                    if bsc not in SCENES or SCENES[bsc].get("scene_type") == "3":
+                        bsc, bx, by = 103, 55, 5
+                    cur_map = bsc
+                    cur().scene = bsc
+                    cur().pos_x, cur().pos_y = bx, by
+                    last_113 = bsc
+                    # 塔里没结算的战斗直接丢掉，否则客户端出塔后一按 146 还在打空气
+                    BATTLE_SESS.pop(cid, None)
+                    body133 = enc_scene(bsc) + bytes([bx, by])
+                    conn.sendall(pack(133, 0, body133))
+                    conn.sendall(pack(113, 0, build_113(bsc)))
+                    conn.sendall(pack(117, 0, b"\x00"))
+                    log("c%03d -> cmd=133 len=%d [离开副本 → %s(%d) 落点(%d,%d)] + 113(%dB)"
+                        % (cid, len(body133), scene_name(bsc), bsc, bx, by,
+                           len(build_113(bsc))))
                     continue
 
                 if cmd == 128:
