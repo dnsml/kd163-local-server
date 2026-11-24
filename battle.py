@@ -445,7 +445,14 @@ class BattleSession(object):
         self.deal = int(round(self.base_deal))
         self.rounds_to_kill = max(1, int(math.ceil(self.cfg_hp / self.base_deal)))
         self.rounds_to_die = max(1, int(math.ceil(self.player_hp_max / self.take)))
-        self.can_win = self.rounds_to_kill <= min(self.rounds_to_die, MAX_ROUNDS)
+        # ★ 2026-11-25 00:4x：真正打的回合数 = min(算术回合, MAX_ROUNDS)。
+        #   以前直接拿 rounds_to_kill 当胜利条件，29884 血的 Lv46 翼魔要 74 回合，
+        #   而 20 回合就判「力竭」→ 怪永远死不了，用户看到的就是「打死了怪物还在」
+        #   （其实是每场都力竭判负）。客户端血条 16/回合，最多也只能表达 20 回合左右，
+        #   所以把战斗压进 MAX_ROUNDS：只要这 20 回合内玩家不会先倒下，就按胜利结算，
+        #   血条同一回合见底。纯防御仍然是 0 进度 → 照样力竭判负。
+        self.fight_rounds = max(1, min(self.rounds_to_kill, MAX_ROUNDS))
+        self.can_win = self.rounds_to_die >= self.fight_rounds
 
         # ---- 两本账都是「回合数」，血量只是显示用的折算 ----
         self.atk_rounds = 0         # 我方出手次数（= 对怪造成伤害的次数）
@@ -472,15 +479,13 @@ class BattleSession(object):
         """
         if HP_TRUE:
             return max(1, int(self.cfg_hp))
-        return max(1, int(CLIENT_PDMG * self.rounds_to_kill))
+        return max(1, int(CLIENT_PDMG * self.fight_rounds))
 
     @property
     def hp(self):
         """剩余血量：按回合进度等比缩放（基数必须跟 max_hp 同一个，否则当前值会超过上限）。"""
-        left = max(0, self.rounds_to_kill - self.atk_rounds)
-        if self.rounds_to_kill <= 0:
-            return 0
-        return int(round(self.max_hp * left / float(self.rounds_to_kill)))
+        left = max(0.0, self.fight_rounds - self.atk_rounds)
+        return int(round(self.max_hp * left / float(self.fight_rounds)))
 
     @property
     def disp_player_hp_max(self):
@@ -540,7 +545,7 @@ class BattleSession(object):
             self.hit_rounds += DEF_TAKE_SHARE
             self.detail.append((self.round, 0, int(round(self.take * DEF_TAKE_SHARE))))
 
-        if self.atk_rounds >= self.rounds_to_kill:
+        if self.atk_rounds >= self.fight_rounds:
             self.over, self.result = True, "win"
         elif self.hit_rounds >= self.rounds_to_die:
             self.over, self.result = True, "lose"
@@ -566,10 +571,11 @@ class BattleSession(object):
 
     def summary(self):
         return ("%s(lv%d) 玩家血%d 输出%.0f/回合 承伤%.0f/回合 "
-                "需%d回合 可扛%d回合 -> %s"
+                "算术需%d回合 实打%d回合 可扛%d回合 -> %s"
                 % (self.name or self.mob_id, self.mob_lv, self.player_hp_max,
                    self.base_deal, self.take, self.rounds_to_kill,
-                   self.rounds_to_die, "可胜" if self.can_win else "打不过"))
+                   self.fight_rounds, self.rounds_to_die,
+                   "可胜" if self.can_win else "打不过"))
 
 
 if __name__ == "__main__":

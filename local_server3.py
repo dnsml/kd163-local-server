@@ -162,6 +162,7 @@ except Exception as _e:
 SCENES = {}      # scene_id -> {name,width,height,jump_points...}
 SCENE_JUMP = {}  # scene_id -> [(jump_id, x, y), ...]
 JUMPS = {}       # jump_id  -> target scene_id
+JUMP_CLEAR = {}  # jump_id  -> clear_needed（要清掉几只本层怪才给走）
 try:
     import re as _re2
     _sx = os.path.join(HERE, "res_cfg", "Scene.xml")
@@ -186,6 +187,10 @@ try:
             _d = dict(_re2.findall(r'(\w+)="([^"]*)"', _m.group(1)))
             if "id" in _d and "scene" in _d:
                 JUMPS[int(_d["id"])] = int(_d["scene"])
+                try:
+                    JUMP_CLEAR[int(_d["id"])] = int(_d.get("clear_needed") or 0)
+                except ValueError:
+                    JUMP_CLEAR[int(_d["id"])] = 0
     print("[scene] 场景 %d / 跳点 %d" % (len(SCENES), len(JUMPS)))
 except Exception as _e:
     print("[scene] 场景表解析失败:", _e)
@@ -255,6 +260,13 @@ SCENE_113_REAL = {
     101: bytes.fromhex("6503ce0001b1fd0f0000ce0001b2c51f0100ce0001b32a2f000001ce00018aed330a"),
     102: bytes.fromhex("6602ce000dbba1150000ce000dbba22a010002ce00018ed62f0ace00018e741f08"),
     1021: bytes.fromhex("cd03fd03ce0001d9d60f0000ce0001d9d71f0100ce0001e0dd2f000001ce00018e75180a"),
+    # 锁妖塔（紫精魂塔普通 1~3 层）。真服 logs/relay.log 23:43:27 / 23:44:06 / 23:45:00。
+    # 结构 = [场景][n=1 刷怪][ce+2120101][19][00][00][n=0 采集]，三层的怪坐标都是 (19,0)。
+    # 必须用真服原文：塔层的 jump_point 带 clear_needed="1"，客户端是拿「113 里的怪
+    # 与之后收到的 121」对账来决定这一层清没清、下一层传送点亮不亮，坐标/个数不对就不亮。
+    21201: bytes.fromhex("cd52d101ce002059a513000000"),
+    21202: bytes.fromhex("cd52d201ce00205a0913000000"),
+    21203: bytes.fromhex("cd52d301ce00205a6d13000000"),
 }
 
 # 锁妖塔：客户端点「进入副本」发 cmd=130，塔 id → 首层场景。
@@ -342,6 +354,20 @@ def build_113(sid):
     for i, oid in enumerate(gathers):
         body += b"\xCE" + struct.pack(">I", oid) + bytes([63 * (i + 1) // (m + 1), 10])
     return bytes(body)
+
+
+def kill_notice(mob_id):
+    """cmd=121 载荷：`ce + u32BE 对象ID` —— **怪物消失/死亡通知**，不是刷怪。
+
+    真服证据（logs/relay.log）：
+      01:23:23 148 致死后紧跟 `S->C cmd=121 len=5 hex=ce000dbba7`（刚打死的 900007），
+               玩家随后 01:23:35 才 145 打下一只 900008 —— 所以 121 一定是「这只没了」；
+      23:43:59 塔一层 `150` 之后紧跟 `S->C cmd=121 hex=ce002059a5`（=2120101）；
+      23:44:54 塔二层同款 `ce00205a09`（=2120201）。
+    以前把它当「刷怪」用（GM 刷怪 就发 121），实际是反的：发一次就等于告诉
+    客户端「这只已经死了」，模型当场消失。别再按刷怪用。
+    """
+    return b"\xce" + struct.pack(">I", int(mob_id) & 0xFFFFFFFF)
 
 
 def arrival_pos(target, prev):
@@ -694,19 +720,42 @@ def apply_gm(line):
                          panel_attr("hit"), panel_attr("crit"),
                          panel_attr("spirit"), panel_attr("agile"),
                          enh_breakdown()))
-    # ---- 刷怪（真服 121 实证，2026-11-24）----
-    #   `刷怪`          按当前场景 113 里的刷怪点逐个推 121
-    #   `刷怪 900003`   只推指定 id（野生怪 id 是 900xxx，与 145 的 payload 同号）
-    # 真服证据（logs/relay.log 01:24:08）：一场打完立刻 `S->C cmd=121 len=5
-    # hex=ce000dbba8`（=900008），客户端收到后视角里那只怪变成可攻击，
-    # 玩家走过去（一串 115）就自己发 `145 ce000dbba9`（=900009）开战。
-    # 本地服从没推过 121，客户端场景里只有 113 摆的模型但没有「活的怪」，
-    # 点上去只走 116（寻路请求）→ 永远不发 145，这就是「点怪打不了」的根因。
-    if line.startswith("刷怪") or line.startswith("spawn"):
+    # `引路` —— 替玩家过到「本层下一层」（等价于自己走到跳点发 128）。
+    # 塔层跳点坐标是写死在 Scene.xml 里的（紫精魂塔一层 (35,5)、二层 (35,5)），
+    # 客户端清怪后才会在跳点位置给引导。这个命令用来直接验证「下一层通不通」，
+    # 不用为了找点在地图上来回跑，也不用截图。
+    if line in ("引路", "下一层", "next"):
+        _cm = int(cur().scene or DEFAULT_SCENE)
+        _jid = None
+        for _j, _x, _y in SCENE_JUMP.get(_cm, []):
+            if JUMP_CLEAR.get(_j, 0) and JUMPS.get(_j):
+                _jid = _j
+                break
+        if _jid is None:
+            return False, "当前场景 %s(%d) 没有「要清怪才给走」的跳点" % (scene_name(_cm), _cm)
+        _tgt = JUMPS[_jid]
+        _pos = arrival_pos(_tgt, _cm)
+        cur().scene = _tgt
+        cur().pos_x, cur().pos_y = _pos
+        body113 = build_113(_tgt)
+        with GAME_LOCK:
+            items = list(GAME_CONNS.items())
+        for cid, conn in items:
+            conn.sendall(pack(129, 0, enc_scene(_tgt) + bytes(_pos)))
+            conn.sendall(pack(113, 0, body113))
+            conn.sendall(pack(117, 0, b"\x00"))
+            log("c%03d .. GM 引路 129 [跳点%d %s → %s 落点%s]"
+                % (cid, _jid, scene_name(_cm), scene_name(_tgt), bytes(_pos).hex()))
+        return True, "已引路 %s → %s" % (scene_name(_cm), scene_name(_tgt))
+
+    # ---- 场景怪物（2026-11-25 纠错：121 的语义以前搞反了）----
+    #   `消怪 [id]`  推 121 = 这只怪从场景里消失（真服致死/结算后就是这个包）
+    #   `刷怪`       重推 113 + 117 = 让客户端按对象表把怪重新摆出来（GM 专用）
+    # 之前的 `刷怪` 发的是 121，等于「把怪全判死」，越刷越空；
+    # 这也解释了为什么「刷怪」之后点上去还是打不了 —— 怪已经被这条包删掉了。
+    if line.startswith("消怪") or line.startswith("despawn"):
         parts = line.split()
         ids = []
-        # 当前地图从角色档里取（Player.scene）。以前写的是裸名 cur_map，
-        # 那是主循环的局部变量，GM 线程里根本不存在 → 无参「刷怪」必 NameError。
         _cm = int(cur().scene or DEFAULT_SCENE)
         if len(parts) > 1 and parts[1].strip().isdigit():
             ids = [int(parts[1].strip())]
@@ -720,9 +769,22 @@ def apply_gm(line):
             items = list(GAME_CONNS.items())
         for cid, conn in items:
             for mid in ids:
-                conn.sendall(pack(121, 0, b"\xce" + struct.pack(">I", mid)))
-                log("c%03d .. push cmd=121 len=5 [刷怪 %d]" % (cid, mid))
-        return True, "已推 121 刷怪 %s（%d 个连接）" % (ids, len(items))
+                conn.sendall(pack(121, 0, kill_notice(mid)))
+                log("c%03d .. GM 消怪 cmd=121 len=5 [%d]" % (cid, mid))
+        return True, "已推 121 消怪 %s（%d 个连接）" % (ids, len(items))
+
+    if line.startswith("刷怪") or line.startswith("spawn"):
+        _cm = int(cur().scene or DEFAULT_SCENE)
+        body = build_113(_cm)
+        with GAME_LOCK:
+            items = list(GAME_CONNS.items())
+        if not items:
+            return False, "当前没有在线连接"
+        for cid, conn in items:
+            conn.sendall(pack(113, 0, body))
+            conn.sendall(pack(117, 0, b"\x00"))
+            log("c%03d .. GM 刷怪重推 113 len=%d hex=%s" % (cid, len(body), body.hex()))
+        return True, "已重推 113/117（%s %d，%d 个连接）" % (scene_name(_cm), _cm, len(items))
 
     # `打怪 2090101` —— 直接推 151 开战（不依赖客户端寻路/点怪）。
     # 用来验证「多回合战斗时血条是否跟着服务端回合走空」，也方便压测结算。
@@ -754,6 +816,28 @@ def apply_gm(line):
             log("c%03d .. GM 打怪推 151 [%s] len=%d" % (cid, s.summary(), len(_p)))
             n += 1
         return True, "已开战 mob=%d（%d 个连接）" % (mob_id, n)
+
+    # `发包 120 0100` —— 给所有在线连接直接发一个原包。
+    # 逆向时没有比这更快的探针：改一个字节就能看客户端反应，不用重启、不用抓包。
+    # 只给 GM 用，别接进业务流程。
+    if line.startswith("发包") or line.startswith("send "):
+        parts = line.split()
+        if len(parts) < 2 or not parts[1].strip().isdigit():
+            return False, "用法：发包 <cmd> [hex]，如 `发包 120 0100`"
+        _cmd = int(parts[1].strip())
+        try:
+            _raw = bytes.fromhex(parts[2]) if len(parts) > 2 else b""
+        except ValueError:
+            return False, "hex 不合法：%s" % parts[2]
+        with GAME_LOCK:
+            items = list(GAME_CONNS.items())
+        if not items:
+            return False, "当前没有在线连接"
+        for cid, conn in items:
+            conn.sendall(pack(_cmd, 0, _raw))
+            log("c%03d .. GM 发包 cmd=%d len=%d hex=%s"
+                % (cid, _cmd, len(_raw), _raw.hex()))
+        return True, "已发 cmd=%d len=%d 给 %d 个连接" % (_cmd, len(_raw), len(items))
 
     if line in ("属性", "attrs", "看属性"):
         a = all_attrs()
@@ -3150,6 +3234,25 @@ def handle_game(conn, cid):
                             % (cid, rw["exp"], rw["coin"],
                                " 升级!" if cur().level != lv_before else "",
                                len(drops), "、".join(got) or "无"))
+                        # ★ 怪物消失：真服在塔里是 150 之后紧跟 121（23:43:59 / 23:44:54），
+                        # 野外是致死那回合 148 之后紧跟 121（01:23:23）。两种顺序都有，
+                        # 这里按塔里那份、放在 150 后面。
+                        # 不发这个包，客户端就一直认为那只怪还活着：模型留在场上、
+                        # 塔层「清怪数」永远不达标 → 下一层的引导传送点不亮。
+                        _mob_dead = int(getattr(battle_sess, "mob_id", 0) or 0)
+                        if _mob_dead:
+                            conn.sendall(pack(121, 0, kill_notice(_mob_dead)))
+                            log("c%03d .. push cmd=121 len=5 [怪物消失 %d]"
+                                % (cid, _mob_dead))
+                            # 塔层下一层跳点带 clear_needed，客户端是「已清怪数够不够」
+                            # 来决定跳点位置给不给引导。清完这一只后把坐标打进日志：
+                            # 万一客户端没画引导，至少知道该往哪走（角标就是 Scene.xml 的坐标）。
+                            _sc_now = int(cur().scene or DEFAULT_SCENE)
+                            for _jid, _jx, _jy in SCENE_JUMP.get(_sc_now, []):
+                                if JUMP_CLEAR.get(_jid, 0) and JUMPS.get(_jid):
+                                    log("c%03d .. 本层已清：引导传送点 %s → %s 在 (%d,%d)"
+                                        % (cid, scene_name(_sc_now),
+                                           scene_name(JUMPS[_jid]), _jx, _jy))
                         # 真服 149 之后紧跟 178（掉落进包后刷新背包），再 29/28/30
                         if drops:
                             send_push(conn, cid, 178)
@@ -3249,7 +3352,9 @@ def handle_game(conn, cid):
                     #   cd27d9(10201) 天音谷->天音谷底 129=cd03fd 05 07
                     #   cd27e3(10211) 天音谷底->天音谷
                     # 129 后紧跟本场景的 113（对象表）+ 117(00)，客户端再发 32513 确认场景。
-                    prev = cur_map
+                    # prev 取角色档里的场景而不是主循环局部变量：GM「引路」改的是
+                    # cur().scene，局部 cur_map 不会跟着变，用 cur_map 会把落点算回旧场景。
+                    prev = int(cur().scene or cur_map)
                     jid = None
                     if len(payload) >= 3 and payload[0] == 0xCD:
                         jid = int.from_bytes(payload[1:3], "big")
