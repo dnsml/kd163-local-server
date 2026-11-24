@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""反汇编指定虚拟地址区间，输出带目标解析的 asm。
+"""指令解析指定虚拟地址区间，输出带目标解析的 asm。
 
 用法: python work/dis_range.py 0x2ed400 0x2ee000 out.asm
 """
