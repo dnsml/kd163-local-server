@@ -16,6 +16,13 @@
 *.jar
 patch/*.apk
 
+# ---- 2b. 分发用的打包产物 ----
+# 2026-11-24 21:16 出现过「安装包+资源包+账号密码.zip」(486MB) 及同名解压目录(465MB)：
+# 内容是 APK + 资源包 + 账号，属于网盘分发物，超 GitHub 单文件 100MB 上限，绝不入库。
+patch/*.zip
+patch/*安装包*
+patch/*账号密码*
+
 # ---- 3. 玩家存档（含账号、等级、背包、任务进度）----
 player_state*.json
 state_before_probe.json
