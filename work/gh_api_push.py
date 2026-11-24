@@ -42,13 +42,17 @@ def call(method, path, body=None):
         return json.loads(r.read().decode())
 
 
+# core.quotepath=false：不然中文文件名会输出成 "docs/\344\272..." 的八进制转义，
+# `git show <c>:<path>` 直接 128。踩过一次。
 def git(*args, **kw):
-    out = subprocess.check_output(["git"] + list(args), cwd=HERE, **kw)
+    out = subprocess.check_output(["git", "-c", "core.quotepath=false"] + list(args),
+                                  cwd=HERE, **kw)
     return out if kw.get("text") is False else out.decode("utf-8")
 
 
 def gitbytes(*args):
-    return subprocess.check_output(["git"] + list(args), cwd=HERE)
+    return subprocess.check_output(["git", "-c", "core.quotepath=false"] + list(args),
+                                   cwd=HERE)
 
 
 def main():
@@ -62,7 +66,24 @@ def main():
         print("已经同步，无需推送")
         return 0
 
-    todo = git("rev-list", "--reverse", "%s..%s" % (base, head)).split()
+    # 远端 HEAD 可能是上一轮 API 推出来的：哈希和本地不同、tree 相同，本地根本没有
+    # 这个对象 → `base..head` 会直接报 128。这时按 tree 找到等价的本地提交当起点，
+    # replay 出来的内容一样，只是少算几条「已经推过」的提交。
+    try:
+        todo = git("rev-list", "--reverse", "%s..%s" % (base, head)).split()
+    except subprocess.CalledProcessError:
+        rtree = call("GET", "/repos/%s/git/commits/%s" % (REPO, base))["tree"]["sha"]
+        eq = None
+        for c in git("rev-list", head).split():
+            if git("rev-parse", c + "^{tree}").strip() == rtree:
+                eq = c
+                break
+        if eq is None:
+            print("远端提交不在本地历史里，也找不到同 tree 的本地提交；"
+                  "先 git fetch / git pull 对齐再推")
+            return 1
+        print("远端提交本地没有，按 tree 对齐到本地 %s（tree=%s）" % (eq[:10], rtree[:10]))
+        todo = git("rev-list", "--reverse", "%s..%s" % (eq, head)).split()
     if not todo:
         print("没有新提交（远端不在本地历史里？先 git fetch 对齐）")
         return 1
