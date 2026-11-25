@@ -16,16 +16,17 @@
     → 首饰槽 = 9/10（戒指）、11/12（护符）；30 包里槽 6 与槽 7 之间那 16 字节
       就是这 4 个槽（空槽 4B，有装备 6B：cd+u16 + 槽 + 01 01）。
 
-断言：
-1. 182 把 10306 穿上 → 槽 11/12；182 把 10305 穿上 → 槽 9/10（真服是成对槽）
-2. 30 包变长（真服 80/82/86/88/96 都出现过），7 装备 + 4 首饰槽 = 90B，
-   且含 `cd28420b0101` / `cd28410a0101` 等四条
-3. 30 包里首饰排在槽 6 之后、槽 7 之前（真服顺序）
-4. 818 记录数 = 11，槽 9/10、11/12 各一条，成对同 id
-5. 29 面板生命 +335（10306 basic_effect 53,335），且不因双槽翻倍
+断言（★ 2026-11-25 23:25 真服抓包定性：首饰四格是**四件独立物品**）：
+1. 182 穿第 1 枚戒指 → 只进槽 9；再穿第 2 枚 → 进槽 10（不是同一件写两格）
+2. 182 穿护符同理：第 1 枚槽 11、第 2 枚槽 12
+3. 30 包按「实槽 6B / 空槽 4B」变长：7 装备 + 4 首饰 = 90B，
+   顺序 1..6 / 11,12 / 9,10 / 7（真服 96B 原包顺序）
+4. 818 记录数 = 11，槽 9/10、11/12 各一条
+5. 29 面板生命：每枚护符 +335，两枚 +670（一格一件，不再需要去重）
 6. 817 回显带首饰槽（客户端重登后不会再被清空）
-7. 819 卸戒指 → 槽 9/10 一起清空、戒指回背包、818 从 11 降回 9、30 从 90B 降回 86B
-8. 819 卸护符 → 818 剩 7 条、30 回 82B、生命回到基线
+7. 819 卸戒指 → **只清点中的那一格**，另一枚戒指还在；回 cmd=1 文本（不是 819）
+   —— 回 819 空包会让客户端 SIGABRT 闪退（23:41:01 实测）
+8. 37 点首饰格 → 只卸那一格；格 08→槽10、格 06→槽11、格 0a→槽7 武器
 
 ⚠️ 用独立测试账号 9112001 的存档，跑完删除，不动玩家主号。
 """
@@ -188,8 +189,12 @@ def main():
     src["equip"] = {1: 12108, 2: 12109, 3: 12110, 4: 12111,
                     5: 12112, 6: 12113, 7: 12114}
     src["bag"] = src.get("bag") or {}
+    # 两枚戒指 + 两枚护符：真服那个号就是 4 件独立首饰（178 里 4 个独立包格），
+    # 这样才能验证「一格一件、四格都能穿满」。
     src["bag"]["21"] = [AMULET, 1]
     src["bag"]["22"] = [RING, 1]
+    src["bag"]["23"] = [AMULET, 1]
+    src["bag"]["24"] = [RING, 1]
     if os.path.exists(STATE):
         shutil.copy2(STATE, STATE + ".bak_acctest")
     json.dump(src, open(STATE, "w", encoding="utf-8"), ensure_ascii=False)
@@ -241,18 +246,38 @@ def main():
         check("177 回 178 全量（不是 23B 新手三件套）",
               n177 >= 5 and len(b177) != 23, "n=%d len=%d" % (n177, len(b177)))
 
-        # ---- 1. 先穿戒指（10305 不带生命属性 → 这一发 29 就是基线）----
+        # ---- 1. 第 1 枚戒指（10305 不带生命属性 → 这一发 29 就是属性基线）----
         s.sendall(pack(182, 20, bytes([0x16, 0x01])))     # 格 22 = 0x16 = 飞仙戒指
         pks = recv_packets(s, wait=2.5)
         cmds = [c for c, _, _ in pks]
         d = {}
         for c, _, p in pks:
             d.setdefault(c, p)
-        hp_ring = hp_of(d.get(29))
+        hp_ring1 = hp_of(d.get(29))
+        b30_r1 = d.get(30) or b""
         check("182 穿戒指回 ACK", 182 in d, "cmd 顺序 %s" % cmds[:10])
+        check("第 1 枚戒指只进槽9（30 = 84B，没有槽10）",
+              len(b30_r1) == 84 and RING_HEX + b"\x09\x01\x01" in b30_r1
+              and RING_HEX + b"\x0a\x01\x01" not in b30_r1,
+              "%dB 记录=%s" % (len(b30_r1), parse_30(b30_r1)))
 
-        # ---- 2. 再穿护符（10306 basic_effect 53,335 → 生命 +335）----
-        s.sendall(pack(182, 21, bytes([0x15, 0x01])))     # 格 21 = 0x15 = 飞仙护符
+        # ---- 2. 第 2 枚戒指 → 同类另一个空槽 10（不是同一件写两格）----
+        s.sendall(pack(182, 21, bytes([0x18, 0x01])))     # 格 24 = 0x18 = 第二枚戒指
+        pks = recv_packets(s, wait=2.5)
+        d = {}
+        for c, _, p in pks:
+            d.setdefault(c, p)
+        b30_r2 = d.get(30) or b""
+        check("第 2 枚戒指进槽10（两格各一枚，30 = 86B）",
+              len(b30_r2) == 86
+              and RING_HEX + b"\x09\x01\x01" in b30_r2
+              and RING_HEX + b"\x0a\x01\x01" in b30_r2,
+              "%dB 记录=%s" % (len(b30_r2), parse_30(b30_r2)))
+
+        # ---- 3/4. 两枚护符 → 槽 11、槽 12（每枚 +335 生命）----
+        s.sendall(pack(182, 22, bytes([0x15, 0x01])))     # 格 21 = 0x15 = 飞仙护符
+        recv_packets(s, wait=2.0)
+        s.sendall(pack(182, 23, bytes([0x17, 0x01])))     # 格 23 = 0x17 = 第二枚护符
         pks = recv_packets(s, wait=2.5)
         d = {}
         for c, _, p in pks:
@@ -261,37 +286,31 @@ def main():
         hp_both = hp_of(d.get(29))
         recs = parse_30(b30)
         print("      30=%dB 记录=%s" % (len(b30), recs))
-        print("      29 生命 基线(只戴戒指) %s -> 戴护符 %s" % (hp_ring, hp_both))
+        print("      29 生命 两枚戒指 %s -> 两枚护符 %s" % (hp_ring1, hp_both))
 
-        check("30 变长：7 装备 + 4 首饰槽 = 90B（真服 30 本就变长）",
+        check("30 = 90B（7 装备 + 4 首饰槽，实槽 6B / 空槽 4B）",
               len(b30) == 90, "%dB" % len(b30))
         check("30 含护符槽11 cd28420b0101", AMULET_HEX + b"\x0b\x01\x01" in b30)
         check("30 含护符槽12 cd28420c0101", AMULET_HEX + b"\x0c\x01\x01" in b30)
         check("30 含戒指槽9  cd2841090101", RING_HEX + b"\x09\x01\x01" in b30)
         check("30 含戒指槽10 cd28410a0101", RING_HEX + b"\x0a\x01\x01" in b30)
         slots = [s_ for s_, _ in recs]
-        check("30 槽位顺序 = 1..6,护符11/12,戒指9/10,7（真服 96B 顺序）",
+        check("30 槽位顺序 = 1..6,护符11/12,戒指9/10,7（真服原包顺序）",
               slots[:6] == [1, 2, 3, 4, 5, 6] and slots[-1] == 7
               and slots[6:-1] == [11, 12, 9, 10],
               str(slots))
-        check("30 首饰 id 正确（成对同 id）",
-              dict(recs).get(9) == RING and dict(recs).get(10) == RING
-              and dict(recs).get(11) == AMULET and dict(recs).get(12) == AMULET,
-              "槽9=%s 槽10=%s 槽11=%s 槽12=%s"
-              % (dict(recs).get(9), dict(recs).get(10),
-                 dict(recs).get(11), dict(recs).get(12)))
 
         # 真服 182 穿戴（23:25:22~36 连穿 11 件）只推 29/28/30/178，
         # 从不主动推 818 —— 818 只是客户端 817 上报的回执。
         check("182 穿戴不主动推 818（与线上服一致）", 818 not in d, str(sorted(d)))
 
-        if hp_ring and hp_both:
-            check("29 生命 +335（护符 basic_effect 53,335）",
-                  hp_both - hp_ring == 335,
-                  "%d -> %d (+%d)" % (hp_ring, hp_both, hp_both - hp_ring))
+        if hp_ring1 and hp_both:
+            check("29 生命 +670（两枚护符各 basic_effect 53,335）",
+                  hp_both - hp_ring1 == 670,
+                  "%d -> %d (+%d)" % (hp_ring1, hp_both, hp_both - hp_ring1))
 
         # ---- 6. 817 回显（重登/切面板时客户端会重新拉）----
-        s.sendall(pack(817, 22, b"\x09" + AMULET_HEX + b"\x0b"
+        s.sendall(pack(817, 24, b"\x09" + AMULET_HEX + b"\x0b"
                        + RING_HEX + b"\x09"
                        + b"\xcd\x2b\x64\x01"))
         pks = recv_packets(s, wait=1.5)
@@ -302,8 +321,8 @@ def main():
         check("817 回显里带首饰槽", AMULET_HEX in b817r and RING_HEX in b817r,
               "len=%d" % len(b817r))
 
-        # ---- 7. 819 卸戒指（真服载荷 cd2841 0a = 戒指 10305 / 槽 9）----
-        s.sendall(pack(819, 23, RING_HEX + b"\x09"))
+        # ---- 7. 819 卸戒指（真服载荷 cd2841 09 = 戒指 10305 / 槽 9）----
+        s.sendall(pack(819, 25, RING_HEX + b"\x09"))
         pks = recv_packets(s, wait=2.5)
         cmds = [c for c, _, _ in pks]
         d = {}
@@ -314,20 +333,24 @@ def main():
         recs_no_ring = parse_30(b30_no_ring)
         print("      [819 卸戒指] cmd 顺序 %s  30=%dB  178=%dB"
               % (cmds[:10], len(b30_no_ring), len(b178_ring)))
-        # 线上服 819 自己回「本服尚未恢复此功能」；本地服实现成卸下，
-        # 应答必须是 819（同 seq），推送对齐 37：29/28/30/178。
-        check("819 应答是 819 本身", 819 in d, str(cmds[:8]))
-        check("819 戒指成对清空（槽9/10 都不在 30 里）",
-              RING_HEX not in b30_no_ring, b30_no_ring.hex()[:48])
-        check("819 后 30 = 86B（4 首饰槽变 2 空 2 实）",
-              len(b30_no_ring) == 86, "%dB 记录=%s" % (len(b30_no_ring), recs_no_ring))
-        check("819 后护符槽 11/12 仍在", AMULET_HEX + b"\x0b\x01\x01" in b30_no_ring
+        # ★ 23:41:01 实测：本地回 819 空包，客户端收到就 SIGABRT 闪退
+        # （logcat: Zygote Process exited due to signal (6)）。
+        # 线上服对 819 只回 cmd=1 文本，从不回 819 本身。
+        check("819 回 cmd=1 文本（绝不回 819 空包，否则客户端断言闪退）",
+              1 in d and 819 not in d, str(cmds[:8]))
+        check("819 只卸槽9，第 2 枚戒指还在槽10",
+              RING_HEX + b"\x09\x01\x01" not in b30_no_ring
+              and RING_HEX + b"\x0a\x01\x01" in b30_no_ring,
+              "%dB 记录=%s" % (len(b30_no_ring), recs_no_ring))
+        check("819 后 30 = 88B（少一件，17 槽结构不变）",
+              len(b30_no_ring) == 88, "%dB 记录=%s" % (len(b30_no_ring), recs_no_ring))
+        check("819 后护符槽 11/12 都在", AMULET_HEX + b"\x0b\x01\x01" in b30_no_ring
               and AMULET_HEX + b"\x0c\x01\x01" in b30_no_ring)
         check("819 卸下的戒指回到背包（178 含 cd2841）", RING_HEX in b178_ring,
               "178=%dB" % len(b178_ring))
 
         # ---- 8. 819 卸护符（cd2842 0b = 护符 10306 / 槽 11）----
-        s.sendall(pack(819, 24, AMULET_HEX + b"\x0b"))
+        s.sendall(pack(819, 26, AMULET_HEX + b"\x0b"))
         pks = recv_packets(s, wait=2.5)
         d = {}
         for c, _, p in pks:
@@ -337,16 +360,19 @@ def main():
         hp_none = hp_of(d.get(29))
         print("      [819 卸护符] 30=%dB  29 生命 %s"
               % (len(b30_none), hp_none))
-        check("819 卸护符后 30 = 82B（4 个首饰槽全空）",
-              len(b30_none) == 82, "%dB 记录=%s" % (len(b30_none), parse_30(b30_none)))
-        check("819 卸护符后 30 里没有首饰", AMULET_HEX not in b30_none and RING_HEX not in b30_none)
+        check("819 卸护符后 30 = 86B（只剩槽12 那枚）",
+              len(b30_none) == 86, "%dB 记录=%s" % (len(b30_none), parse_30(b30_none)))
+        check("819 卸护符后槽12 仍在（只掉点中的那格）",
+              AMULET_HEX + b"\x0c\x01\x01" in b30_none,
+              str(parse_30(b30_none)))
         check("819 卸下的护符回到背包（178 含 cd2842）", AMULET_HEX in b178_am,
               "178=%dB" % len(b178_am))
-        if hp_ring and hp_none:
-            check("819 全卸后生命回到只戴戒指的基线（属性不残留）", hp_none == hp_ring,
-                  "%s -> %s" % (hp_ring, hp_none))
+        if hp_both and hp_none:
+            check("819 卸一枚护符后生命 -335（另一枚还在算）",
+                  hp_both - hp_none == 335,
+                  "%s -> %s" % (hp_both, hp_none))
         else:
-            check("819 全卸后拿到 29 面板做比对", bool(hp_none), "hp=%s" % hp_none)
+            check("819 后拿到 29 面板做比对", bool(hp_none), "hp=%s" % hp_none)
 
         # ---- 9. 37 = 点装备格卸下（客户端 0 基格号：00 -> 槽 1）----
         # 这是真机脱装备真正发的命令，以前服务端没分支直接丢，表现「脱不下来」。
@@ -365,8 +391,8 @@ def main():
         # 所以「衣服真的脱了」要看 30 里那件消失，而不是看 818。
         check("37 卸下后 30 里没有该装备", b"\xcd\x2f\x4c" not in b30_37,
               "30=%dB" % len(b30_37))
-        check("37 卸下后 30 = 80B（槽1 变空 + 17 槽结构）",
-              len(b30_37) == 80, "30=%dB" % len(b30_37))
+        check("37 卸下后 30 = 84B（槽1 变空 + 17 槽结构）",
+              len(b30_37) == 84, "30=%dB" % len(b30_37))
         check("37 卸下的装备回到背包（178 含 cd2f4c = 12108）",
               b"\xcd\x2f\x4c" in b178_37, "178=%dB" % len(b178_37))
 
@@ -409,8 +435,10 @@ def main():
             b178_i = d.get(178) or b""
             print("      [37 第8格→槽10] 30=%dB 记录=%s"
                   % (len(b30_i), parse_30(b30_i)))
-            check("37 第8格 → 槽10 戒指（30 里没有 cd2841）",
-                  RING_HEX not in b30_i, str(parse_30(b30_i)))
+            check("37 第8格 → 槽10 那枚戒指掉了（cd2841 槽0a 不在）",
+                  RING_HEX + b"\x0a\x01\x01" not in b30_i, str(parse_30(b30_i)))
+            check("37 第8格 槽9 那枚戒指还在（一格一件，不连坐）",
+                  RING_HEX + b"\x09\x01\x01" in b30_i, str(parse_30(b30_i)))
             check("37 第8格 护符还在（30 里仍有 cd2842）",
                   AMULET_HEX in b30_i, str(parse_30(b30_i)))
             check("37 掉的戒指回背包", RING_HEX in b178_i, "178=%dB" % len(b178_i))
@@ -425,11 +453,12 @@ def main():
             b178_j = d.get(178) or b""
             print("      [37 第6格→槽11] 30=%dB 记录=%s"
                   % (len(b30_j), parse_30(b30_j)))
-            check("37 第6格 → 槽11 护符（30 里没有 cd2842）",
-                  AMULET_HEX not in b30_j, str(parse_30(b30_j)))
-            check("37 第6格 主装备不受影响（30 里仍有槽1 装备）",
-                  b"\x01\x01\x01" in b30_j or len(b30_j) >= 74,
-                  str(parse_30(b30_j)))
+            check("37 第6格 → 槽11 护符掉了（cd2842 槽0b 不在）",
+                  AMULET_HEX + b"\x0b\x01\x01" not in b30_j, str(parse_30(b30_j)))
+            check("37 第6格 槽12 另一枚护符还在",
+                  AMULET_HEX + b"\x0c\x01\x01" in b30_j, str(parse_30(b30_j)))
+            check("37 第6格 主装备不受影响（槽2~6 还在）",
+                  len(b30_j) >= 74, str(parse_30(b30_j)))
             check("37 掉的护符回背包", AMULET_HEX in b178_j, "178=%dB" % len(b178_j))
 
         # ---- 12. 武器：kind2=2 的匕首也必须进槽 7（五职业五种武器 1~5）----
