@@ -1052,14 +1052,17 @@ def apply_gm(line):
         slot = SLOT_OF_KIND2.get(it.get("kind2"))
         if slot is None:
             return False, "%s kind2=%s 没有对应装备槽" % (it["name"], it.get("kind2"))
-        cur().equip[slot] = val
+        for _s in acc_slots_of(slot):
+            cur().equip[_s] = val
         save_state()
         push_all([28, 818])
         return True, "槽%d 穿上 %s(id=%d)" % (slot, it["name"], val)
 
     if key in ("脱装备", "卸装备", "unequip"):
         if val in cur().equip:
-            old = cur().equip.pop(val)
+            old = cur().equip.get(val)
+            for _s in acc_slots_of(val):
+                cur().equip.pop(_s, None)
             save_state()
             push_all([28, 818])
             return True, "槽%d 卸下 id=%d" % (val, old)
@@ -1297,6 +1300,18 @@ SLOT_OF_KIND2 = {1: 7, 6: 1, 7: 2, 8: 3, 9: 4, 10: 5, 11: 6,
 
 # 首饰槽（30 包槽 6 与槽 7 之间那 16 字节就是这 4 个槽：空 4B、有装备 6B）
 ACC_SLOTS = (9, 10, 11, 12)
+
+# ★ 2026-11-25：首饰是**成对**的 —— 一枚戒指同时占 9 和 10，一枚护符同时占 11 和 12，
+# 两格写同一个物品 id。真服 818 的 11 条样本（len=309）槽序是
+#   11,12,2,3,1,4,5,9,10,6,7
+# 其中 11/12 同 id、9/10 同 id，30 的 96B 样本也是四个槽全填。
+# 以前只写 9 和 11，客户端装备栏里就空出 10、12 两格 —— 玩家反馈的「还有两个槽是空的」。
+ACC_PAIR = {9: 10, 10: 9, 11: 12, 12: 11}
+
+
+def acc_slots_of(slot):
+    """首饰槽 -> 需要一起写/一起清的槽（非首饰槽原样返回）。"""
+    return (slot, ACC_PAIR[slot]) if slot in ACC_PAIR else (slot,)
 
 
 def equip_slots():
@@ -1671,6 +1686,11 @@ def load_state(pl=None):
         pl.equip.clear()
         for k, v in eq.items():
             pl.equip[int(k)] = int(v)
+    # 老存档只写了 9 / 11 一个槽，这里补出配对槽（10 / 12），
+    # 否则装备栏里会空着两格 —— 玩家反馈的「还有两个槽是空的」。
+    for _s in (9, 11):
+        if pl.equip.get(_s):
+            pl.equip[ACC_PAIR[_s]] = pl.equip[_s]
     eh = d.get("enhance")
     if isinstance(eh, dict):
         pl.enhance.clear()
@@ -2267,18 +2287,18 @@ def build_30():
             out += b"\xcd" + iid.to_bytes(2, "big") + bytes([slot]) + b"\x01\x01"
         else:
             out += b"\x00\x00\x00\x00"
-    # ---- 首饰区：4 个槽（9/10 戒指、11/12 护符）----
+    # ---- 首饰区：4 个槽（戒指 9/10、护符 11/12）----
     # 真服 82B 原包里这 16 字节全 0 = 4 个空首饰槽（空槽编码 4B，与上面空装备槽同理）。
-    # 真服 96B 样本（23:52:25）在这 16 字节位置变成了
+    # 真服 96B 样本（23:52:25）在同一位置是 4 个实槽，顺序 11/12/9/10：
     #   cd2842 0b 0101 / cd2842 0c 0101 / cd2841 09 0101 / cd2841 0a 0101
-    # 即「有装备 6B、空槽 4B」的变长写法。本地服只穿一个戒指(9) + 一个护符(11)，
-    # 总长仍保持 82B：每多 1 件首饰就少 2 字节尾部填充，避免客户端按固定偏移解析错位。
-    _acc_filled = 0
+    # 所以 30 **本来就是变长**的（80/82/86/88/96 都出现过），不能锁死 82B。
+    # 早先为了「保持 82B」去裁尾部填充，等于把后面的字段整体前移，
+    # 客户端按尾部结构解析就会读错 —— 表现为穿戒指当场闪退。
+    # 现在按真服语义来：有货 6B、空槽 4B，尾部填充保持 24B 不动。
     for _as in ACC_SLOTS:
         _aid = cur().equip.get(_as, 0) & 0xFFFF
         if _aid:
             out += b"\xcd" + _aid.to_bytes(2, "big") + bytes([_as]) + b"\x01\x01"
-            _acc_filled += 1
         else:
             out += b"\x00\x00\x00\x00"
     iid7 = cur().equip.get(7, 0) & 0xFFFF
@@ -2286,7 +2306,7 @@ def build_30():
         out += b"\xcd" + iid7.to_bytes(2, "big") + b"\x07\x01\x01"
     else:
         out += b"\x00\x00\x00\x00"
-    out += b"\x00" * max(0, 24 - 2 * _acc_filled)
+    out += b"\x00" * 24
     return bytes(out)
 
 
@@ -2451,8 +2471,13 @@ EQUIP_STR_SRC = [equip_attr.EQUIP_XML]
 
 
 def all_attrs():
-    """全身强化相关属性合计：strengthen + gift + 强化大师 + 套装件数。"""
-    return equip_attr.total_attrs(cur().equip, cur().enhance)
+    """全身强化相关属性合计：strengthen + gift + 强化大师 + 套装件数。
+
+    首饰成对下发（9/10 同 id、11/12 同 id），但属性只能算一次，
+    所以汇总前把配对槽 10、12 剔掉，否则戴一枚护符会加两遍。
+    """
+    eq = {s: v for s, v in cur().equip.items() if s not in (10, 12)}
+    return equip_attr.total_attrs(eq, cur().enhance)
 
 
 def enh_power_add():
@@ -2704,17 +2729,36 @@ def builtin_resp(cmd, payload):
             % (payload.hex() or "-", cur().level))
         return 1859, b""
     if cmd == 819:
-        # 819 = 点某个装备格要详情（payload [对象 varint][槽位]）。
-        # 真服客户端在 17/818 里已经有完整装备数据时根本不会发这个包，
-        # 它出现就说明客户端那边这条槽是空的/没数据。
-        # 820 的结构还没有正样本（真服那个客户端不发 819），
-        # 所以这里不瞎回 820（回空包实测会把客户端打崩），
-        # 改成推一份最新的 818，让客户端自己把槽位数据补上。
+        # 819 = 客户端对装备栏某一格的操作请求，真服载荷是 [物品 id varint][槽位]：
+        #   23:52:30 C->S cmd=819 len=4 hex=cd28420b → 护符 10306 / 槽 11
+        #   23:52:31 C->S cmd=819 len=4 hex=cd28420c → 槽 12（同一件，成对的那格）
+        # 真服自己回的是「本服尚未恢复此功能」（cmd=1 + 29B 文本），
+        # 所以线上服也脱不下来。本地服按玩家预期实现成**卸下**：
+        # 槽里确实是这件就脱下来放回背包，再推 818/30/29/28/178 一起刷新。
         slot = payload[-1] if payload else 0
+        iid = 0
+        if payload:
+            if payload[0] == 0xCE and len(payload) >= 5:
+                iid = int.from_bytes(payload[1:5], "big")
+            elif payload[0] == 0xCD and len(payload) >= 3:
+                iid = int.from_bytes(payload[1:3], "big")
+            elif payload[0] == 0xCC and len(payload) >= 2:
+                iid = payload[1]
+            else:
+                iid = payload[0]
+        have = cur().equip.get(slot)
+        if have and (not iid or have == iid):
+            for _s in acc_slots_of(slot):
+                cur().equip.pop(_s, None)
+            bag_add(have, 1)
+            save_state()
+            log("[equip] 819 槽%d 卸下 %s(id=%d) 已回包"
+                % (slot, bag_proto.item(have)["name"], have))
+            return 818, build_818(equip_slots()), [29, 28, 30, 178]
         pr = probe_820()
-        log("[equip] 819 槽%d payload=%s -> 818 全量%s"
+        log("[equip] 819 槽%d payload=%s 无可卸装备 -> 818 全量%s"
             % (slot, payload.hex(),
-               ("+ 实验 820(len=%d)" % len(pr)) if pr is not None else "+ 28"))
+               ("+ 实验 820(len=%d)" % len(pr)) if pr is not None else ""))
         return 818, build_818(equip_slots()), [28]
     if cmd == 837:
         # 837 = 打开衣柜（C->S 空包）→ 838 已拥有时装列表。
@@ -2848,7 +2892,9 @@ def builtin_resp(cmd, payload):
                 if old and old != iid:
                     bag_add(old, 1)          # 换下来的旧装备回背包
                     log("[equip] 槽%d 换下 %s 已回包" % (slot, old))
-                cur().equip[slot] = iid
+                # 首饰成对：戒指写 9+10、护符写 11+12，与真服 818/30 一致
+                for _s in acc_slots_of(slot):
+                    cur().equip[_s] = iid
                 follow = [29, 28, 30, 818, 178]
                 log("[equip] 槽%d 穿戴 %s(id=%d)，当前装备=%s"
                     % (slot, it["name"], iid, sorted(cur().equip.items())))
@@ -3043,9 +3089,16 @@ def ssl_ctx():
     if _ctx[0] is None:
         c = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         c.load_cert_chain(CERT, KEY)
-        c.set_ciphers("DEFAULT:@SECLEVEL=1")
+        # 老客户端只发 TLS1.0/1.1。新版 OpenSSL 默认最低 TLS1.2，会直接回
+        # alert protocol version，客户端只显示「安全连接验证失败」，看起来像
+        # 证书或时间问题。这里把下限放开到 TLS1.0，并放宽容错级别。
+        try:
+            c.minimum_version = ssl.TLSVersion.TLSv1
+        except Exception:
+            pass
+        c.set_ciphers("ALL:@SECLEVEL=0")
         _ctx[0] = c
-        log("TLS 证书已加载：%s" % CERT)
+        log("TLS 证书已加载：%s（兼容 TLS1.0~1.3）" % CERT)
     return _ctx[0]
 
 
@@ -3364,6 +3417,16 @@ def handle_game(conn, cid):
                             # 这时客户端就永远收不到「可交」，表现为「提交不了」。
                             log("c%03d .. 警告：打完怪但 active_qid 为空，"
                                 "客户端收不到 210 可交（让它重新接一次任务即可）" % cid)
+                        # ★ 2026-11-25：进战斗的瞬间客户端会把整屏 NPC 销毁
+                        #   （logcat 实证 21:37:50.779，和 ObjectBattleView created 同一毫秒：
+                        #    NPCMainView: 龙太子/哪吒/龙虾大将/托塔天王 destroyed），
+                        #   战后它自己不会重建 —— 玩家看到的就是「打完怪野外 NPC 全没了」。
+                        #   重推 113 + 117 让客户端按对象表把场景视图重建一遍。
+                        _sc_now2 = int(cur().scene or DEFAULT_SCENE)
+                        conn.sendall(pack(113, 0, build_113(_sc_now2)))
+                        conn.sendall(pack(117, 0, b"\x00"))
+                        log("c%03d .. 战后重推 113+117 [%s 重建场景对象/NPC]"
+                            % (cid, scene_name(_sc_now2)))
                     else:
                         # 失败/力竭：什么都不给（0 经验 0 铜钱），但不扣任何已有收益。
                         # 客户端 PVE 没有失败结算画面（结束包结果位置 01 会闪退），
@@ -3540,6 +3603,14 @@ def handle_game(conn, cid):
                             break
                     if not slots:
                         slots = [1, 2, 3, 4, 5, 6, 7]
+                    # ★ 2026-11-25：客户端 817 只上报 7 个主装备槽，首饰槽（9/10/11/12）
+                    #   它不报；而真服 818 是带首饰的 11 条（len=309 样本实测）。
+                    #   只按上报回 7 条，客户端装备栏的首饰格就一直是空的 ——
+                    #   玩家反馈的「还有两个槽是空的」。
+                    #   这里把服务端实际穿着的首饰槽补进来，顺序沿用客户端的。
+                    for _s in equip_slots():
+                        if _s not in slots:
+                            slots.append(_s)
                     body = build_818(slots)
                     conn.sendall(pack(818, 0, body))
                     log("c%03d -> cmd=818 seq=0 len=%d [装备栏 槽%s] 装备=%s"
@@ -4572,6 +4643,19 @@ def handle_game(conn, cid):
                         resp = pack(k, seq, TPL[k])
                         log("c%03d -> cmd=%-6d seq=%-4d len=%d (模板 %d)"
                             % (cid, k, seq, len(TPL[k]), k))
+                    elif cmd == 17:
+                        # 断线自动重连时 seq 会接着涨（实测 seq=334），
+                        # 而回放里只有登录那一刻的 seq=2，匹配不到就掉进「无模板静默丢弃」，
+                        # 客户端表现为一直转圈、连上了却进不去。
+                        # 这里按当前角色动态回一份 17，并把 113/117 一起补上。
+                        _b17 = build_17()
+                        _cm17 = int(cur().scene or DEFAULT_SCENE)
+                        conn.sendall(pack(17, seq, _b17))
+                        conn.sendall(pack(113, 0, build_113(_cm17)))
+                        conn.sendall(pack(117, 0, b"\x00"))
+                        log("c%03d -> cmd=17 seq=%d 重连兜底 len=%d + 113/117"
+                            % (cid, seq, len(_b17)))
+                        continue
                     elif quiet:
                         continue
                     else:

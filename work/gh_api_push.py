@@ -125,11 +125,21 @@ def main():
         stat = [l.split("\t") for l in
                 git("diff", "--name-status", local_parent, c).strip().splitlines() if l.strip()]
         entries = []
-        for st, path in stat:
-            if st == "D":
-                entries.append({"path": path, "mode": "100644",
+        for parts in stat:
+            st = parts[0]
+            if st.startswith("R") and len(parts) >= 3:
+                # 改名：老路径要从 tree 里删掉，新路径写 blob。
+                # 之前这里直接 `for st, path in stat` 解包，遇到 R100（3 列）就
+                # ValueError: too many values to unpack —— 一改名推送必挂。
+                old, path = parts[1], parts[2]
+                entries.append({"path": old, "mode": "100644",
+                                "type": "blob", "sha": None})
+            elif st == "D":
+                entries.append({"path": parts[1], "mode": "100644",
                                 "type": "blob", "sha": None})
                 continue
+            else:
+                path = parts[1]
             raw = gitbytes("show", "%s:%s" % (c, path))
             b = call("POST", "/repos/%s/git/blobs" % REPO,
                      {"content": base64.b64encode(raw).decode(), "encoding": "base64"})
