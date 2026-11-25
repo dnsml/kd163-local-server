@@ -83,6 +83,15 @@ def recv_packets(sock, wait=2.0):
     return out
 
 
+def port_busy(port):
+    """端口上已经有人在监听 → 说明旧服务没退，测试不能跑（会连到旧代码）。"""
+    try:
+        socket.create_connection(("127.0.0.1", port), timeout=0.5).close()
+        return True
+    except OSError:
+        return False
+
+
 def wait_port(port, proc, timeout=25):
     t0 = time.time()
     while time.time() - t0 < timeout:
@@ -118,6 +127,31 @@ def hp_of(body29):
     return None
 
 
+def parse_bag(body):
+    """178 体：[0x40][n]，每条 [槽][id varint][enh][bind][num]。"""
+    if not body or body[0] != 0x40 or len(body) < 2:
+        return []
+    n, i, out = body[1], 2, []
+    for _ in range(n):
+        if i >= len(body):
+            break
+        pos = body[i]
+        i += 1
+        b = body[i]
+        if b == 0xCD:
+            iid, i = int.from_bytes(body[i + 1:i + 3], "big"), i + 3
+        elif b == 0xCE:
+            iid, i = int.from_bytes(body[i + 1:i + 5], "big"), i + 5
+        elif b == 0xCC:
+            iid, i = body[i + 1], i + 2
+        else:
+            iid, i = b, i + 1
+        num = body[i + 2] if i + 2 < len(body) else 0
+        i += 3
+        out.append((pos, iid, num))
+    return out
+
+
 def parse_30(body):
     """把 30 包解成 [(槽位, 物品id)]。空槽是 4 个 0，有装备是 6B。"""
     recs, i = [], 0
@@ -146,8 +180,10 @@ def main():
         print("FAIL 找不到主号存档 %s" % SRC_STATE)
         return 1
     src = json.load(open(SRC_STATE, encoding="utf-8"))
-    src["equip"] = {k: v for k, v in (src.get("equip") or {}).items()
-                    if int(k) <= 7}
+    # 装备表写死：以前是「过滤主号 equip<=7」，主号一脱装备这个测试就跟着漂
+    # （22:33 真机把逍遥战甲脱了，30=90B 的断言直接红）。回归必须与线上存档无关。
+    src["equip"] = {1: 12108, 2: 12109, 3: 12110, 4: 12111,
+                    5: 12112, 6: 12113, 7: 12114}
     src["bag"] = src.get("bag") or {}
     src["bag"]["21"] = [AMULET, 1]
     src["bag"]["22"] = [RING, 1]
@@ -156,6 +192,11 @@ def main():
     json.dump(src, open(STATE, "w", encoding="utf-8"), ensure_ascii=False)
 
     if not nostart:
+        # ★ 2026-11-25：踩过坑 —— 9112 上还有旧代码的进程在跑时，新 Popen 绑不上端口，
+        # 测试会静默连到旧进程上，断言全红但改的其实是新代码。这里必须硬报错。
+        if port_busy(port):
+            print("FAIL 端口 %d 已被占用（旧的服务进程没退），先杀掉再跑" % port)
+            return 1
         log = tempfile.NamedTemporaryFile(delete=False, suffix=".log", mode="w+", encoding="utf-8")
         proc = subprocess.Popen([PY, "local_server3.py", str(port), "patch/exact.pem", "patch/exact.key"],
                                 cwd=HERE, stdout=log, stderr=subprocess.STDOUT,
@@ -226,9 +267,9 @@ def main():
         check("30 含戒指槽9  cd2841090101", RING_HEX + b"\x09\x01\x01" in b30)
         check("30 含戒指槽10 cd28410a0101", RING_HEX + b"\x0a\x01\x01" in b30)
         slots = [s_ for s_, _ in recs]
-        check("30 槽位顺序 = 1..6,首饰,7（真服顺序）",
+        check("30 槽位顺序 = 1..6,护符11/12,戒指9/10,7（真服 96B 顺序）",
               slots[:6] == [1, 2, 3, 4, 5, 6] and slots[-1] == 7
-              and set(slots[6:-1]) == {9, 10, 11, 12},
+              and slots[6:-1] == [11, 12, 9, 10],
               str(slots))
         check("30 首饰 id 正确（成对同 id）",
               dict(recs).get(9) == RING and dict(recs).get(10) == RING
@@ -335,6 +376,61 @@ def main():
               "30=%dB" % len(b30_37))
         check("37 卸下的装备回到背包（178 含 cd2f4c = 12108）",
               b"\xcd\x2f\x4c" in b178_37, "178=%dB" % len(b178_37))
+
+        # ---- 10. 37 的字节是「客户端面板格号」，首饰 4 格是 护符11/12、戒指9/10 ----
+        # 反例就是 22:33 真机：穿上戒指+护符后点第 8 格（面板上的护符格），
+        # 「格号+1」会当成槽 9 去脱戒指。真服 96B 的 30 原包首饰顺序是
+        # 11,12,9,10，面板 4 格 = 护符/护符/戒指/戒指，所以 8 = 槽 12 护符、
+        # 9 = 槽 9 戒指。点 8 必须掉护符、戒指留着。
+        s.sendall(pack(177, 26))
+        pks = recv_packets(s, wait=1.5)
+        d = {}
+        for c, _, p in pks:
+            d.setdefault(c, p)
+        bag_now = parse_bag(d.get(178) or b"")
+        pos_ring = next((p for p, i, _ in bag_now if i == RING), None)
+        pos_am = next((p for p, i, _ in bag_now if i == AMULET), None)
+        rehung = False
+        if pos_ring is not None and pos_am is not None:
+            s.sendall(pack(182, 27, bytes([pos_ring, 1])))
+            recv_packets(s, wait=1.5)
+            s.sendall(pack(182, 28, bytes([pos_am, 1])))
+            pks = recv_packets(s, wait=2.0)
+            dd = {}
+            for c, _, p in pks:
+                dd.setdefault(c, p)
+            rehung = bool(dd.get(30)) and AMULET_HEX in (dd.get(30) or b"") \
+                and RING_HEX in (dd.get(30) or b"")
+        check("重新戴上戒指+护符（准备验证下标映射）", rehung,
+              "戒指格=%s 护符格=%s" % (pos_ring, pos_am))
+        if rehung:
+            s.sendall(pack(37, 29, b"\x08"))
+            pks = recv_packets(s, wait=2.5)
+            d = {}
+            for c, _, p in pks:
+                d.setdefault(c, p)
+            b30_i = d.get(30) or b""
+            b178_i = d.get(178) or b""
+            print("      [37 第8格] 30=%dB 记录=%s" % (len(b30_i), parse_30(b30_i)))
+            check("37 第8格掉的是护符（30 里没有 cd2842）", AMULET_HEX not in b30_i)
+            check("37 第8格戒指还在（30 里仍有 cd2841）", RING_HEX in b30_i,
+                  str(parse_30(b30_i)))
+            check("37 掉的护符回背包", AMULET_HEX in b178_i, "178=%dB" % len(b178_i))
+
+            # ---- 11. 同一张表反过来验：第 9 格 = 戒指 ----
+            s.sendall(pack(37, 30, b"\x09"))
+            pks = recv_packets(s, wait=2.5)
+            d = {}
+            for c, _, p in pks:
+                d.setdefault(c, p)
+            b30_j = d.get(30) or b""
+            b178_j = d.get(178) or b""
+            print("      [37 第9格] 30=%dB 记录=%s" % (len(b30_j), parse_30(b30_j)))
+            check("37 第9格掉的是戒指（30 里没有 cd2841）", RING_HEX not in b30_j,
+                  str(parse_30(b30_j)))
+            check("37 第9格护符早已不在（此时 30 里没有首饰）",
+                  AMULET_HEX not in b30_j, str(parse_30(b30_j)))
+            check("37 掉的戒指回背包", RING_HEX in b178_j, "178=%dB" % len(b178_j))
 
         s.close()
         time.sleep(0.8)
