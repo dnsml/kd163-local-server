@@ -397,6 +397,21 @@ def bag_view():
     return {p: {"pos": p, "id": v[0], "num": v[1]} for p, v in cur().bag.items()}
 
 
+def bag_one_desc(v):
+    """给日志用：[id, num] -> 「名字×数量」，空槽写「空」。"""
+    if not v:
+        return "空"
+    iid, num = int(v[0]), int(v[1])
+    return "%s(%d)×%d" % (bag_proto.item(iid)["name"], iid, num)
+
+
+def bag_digest(bag):
+    """整包一行摘要：槽0 名字×n / 槽1 ...（按槽升序）"""
+    if not bag:
+        return "空包"
+    return " / ".join("%d:%s" % (p, bag_one_desc(bag[p])) for p in sorted(bag))
+
+
 def build_88():
     """87 -> 88「成就 / 称号列表」。
 
@@ -450,7 +465,24 @@ def send_push(conn, cid, cmd):
     if cmd == 178:
         body = bag_proto.build_178(bag_view())
         conn.sendall(pack(178, 0, body))
-        log("c%03d .. push cmd=178    len=%d [动态背包 %d件]" % (cid, len(body), len(cur().bag)))
+        log("c%03d .. push cmd=178    len=%d [动态背包 %d件]"
+            % (cid, len(body), len(cur().bag)))
+        # 「背包里的东西忽然变成别的」这类反馈，光看件数查不出来：
+        # 件数没变、槽位内容变了才是现场。所以这里记一份快照做差异，
+        # 首次推全量清单，之后只打变化行（槽x A → B / → 空）。
+        prev = getattr(cur(), "bag_sent", None)
+        now = {int(k): list(v) for k, v in cur().bag.items()}
+        if prev is None:
+            log("c%03d .. 背包快照 %s" % (cid, bag_digest(now)))
+        else:
+            diff = []
+            for p in sorted(set(prev) | set(now)):
+                if prev.get(p) != now.get(p):
+                    diff.append("槽%d %s → %s"
+                                % (p, bag_one_desc(prev.get(p)), bag_one_desc(now.get(p))))
+            if diff:
+                log("c%03d .. 背包变动 %d 格：%s" % (cid, len(diff), "；".join(diff)))
+        cur().bag_sent = now
         return
     if cmd == 818:
         body = build_818(equip_slots())
