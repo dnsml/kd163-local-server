@@ -2760,6 +2760,25 @@ def builtin_resp(cmd, payload):
         log("[maze] 1859 档位%s 等级 Lv%d 达门槛 -> 记为已进迷宫（待真服正样本校准场景切换）"
             % (payload.hex() or "-", cur().level))
         return 1859, b""
+    if cmd == 37:
+        # 37 = 点装备栏某一格（1 字节格号，**0 基**）。本机客户端脱装备发的就是它：
+        #   22:26:46 C->S cmd=37 len=1 hex=06   22:27:40 hex=00
+        # relay.log 里没有 37 样本（那几次抓包没人点装备格），线上服同族的
+        # 35 是转职（35 -> 36 空 ACK），所以这里按玩家预期实现成**卸下**：
+        # 把格子里的东西放回背包，再推 818/30/29/28/178 刷新。
+        raw = payload[0] if payload else 0
+        slot = raw + 1 if (raw + 1) in cur().equip else raw
+        have = cur().equip.get(slot)
+        if have:
+            for _s in acc_slots_of(slot):
+                cur().equip.pop(_s, None)
+            bp = bag_add(have, 1)
+            save_state()
+            log("[equip] 37 格%d -> 槽%d 卸下 %s(id=%d)，回背包格%d"
+                % (raw, slot, bag_proto.item(have)["name"], have, bp))
+        else:
+            log("[equip] 37 格%d -> 槽%d 没有装备，只回 ACK" % (raw, slot))
+        return 37, b"", [818, 30, 29, 28, 178]
     if cmd == 819:
         # 819 = 客户端对装备栏某一格的操作请求，真服载荷是 [物品 id varint][槽位]：
         #   23:52:30 C->S cmd=819 len=4 hex=cd28420b → 护符 10306 / 槽 11

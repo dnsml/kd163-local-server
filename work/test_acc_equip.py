@@ -313,6 +313,29 @@ def main():
         else:
             check("819 全卸后拿到 29 面板做比对", bool(hp_none), "hp=%s" % hp_none)
 
+        # ---- 9. 37 = 点装备格卸下（客户端 0 基格号：00 -> 槽 1）----
+        # 这是真机脱装备真正发的命令，以前服务端没分支直接丢，表现「脱不下来」。
+        s.sendall(pack(37, 25, b"\x00"))
+        pks = recv_packets(s, wait=2.5)
+        cmds = [c for c, _, _ in pks]
+        d = {}
+        for c, _, p in pks:
+            d.setdefault(c, p)
+        b818_37 = d.get(818) or b""
+        b178_37 = d.get(178) or b""
+        b30_37 = d.get(30) or b""
+        n37 = b818_37[0] if b818_37 else 0
+        print("      [37 卸下槽1] cmd 顺序 %s  818 n=%d  30=%dB  178=%dB"
+              % (cmds[:10], n37, len(b30_37), len(b178_37)))
+        check("37 有应答（不再静默丢弃）", 37 in d or 818 in d, str(cmds[:6]))
+        # 1~7 是固定槽位，空槽也占一条（id 写 0），所以条数不变、槽1 记录变空
+        check("37 卸下后 818 槽1 变空（01 cd 0000）",
+              b"\x01\xcd\x00\x00" in b818_37, "len=%d" % len(b818_37))
+        check("37 卸下后 30 里没有该装备", b"\xcd\x2f\x4c" not in b30_37,
+              "30=%dB" % len(b30_37))
+        check("37 卸下的装备回到背包（178 含 cd2f4c = 12108）",
+              b"\xcd\x2f\x4c" in b178_37, "178=%dB" % len(b178_37))
+
         s.close()
         time.sleep(0.8)
     finally:
