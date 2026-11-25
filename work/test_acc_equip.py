@@ -181,6 +181,22 @@ def main():
         print("[1] 登录 %d 个包，初始生命 %s，30=%s" %
               (len(pks), hp0, (d0.get(30) or b"").hex()[:24]))
 
+        # ---- 0. 177 打开背包 → 178 必须是当前背包全量 ----
+        # 之前这里落到「cmd+1 有模板就回模板」，回的是录制的新号三件套
+        # （绑定铜钱卡×10 / 10绑定元宝 / 5级新丁礼包，23B），
+        # 于是每次开背包那三件就盖在槽 0/1/2 上，点使用没反应。
+        s.sendall(pack(177, 19))
+        pks = recv_packets(s, wait=1.5)
+        d177 = {}
+        for c, _, p in pks:
+            d177.setdefault(c, p)
+        b177 = d177.get(178) or b""
+        n177 = b177[1] if len(b177) >= 2 else 0     # 178 体：[0x40][条数]…
+        print("      [177 开背包] cmd 顺序 %s  n=%d len=%d" %
+              ([c for c, _, _ in pks][:6], n177, len(b177)))
+        check("177 回 178 全量（不是 23B 新手三件套）",
+              n177 >= 5 and len(b177) != 23, "n=%d len=%d" % (n177, len(b177)))
+
         # ---- 1. 先穿戒指（10305 不带生命属性 → 这一发 29 就是基线）----
         s.sendall(pack(182, 20, bytes([0x16, 0x01])))     # 格 22 = 0x16 = 飞仙戒指
         pks = recv_packets(s, wait=2.5)

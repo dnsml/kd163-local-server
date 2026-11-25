@@ -2800,6 +2800,17 @@ def builtin_resp(cmd, payload):
         log("[wardrobe] 837 -> 838 衣柜 %d 件 len=%d %s"
             % (len(cur().wardrobe), len(body), sorted(cur().wardrobe)))
         return 838, body
+    if cmd == 177:
+        # 177 = 打开背包 → 真服回 178 全量。
+        # 以前这里没有分支，落到通用「cmd+1 有模板就回模板」那一档，
+        # 而 TPL_PUSH[178] 是录制下来的**新号三件套**：
+        #   绑定铜钱卡×10 / 10绑定元宝 / 5级新丁礼包（23B）
+        # 于是每次开背包都把这三件盖到槽 0/1/2 上 —— 服务端根本没这些东西，
+        # 点「使用」自然没反应；等打完怪 / 交任务推了动态 178，
+        # 同一格子又变回强化仙玉，表现就是「东西会变成别的物品」。
+        body = bag_proto.build_178(bag_view())
+        log("[bag] 177 打开背包 -> 178 全量 %d 件 len=%d" % (len(cur().bag), len(body)))
+        return 178, body, []
     if cmd == 181:
         # 181 = 打开 / 整理背包。真服回「同号 + [0x40][n] 全量」：
         #   23:35:47 打开背包 → 181 + 114B(16件)
