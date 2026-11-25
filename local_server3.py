@@ -1084,22 +1084,20 @@ def apply_gm(line):
     # `脱装备 1` 按槽位卸下。用于不走客户端 182 也能验证装备栏显示。
     if key in ("装备", "穿装备", "equip"):
         it = bag_proto.item(val)
-        slot = SLOT_OF_KIND2.get(it.get("kind2"))
+        slot = equip_slot_for(it.get("kind2"))
         if slot is None:
             return False, "%s kind2=%s 没有对应装备槽" % (it["name"], it.get("kind2"))
-        for _s in acc_slots_of(slot):
-            cur().equip[_s] = val
+        cur().equip[slot] = val
         save_state()
-        push_all([28, 818])
+        push_all([29, 28, 30, 178])
         return True, "槽%d 穿上 %s(id=%d)" % (slot, it["name"], val)
 
     if key in ("脱装备", "卸装备", "unequip"):
         if val in cur().equip:
             old = cur().equip.get(val)
-            for _s in acc_slots_of(val):
-                cur().equip.pop(_s, None)
+            cur().equip.pop(val, None)
             save_state()
-            push_all([28, 818])
+            push_all([29, 28, 30, 178])
             return True, "槽%d 卸下 id=%d" % (val, old)
         return False, "槽%d 本来就是空的" % val
 
@@ -1343,11 +1341,16 @@ SLOT_OF_KIND2 = {1: 7, 2: 7, 3: 7, 4: 7, 5: 7,      # 武器只有槽 7 一个
 # 首饰槽（30 包槽 6 与槽 7 之间那 16 字节就是这 4 个槽：空 4B、有装备 6B）
 ACC_SLOTS = (9, 10, 11, 12)
 
-# ★ 2026-11-25：首饰是**成对**的 —— 一枚戒指同时占 9 和 10，一枚护符同时占 11 和 12，
-# 两格写同一个物品 id。真服 818 的 11 条样本（len=309）槽序是
-#   11,12,2,3,1,4,5,9,10,6,7
-# 其中 11/12 同 id、9/10 同 id，30 的 96B 样本也是四个槽全填。
-# 以前只写 9 和 11，客户端装备栏里就空出 10、12 两格 —— 玩家反馈的「还有两个槽是空的」。
+# ★ 2026-11-25 23:25 真服抓包定性（推翻「成对镜像」的旧结论）：
+#   23:25:24  C->S 182 hex=3a01  → 30 只多了一条 cd28420c0101（护符，槽12）
+#   23:25:26  C->S 182 hex=3b01  → 30 又只多一条 cd28420b0101（护符，槽11）
+#   23:25:27  C->S 182 hex=3801  → 只多 cd2841090101（戒指，槽9）
+#   23:25:29  C->S 182 hex=3901  → 只多 cd28410a0101（戒指，槽10）
+# 同一个 178 里这四件各占一个独立包格（38/39/3a/3b）。
+# 也就是说 9/10 是**两个戒指槽**、11/12 是**两个护符槽**，四件独立物品，
+# 不是「一件同时写两格」。以前按镜像处理 → 面板多一件、属性翻倍、
+# 卸下时两格一起消失、178 少回一件，客户端对不上账直接 SIGABRT 闪退。
+# 下面这张表只剩「同类的另一个槽」这一个用途：装备时优先找空的那格。
 ACC_PAIR = {9: 10, 10: 9, 11: 12, 12: 11}
 
 # ★ 2026-11-25 23:24 真服实测（决定性）：11 格逐格点击 + 每次点击后的 30 包
@@ -1366,8 +1369,29 @@ CELL_SLOTS = (1, 2, 3, 4, 5, 6,      # 00~05 主装备（槽 1~6）
 
 
 def acc_slots_of(slot):
-    """首饰槽 -> 需要一起写/一起清的槽（非首饰槽原样返回）。"""
-    return (slot, ACC_PAIR[slot]) if slot in ACC_PAIR else (slot,)
+    """某个槽卸下时**实际要清的槽**。
+
+    首饰四格是四件独立物品（真服 23:25:24~29 四个 182 各占一格），
+    所以永远只清点中的那一格 —— 以前返回 (slot, 配对槽) 会把玩家另一件
+    首饰一起吞掉，客户端收到 178 少一件就对不上账（SIGABRT 闪退）。
+    """
+    return (slot,)
+
+
+def equip_slot_for(kind2):
+    """按 kind2 找该穿进哪个槽。首饰同类有两格（戒指 9/10、护符 11/12），
+    优先放空的那格，两格都满就换主槽（9 / 11），旧的那件回背包。"""
+    base = SLOT_OF_KIND2.get(kind2)
+    if base is None:
+        return None
+    pair = ACC_PAIR.get(base)
+    if not pair:
+        return base
+    if not cur().equip.get(base):
+        return base
+    if not cur().equip.get(pair):
+        return pair
+    return base
 
 
 def equip_slots():
@@ -1742,11 +1766,12 @@ def load_state(pl=None):
         pl.equip.clear()
         for k, v in eq.items():
             pl.equip[int(k)] = int(v)
-    # 老存档只写了 9 / 11 一个槽，这里补出配对槽（10 / 12），
-    # 否则装备栏里会空着两格 —— 玩家反馈的「还有两个槽是空的」。
-    for _s in (9, 11):
-        if pl.equip.get(_s):
-            pl.equip[ACC_PAIR[_s]] = pl.equip[_s]
+    # ★ 旧版本把一件首饰同时写进成对两格（9+10 / 11+12），读档时清掉多出来的那格。
+    # 首饰四格是四件独立物品，同一件不可能同时占两格；留着会让面板多一件、
+    # 卸下时两格一起消失、178 和面板对不上账（客户端 SIGABRT 闪退）。
+    for _a, _b in ((9, 10), (11, 12)):
+        if pl.equip.get(_a) and pl.equip.get(_a) == pl.equip.get(_b):
+            pl.equip.pop(_b, None)
     eh = d.get("enhance")
     if isinstance(eh, dict):
         pl.enhance.clear()
@@ -2562,10 +2587,12 @@ EQUIP_STR_SRC = [equip_attr.EQUIP_XML]
 def all_attrs():
     """全身强化相关属性合计：strengthen + gift + 强化大师 + 套装件数。
 
-    首饰成对下发（9/10 同 id、11/12 同 id），但属性只能算一次，
-    所以汇总前把配对槽 10、12 剔掉，否则戴一枚护符会加两遍。
+    四个首饰槽是四件独立物品（真服 23:25:24~29 四个 182 各占一格，
+    178 里也是四个独立包格），所以每格都要算，没有「配对槽去重」这回事。
+    以前剔掉 10/12 是因为把一件首饰写进了两格；现在一格一件，
+    再剔就会少算玩家真正戴着的第二枚戒指/护符。
     """
-    eq = {s: v for s, v in cur().equip.items() if s not in (10, 12)}
+    eq = dict(cur().equip.items())
     return equip_attr.total_attrs(eq, cur().enhance)
 
 
@@ -2853,10 +2880,13 @@ def builtin_resp(cmd, payload):
     if cmd == 819:
         # 819 = 客户端对装备栏某一格的操作请求，真服载荷是 [物品 id varint][槽位]：
         #   23:52:30 C->S cmd=819 len=4 hex=cd28420b → 护符 10306 / 槽 11
-        #   23:52:31 C->S cmd=819 len=4 hex=cd28420c → 槽 12（同一件，成对的那格）
-        # 真服自己回的是「本服尚未恢复此功能」（cmd=1 + 29B 文本），
-        # 所以线上服也脱不下来。本地服按玩家预期实现成**卸下**：
-        # 槽里确实是这件就脱下来放回背包，再推 818/30/29/28/178 一起刷新。
+        #   23:52:31 C->S cmd=819 len=4 hex=cd28420c → 槽 12（另一件护符）
+        # 真服只会回 cmd=1 的文本包（04 bb + 「本服尚未恢复此功能」，len=29），
+        # **从不回 cmd=819 本身**。本地照回 819 空包时，客户端刚收到就
+        # SIGABRT 把进程带走（23:41:01，Zygote: exited due to signal (6)）——
+        # 它没有「819 成功」这条分支，空包体解析直接断言。
+        # 所以这里：本地照玩家预期真的卸下（只卸点中的那一格），
+        # 但回包用线上服同形的 cmd=1 文本，绝不发 819 应答。
         slot = payload[-1] if payload else 0
         iid = 0
         if payload:
@@ -2870,21 +2900,16 @@ def builtin_resp(cmd, payload):
                 iid = payload[0]
         have = cur().equip.get(slot)
         if have and (not iid or have == iid):
-            for _s in acc_slots_of(slot):
-                cur().equip.pop(_s, None)
+            cur().equip.pop(slot, None)
             bag_add(have, 1)
             save_state()
-            log("[equip] 819 槽%d 卸下 %s(id=%d) 已回包"
-                % (slot, bag_proto.item(have)["name"], have))
-            # 应答必须是 819 本身（真服同 seq 回 ACK）。推送顺序对齐 37 实测：
-            # 29 属性 -> 28 -> 30 外观 -> 178 背包。818 是 817 的回执，
-            # 主动推它会被客户端当成权威装备表覆盖本地面板，所以不推。
-            return 819, b"", [29, 28, 30, 178]
-        pr = probe_820()
-        log("[equip] 819 槽%d payload=%s 无可卸装备 -> 818 全量%s"
-            % (slot, payload.hex(),
-               ("+ 实验 820(len=%d)" % len(pr)) if pr is not None else ""))
-        return 818, build_818(equip_slots()), [28]
+            nm = bag_proto.item(have)["name"]
+            log("[equip] 819 槽%d 卸下 %s(id=%d) → 回 cmd=1 文本 + 29/28/30/178"
+                % (slot, nm, have))
+            return 1, err_text("已脱下%s" % nm), [29, 28, 30, 178]
+        log("[equip] 819 槽%d 没有可卸装备（payload=%s），只回文本"
+            % (slot, payload.hex()))
+        return 1, err_text("这个位置没有可脱下的装备"), []
     if cmd == 837:
         # 837 = 打开衣柜（C->S 空包）→ 838 已拥有时装列表。
         # 以前这个号完全没处理：客户端发了 837 什么都没回来，衣柜界面就一直转圈。
@@ -3019,7 +3044,7 @@ def builtin_resp(cmd, payload):
                 # 装备（kind2=15 翅膀、kind2=14 时装 已在上面分流，不会走到这里）。
                 # 真服装备栏协议：17 登录带一份全量，817 拉取时回 818，
                 # 818 里每条 = [槽位][物品 id][01][21 个 0]（强化/洗炼/宝石位全 0）。
-                slot = SLOT_OF_KIND2.get(it["kind2"])
+                slot = equip_slot_for(it["kind2"])
                 if slot is None:
                     log("[equip] 格%02x %s kind2=%d 没有对应槽位，保留不消耗"
                         % (pos, it["name"], it["kind2"]))
@@ -3031,9 +3056,8 @@ def builtin_resp(cmd, payload):
                 if old:
                     bag_add(old, 1)          # 换下来的旧装备回背包
                     log("[equip] 槽%d 换下 %s 已回包" % (slot, old))
-                # 首饰成对：戒指写 9+10、护符写 11+12，与真服 818/30 一致
-                for _s in acc_slots_of(slot):
-                    cur().equip[_s] = iid
+                # 一件只占一格。首饰四格是四件独立物品，绝不同时写两格。
+                cur().equip[slot] = iid
                 # 真服 15:38:17~15:38:22 三个 182 穿戴样本：只跟 29 / 28 / 178。
                 # 不推 30（外观广播）、不推 818（817 的回执）—— 见 37 分支注释。
                 # 真服 23:25:22~23:25:36 连续穿 11 件，每件都是：
@@ -3762,12 +3786,13 @@ def handle_game(conn, cid):
                     continue
                 if cmd == 42:
                     # 真服实证（20:51:33 / 20:51:52 / 20:52:23 三次）：
-                    #   42 payload=06  →  818 seq=0 (850B 完整装备列表) + 43 seq=同请求 (345B 角色详情)
-                    # 43 里能直接看到角色名和账号，是「登录后完整角色数据」。
-                    # 之前本地服把 42 静默丢弃 → 客户端从未拿到这份角色详情，
-                    # 装备面板转圈、宠物/妖灵界面空都可能是它引起的。
-                    # 这里先按真服原包回放（850B 是那个角色的装备，与本地装备不同，
-                    # 但结构完整；后续要按本地 EQUIP 重算再替换）。
+                    #   42 payload=06  →  818 seq=0 + 43 seq=同请求 (345B 角色详情)
+                    # ★ 注意：42 触发的那份 818 是 850B / 14 条，载荷里
+                    # 一个装备 id 都没有（cd2b65/cd2f4c/cd2841 全不出现，id 是
+                    # cd353d、cd4f30、cd2745 这类），属于另一个子系统（心法类）。
+                    # 它和「装备表 818」（count + 28B/条，如 197B=7 条）不是一回事，
+                    # 所以这里仍旧原样回放录制包，不要拿 build_818 去替换 ——
+                    # 换了等于给这个 handler 塞错结构。装备表走 30 / 817 的 818 回执。
                     if ROLE_FULL.get("818_full"):
                         _bfull = bytes.fromhex(ROLE_FULL["818_full"])
                         conn.sendall(pack(818, 0, _bfull))
