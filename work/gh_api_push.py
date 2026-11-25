@@ -27,23 +27,35 @@ REPO = "dnsml/kd163-local-server"
 BRANCH = "master"
 TOKEN = open("D:/66666/.gh_pat", encoding="utf-8").read().strip()
 API = "https://api.github.com"
-PROXY = "http://127.0.0.1:64435"
+# 出口：优先用环境里的代理（KD163_GH_PROXY 可覆盖），没有就直接连。
+# 以前这里写死 127.0.0.1:64435，代理一换端口就 WinError 10061，
+# 还容易误判成「GitHub 不通」。
+PROXY = (os.environ.get("KD163_GH_PROXY")
+         or os.environ.get("https_proxy")
+         or os.environ.get("HTTPS_PROXY")
+         or "").strip()
 
 
-def _opener(verify=True):
-    """走本地代理（github.com:443 不通，只能借这个出口）。
+def _opener(verify=True, proxy=None):
+    """按指定出口建 opener；proxy 为空串 = 直连。
 
     代理会做 TLS 中间人，某些会话下给的是「签不出完整链」的证书，
     默认校验会 `CERTIFICATE_VERIFY_FAILED`。这时退一步不校验证书再试一次
     —— 只为把提交推上去，不是安全通道，别拿它传别的东西。
     """
+    if proxy is None:
+        proxy = PROXY
     ctx = ssl.create_default_context()
     if not verify:
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
-    return urllib.request.build_opener(
-        urllib.request.ProxyHandler({"http": PROXY, "https": PROXY}),
-        urllib.request.HTTPSHandler(context=ctx))
+    handlers = [urllib.request.HTTPSHandler(context=ctx)]
+    if proxy:
+        handlers.insert(0, urllib.request.ProxyHandler({"http": proxy, "https": proxy}))
+    else:
+        # 显式空 ProxyHandler，避免 urllib 又去读环境变量
+        handlers.insert(0, urllib.request.ProxyHandler({}))
+    return urllib.request.build_opener(*handlers)
 
 
 def call(method, path, body=None):
@@ -54,15 +66,30 @@ def call(method, path, body=None):
     req.add_header("User-Agent", "kd163-push")
     if data:
         req.add_header("Content-Type", "application/json")
-    try:
-        with _opener(True).open(req, timeout=180) as r:
-            return json.loads(r.read().decode())
-    except urllib.error.URLError as e:
-        if not isinstance(getattr(e, "reason", None), ssl.SSLCertVerificationError):
-            raise
-        sys.stderr.write("[warn] 代理证书链校验失败，改用不校验通道重试\n")
-        with _opener(False).open(req, timeout=180) as r:
-            return json.loads(r.read().decode())
+    if method == "GET":
+        req.add_header("Cache-Control", "no-cache")
+
+    exits = [PROXY, ""] if PROXY else [""]
+    last = None
+    for proxy in exits:
+        for verify in (True, False):
+            try:
+                with _opener(verify, proxy).open(req, timeout=180) as r:
+                    return json.loads(r.read().decode())
+            except urllib.error.HTTPError:
+                raise
+            except urllib.error.URLError as e:
+                last = e
+                if isinstance(getattr(e, "reason", None), ssl.SSLCertVerificationError):
+                    if verify:
+                        sys.stderr.write("[warn] %s 证书链校验失败，改不校验重试\n"
+                                         % (proxy or "直连"))
+                        continue
+                if proxy:
+                    sys.stderr.write("[warn] 出口 %s 不可用（%s），改直连\n"
+                                     % (proxy, getattr(e, "reason", e)))
+                break
+    raise last
 
 
 # core.quotepath=false：不然中文文件名会输出成 "docs/\344\272..." 的八进制转义，

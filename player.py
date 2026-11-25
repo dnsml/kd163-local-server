@@ -28,6 +28,7 @@ class Player(object):
         "spirit_bag", "spirit_slot",
         "quest_active", "quest_ready", "done_quests",
         "scene", "pos_x", "pos_y",
+        "bag_sent",              # 上次推给客户端的背包快照，只用来算差异日志
     )
 
     def __init__(self):
@@ -79,6 +80,8 @@ class Player(object):
         # 默认值 21,7 是原 17 模板里那对坐标，保持既有手感不变。
         self.pos_x = 21
         self.pos_y = 7
+        # 只用于「背包变动」日志：None 表示这次连接还没推过背包
+        self.bag_sent = None
 
     def purses(self):
         """货币键 -> 可变列表（GM 与商城共用同一份引用）。"""
