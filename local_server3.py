@@ -3869,6 +3869,13 @@ def handle_game(conn, cid):
                         conn.sendall(pack(43, seq, _b43))
                         log("c%03d -> cmd=43  seq=%-4d len=%d [角色详情 真服原包]"
                             % (cid, seq, len(_b43)))
+                    # ★ 打开角色面板顺带补一条 30：真服装备变化时就推，本地以前
+                    #   只有穿脱之后才推，重登直接开面板看不到首饰/武器（空槽）。
+                    _b30role = build_30()
+                    if _b30role:
+                        conn.sendall(pack(30, 0, _b30role))
+                        log("c%03d -> cmd=30  seq=0    len=%d [角色面板补推装备 %d件]"
+                            % (cid, len(_b30role), len(cur().equip)))
                     continue
                 if cmd == 1154:
                     # 货币目录：真服 9 次样本全是同一份 69B，21 项 id(1B)+值(u16) 全 0，
@@ -4595,6 +4602,15 @@ def handle_game(conn, cid):
                         conn.sendall(pack(306, 0, _skb))
                         log("c%03d .. push cmd=306 len=%d [登录补推技能栏 职业%d]"
                             % (cid, len(_skb), cur().cls))
+                        # ★ 2026-11-26 02:1x：登录回放里根本不含 30，角色面板上
+                        #   首饰 4 格 / 鞋子 / 武器就一直空着（左列 6 个主槽靠 17 的
+                        #   外观数据还能画出来，所以只有右半边是空的）。
+                        #   真服是「装备一变就推 30」，本地在登录序列走完后补一条。
+                        _b30login = build_30()
+                        if _b30login:
+                            conn.sendall(pack(30, 0, _b30login))
+                            log("c%03d .. push cmd=30 len=%d [登录补推装备 %d件]"
+                                % (cid, len(_b30login), len(cur().equip)))
                     continue
 
                 # 209 = 客户端主动拉任务状态。默认走 TPL[210] 那份抓包快照
