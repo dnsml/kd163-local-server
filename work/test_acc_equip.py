@@ -19,13 +19,14 @@
 断言（★ 2026-11-25 23:25 真服抓包定性：首饰四格是**四件独立物品**）：
 1. 182 穿第 1 枚戒指 → 只进槽 9；再穿第 2 枚 → 进槽 10（不是同一件写两格）
 2. 182 穿护符同理：第 1 枚槽 11、第 2 枚槽 12
-3. 30 包按「实槽 6B / 空槽 4B」变长：7 装备 + 4 首饰 = 90B，
+3. 30 包按「实槽 6B / 空槽 4B」变长，尾部 = 第12块 4B + 翅膀 20B + 坐骑 6B（两块长度恒定）：
    顺序 1..6 / 11,12 / 9,10 / 7（真服 96B 原包顺序）
 4. 818 记录数 = 11，槽 9/10、11/12 各一条
 5. 29 面板生命：每枚护符 +335，两枚 +670（一格一件，不再需要去重）
 6. 817 回显带首饰槽（客户端重登后不会再被清空）
-7. 819 卸戒指 → **只清点中的那一格**，另一枚戒指还在；回 cmd=1 文本（不是 819）
-   —— 回 819 空包会让客户端 SIGABRT 闪退（23:41:01 实测）
+7. 819（点装备格）= 线上服只回 `04bb` +「本服尚未恢复此功能」，**一件都不脱**
+   —— 回 819 空包会让客户端 SIGABRT 闪退（23:41:01 实测）；
+   本地以前把 819 当卸下，玩家点一下武器就从身上掉了，还会多出一件到背包
 8. 37 点首饰格 → 只卸那一格；格 08→槽9、格 06→槽12、格 0a→槽8 武器
 
 ⚠️ 用独立测试账号 9112001 的存档，跑完删除，不动玩家主号。
@@ -256,8 +257,8 @@ def main():
         hp_ring1 = hp_of(d.get(29))
         b30_r1 = d.get(30) or b""
         check("182 穿戒指回 ACK", 182 in d, "cmd 顺序 %s" % cmds[:10])
-        check("第 1 枚戒指只进槽9（30 = 84B，没有槽10）",
-              len(b30_r1) == 84 and RING_HEX + b"\x09\x01\x01" in b30_r1
+        check("第 1 枚戒指只进槽9（30 = 90B，没有槽10）",
+              len(b30_r1) == 90 and RING_HEX + b"\x09\x01\x01" in b30_r1
               and RING_HEX + b"\x0a\x01\x01" not in b30_r1,
               "%dB 记录=%s" % (len(b30_r1), parse_30(b30_r1)))
 
@@ -268,8 +269,8 @@ def main():
         for c, _, p in pks:
             d.setdefault(c, p)
         b30_r2 = d.get(30) or b""
-        check("第 2 枚戒指进槽10（两格各一枚，30 = 86B）",
-              len(b30_r2) == 86
+        check("第 2 枚戒指进槽10（两格各一枚，30 = 92B）",
+              len(b30_r2) == 92
               and RING_HEX + b"\x09\x01\x01" in b30_r2
               and RING_HEX + b"\x0a\x01\x01" in b30_r2,
               "%dB 记录=%s" % (len(b30_r2), parse_30(b30_r2)))
@@ -288,8 +289,8 @@ def main():
         print("      30=%dB 记录=%s" % (len(b30), recs))
         print("      29 生命 两枚戒指 %s -> 两枚护符 %s" % (hp_ring1, hp_both))
 
-        check("30 = 90B（7 装备 + 4 首饰槽，实槽 6B / 空槽 4B）",
-              len(b30) == 90, "%dB" % len(b30))
+        check("30 = 96B（7 装备 + 4 首饰槽，实槽 6B / 空槽 4B + 翅膀 20B + 坐骑 6B）",
+              len(b30) == 96, "%dB" % len(b30))
         check("30 含护符槽11 cd28420b0101", AMULET_HEX + b"\x0b\x01\x01" in b30)
         check("30 含护符槽12 cd28420c0101", AMULET_HEX + b"\x0c\x01\x01" in b30)
         check("30 含戒指槽9  cd2841090101", RING_HEX + b"\x09\x01\x01" in b30)
@@ -321,58 +322,42 @@ def main():
         check("817 回显里带首饰槽", AMULET_HEX in b817r and RING_HEX in b817r,
               "len=%d" % len(b817r))
 
-        # ---- 7. 819 卸戒指（真服载荷 cd2841 09 = 戒指 10305 / 槽 9）----
+        # ---- 7. 819 = 客户端「点装备格」，线上服只回文本、一件都不脱 ----
+        # 线上服 23:52:30~37 连点 8 次，每次都是同一条 29B `04bb` +「本服尚未恢复此功能」，
+        # 装备栏原样不动。本地以前照玩家预期真的卸下，结果玩家只想看看武器，
+        # 点一下就从身上掉了、还往背包多塞一件（反馈「点一下武器，武器槽就消失了」）。
         s.sendall(pack(819, 25, RING_HEX + b"\x09"))
-        pks = recv_packets(s, wait=2.5)
+        s.sendall(pack(819, 26, AMULET_HEX + b"\x0b"))
+        pks = recv_packets(s, wait=2.0)
         cmds = [c for c, _, _ in pks]
         d = {}
         for c, _, p in pks:
             d.setdefault(c, p)
-        b30_no_ring = d.get(30) or b""
-        b178_ring = d.get(178) or b""
-        recs_no_ring = parse_30(b30_no_ring)
-        print("      [819 卸戒指] cmd 顺序 %s  30=%dB  178=%dB"
-              % (cmds[:10], len(b30_no_ring), len(b178_ring)))
+        btxt819 = d.get(1) or b""
+        want819 = b"\x04\xbb" + "本服尚未恢复此功能".encode("utf-8")
+        print("      [819 点戒指/护符格] cmd 顺序 %s  text=%s"
+              % (cmds[:8], btxt819.hex()))
         # ★ 23:41:01 实测：本地回 819 空包，客户端收到就 SIGABRT 闪退
-        # （logcat: Zygote Process exited due to signal (6)）。
-        # 线上服对 819 只回 cmd=1 文本，从不回 819 本身。
-        check("819 回 cmd=1 文本（绝不回 819 空包，否则客户端断言闪退）",
+        # （logcat: Zygote Process exited due to signal (6)）。线上服从不回 819 本身。
+        check("819 只回 cmd=1 文本（绝不回 819 空包，否则客户端断言闪退）",
               1 in d and 819 not in d, str(cmds[:8]))
-        check("819 只卸槽9，第 2 枚戒指还在槽10",
-              RING_HEX + b"\x09\x01\x01" not in b30_no_ring
-              and RING_HEX + b"\x0a\x01\x01" in b30_no_ring,
-              "%dB 记录=%s" % (len(b30_no_ring), recs_no_ring))
-        check("819 后 30 = 88B（少一件，17 槽结构不变）",
-              len(b30_no_ring) == 88, "%dB 记录=%s" % (len(b30_no_ring), recs_no_ring))
-        check("819 后护符槽 11/12 都在", AMULET_HEX + b"\x0b\x01\x01" in b30_no_ring
-              and AMULET_HEX + b"\x0c\x01\x01" in b30_no_ring)
-        check("819 卸下的戒指回到背包（178 含 cd2841）", RING_HEX in b178_ring,
-              "178=%dB" % len(b178_ring))
+        check("819 文本与线上服同形（04bb + 本服尚未恢复此功能，29B）",
+              btxt819 == want819, "%dB %s" % (len(btxt819), btxt819.hex()[:40]))
+        check("819 不推 29/28/30/178（点一下不该改装备）",
+              not (set(cmds) & {29, 28, 30, 178}), str(cmds[:8]))
 
-        # ---- 8. 819 卸护符（cd2842 0b = 护符 10306 / 槽 11）----
-        s.sendall(pack(819, 26, AMULET_HEX + b"\x0b"))
-        pks = recv_packets(s, wait=2.5)
+        # ---- 8. 819 之后装备栏必须原样：用 817 让客户端上报，818 回显对账 ----
+        s.sendall(pack(817, 27, b"\x09" + RING_HEX + b"\x09"
+                       + AMULET_HEX + b"\x0b"))
+        pks = recv_packets(s, wait=1.5)
         d = {}
         for c, _, p in pks:
             d.setdefault(c, p)
-        b30_none = d.get(30) or b""
-        b178_am = d.get(178) or b""
-        hp_none = hp_of(d.get(29))
-        print("      [819 卸护符] 30=%dB  29 生命 %s"
-              % (len(b30_none), hp_none))
-        check("819 卸护符后 30 = 86B（只剩槽12 那枚）",
-              len(b30_none) == 86, "%dB 记录=%s" % (len(b30_none), parse_30(b30_none)))
-        check("819 卸护符后槽12 仍在（只掉点中的那格）",
-              AMULET_HEX + b"\x0c\x01\x01" in b30_none,
-              str(parse_30(b30_none)))
-        check("819 卸下的护符回到背包（178 含 cd2842）", AMULET_HEX in b178_am,
-              "178=%dB" % len(b178_am))
-        if hp_both and hp_none:
-            check("819 卸一枚护符后生命 -335（另一枚还在算）",
-                  hp_both - hp_none == 335,
-                  "%s -> %s" % (hp_both, hp_none))
-        else:
-            check("819 后拿到 29 面板做比对", bool(hp_none), "hp=%s" % hp_none)
+        b818_after = d.get(818) or b""
+        check("819 之后戒指仍在槽 9（818 回显含 cd2841）",
+              RING_HEX in b818_after, "818=%dB" % len(b818_after))
+        check("819 之后护符仍在槽 11（818 回显含 cd2842）",
+              AMULET_HEX in b818_after, "818=%dB" % len(b818_after))
 
         # ---- 9. 37 = 点装备格卸下（客户端 0 基格号：00 -> 槽 1）----
         # 这是真机脱装备真正发的命令，以前服务端没分支直接丢，表现「脱不下来」。
@@ -391,76 +376,55 @@ def main():
         # 所以「衣服真的脱了」要看 30 里那件消失，而不是看 818。
         check("37 卸下后 30 里没有该装备", b"\xcd\x2f\x4c" not in b30_37,
               "30=%dB" % len(b30_37))
-        check("37 卸下后 30 = 84B（槽1 变空 + 17 槽结构）",
-              len(b30_37) == 84, "30=%dB" % len(b30_37))
+        check("37 卸下后 30 = 94B（11 件少一件 + 翅膀/坐骑块固定）",
+              len(b30_37) == 94, "30=%dB" % len(b30_37))
         check("37 卸下的装备回到背包（178 含 cd2f4c = 12108）",
               b"\xcd\x2f\x4c" in b178_37, "178=%dB" % len(b178_37))
 
         # ---- 10. 37 的字节是「客户端面板格号」，首饰 4 格是 护符11/12、戒指9/10 ----
-        # 反例就是 22:33 真机：穿上戒指+护符后点第 8 格（面板上的护符格），
-        # 「格号+1」会当成槽 9 去脱戒指。真服 96B 的 30 原包首饰顺序是
-        # 11,12,9,10，面板 4 格 = 护符/护符/戒指/戒指，所以 8 = 槽 12 护符、
-        # 9 = 槽 9 戒指。点 8 必须掉护符、戒指留着。
-        s.sendall(pack(177, 26))
-        pks = recv_packets(s, wait=1.5)
+        # ★ 819 已经改成「只回文本不脱装」，所以戒指/护符本来就还在身上，
+        #   不再需要「从背包重新戴上」那一步（那是当年把 819 当卸下时的补丁）。
+        check("37 卸槽1 之后两枚戒指仍在（819 没有偷卸）",
+              RING_HEX + b"\x09\x01\x01" in b30_37
+              and RING_HEX + b"\x0a\x01\x01" in b30_37, str(parse_30(b30_37)))
+        # ★ 线上服 23:24:38~51 逐格实测得到的映射（见 local_server3.CELL_SLOTS）：
+        #   格 00..05 → 槽 1..6      格 06 → 槽 12   格 07 → 槽 11
+        #   格 08 → 槽 9             格 09 → 槽 10   格 0a → 槽 8（武器在最后）
+        # 2026-11-26 00:20~00:23 真服逐格点 37 再核对一遍，全部一致。
+        s.sendall(pack(37, 29, b"\x08"))          # 第 8 格 = 槽 9 戒指
+        pks = recv_packets(s, wait=2.5)
         d = {}
         for c, _, p in pks:
             d.setdefault(c, p)
-        bag_now = parse_bag(d.get(178) or b"")
-        pos_ring = next((p for p, i, _ in bag_now if i == RING), None)
-        pos_am = next((p for p, i, _ in bag_now if i == AMULET), None)
-        rehung = False
-        if pos_ring is not None and pos_am is not None:
-            s.sendall(pack(182, 27, bytes([pos_ring, 1])))
-            recv_packets(s, wait=1.5)
-            s.sendall(pack(182, 28, bytes([pos_am, 1])))
-            pks = recv_packets(s, wait=2.0)
-            dd = {}
-            for c, _, p in pks:
-                dd.setdefault(c, p)
-            rehung = bool(dd.get(30)) and AMULET_HEX in (dd.get(30) or b"") \
-                and RING_HEX in (dd.get(30) or b"")
-        check("重新戴上戒指+护符（准备验证下标映射）", rehung,
-              "戒指格=%s 护符格=%s" % (pos_ring, pos_am))
-        if rehung:
-            # ★ 线上服 23:24:38~51 逐格实测得到的映射（见 local_server3.CELL_SLOTS）：
-            #   格 00..05 → 槽 1..6      格 06 → 槽 12   格 07 → 槽 11
-            #   格 08 → 槽 9             格 09 → 槽 10   格 0a → 槽 8（武器在最后）
-            # 2026-11-26 00:20~00:23 真服逐格点 37 再核对一遍，全部一致。
-            s.sendall(pack(37, 29, b"\x08"))          # 第 8 格 = 槽 9 戒指
-            pks = recv_packets(s, wait=2.5)
-            d = {}
-            for c, _, p in pks:
-                d.setdefault(c, p)
-            b30_i = d.get(30) or b""
-            b178_i = d.get(178) or b""
-            print("      [37 第8格→槽9] 30=%dB 记录=%s"
-                  % (len(b30_i), parse_30(b30_i)))
-            check("37 第8格 → 槽9 那枚戒指掉了（cd2841 槽09 不在）",
-                  RING_HEX + b"\x09\x01\x01" not in b30_i, str(parse_30(b30_i)))
-            check("37 第8格 槽10 那枚戒指还在（一格一件，不连坐）",
-                  RING_HEX + b"\x0a\x01\x01" in b30_i, str(parse_30(b30_i)))
-            check("37 第8格 护符还在（30 里仍有 cd2842）",
-                  AMULET_HEX in b30_i, str(parse_30(b30_i)))
-            check("37 掉的戒指回背包", RING_HEX in b178_i, "178=%dB" % len(b178_i))
+        b30_i = d.get(30) or b""
+        b178_i = d.get(178) or b""
+        print("      [37 第8格→槽9] 30=%dB 记录=%s"
+              % (len(b30_i), parse_30(b30_i)))
+        check("37 第8格 → 槽9 那枚戒指掉了（cd2841 槽09 不在）",
+              RING_HEX + b"\x09\x01\x01" not in b30_i, str(parse_30(b30_i)))
+        check("37 第8格 槽10 那枚戒指还在（一格一件，不连坐）",
+              RING_HEX + b"\x0a\x01\x01" in b30_i, str(parse_30(b30_i)))
+        check("37 第8格 护符还在（30 里仍有 cd2842）",
+              AMULET_HEX in b30_i, str(parse_30(b30_i)))
+        check("37 掉的戒指回背包", RING_HEX in b178_i, "178=%dB" % len(b178_i))
 
-            # ---- 11. 第 6 格是护符 12 —— 不是武器（武器在第 0a 格）----
-            s.sendall(pack(37, 30, b"\x06"))
-            pks = recv_packets(s, wait=2.5)
-            d = {}
-            for c, _, p in pks:
-                d.setdefault(c, p)
-            b30_j = d.get(30) or b""
-            b178_j = d.get(178) or b""
-            print("      [37 第6格→槽12] 30=%dB 记录=%s"
-                  % (len(b30_j), parse_30(b30_j)))
-            check("37 第6格 → 槽12 护符掉了（cd2842 槽0c 不在）",
-                  AMULET_HEX + b"\x0c\x01\x01" not in b30_j, str(parse_30(b30_j)))
-            check("37 第6格 槽11 另一枚护符还在",
-                  AMULET_HEX + b"\x0b\x01\x01" in b30_j, str(parse_30(b30_j)))
-            check("37 第6格 主装备不受影响（槽2~6 还在）",
-                  len(b30_j) >= 74, str(parse_30(b30_j)))
-            check("37 掉的护符回背包", AMULET_HEX in b178_j, "178=%dB" % len(b178_j))
+        # ---- 11. 第 6 格是护符 12 —— 不是武器（武器在第 0a 格）----
+        s.sendall(pack(37, 30, b"\x06"))
+        pks = recv_packets(s, wait=2.5)
+        d = {}
+        for c, _, p in pks:
+            d.setdefault(c, p)
+        b30_j = d.get(30) or b""
+        b178_j = d.get(178) or b""
+        print("      [37 第6格→槽12] 30=%dB 记录=%s"
+              % (len(b30_j), parse_30(b30_j)))
+        check("37 第6格 → 槽12 护符掉了（cd2842 槽0c 不在）",
+              AMULET_HEX + b"\x0c\x01\x01" not in b30_j, str(parse_30(b30_j)))
+        check("37 第6格 槽11 另一枚护符还在",
+              AMULET_HEX + b"\x0b\x01\x01" in b30_j, str(parse_30(b30_j)))
+        check("37 第6格 主装备不受影响（槽2~6 还在）",
+              len(b30_j) >= 74, str(parse_30(b30_j)))
+        check("37 掉的护符回背包", AMULET_HEX in b178_j, "178=%dB" % len(b178_j))
 
         # ---- 12. 武器：kind2=2 的匕首也必须进槽 8（五职业五种武器 1~5）----
         # 玩家实测「全穿上之后武器是空的，在背包里点使用提示该物品不能直接使用」：

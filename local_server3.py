@@ -431,17 +431,38 @@ def build_88():
     return bytes(b)
 
 
+# 178 真服实证：pos 只出现 0~59，也就是 60 格。
+# 以前没有上限，bag_add 会一路写到 60/61…，客户端按 60 格渲染 →
+# 物品「进了包但看不见」，只能靠 GM 删格才清得掉（2026-11-26 日志里出现过槽 25/26 与 60+）。
+BAG_CAPACITY = 60
+
+
+def bag_free_pos():
+    """最小空格号（< BAG_CAPACITY）；满包返回 None。"""
+    p = 0
+    while p in cur().bag:
+        p += 1
+    return p if p < BAG_CAPACITY else None
+
+
 def bag_add(iid, n, stack_max=99):
-    """入包：同 id 且未满先叠，否则放最小空格。"""
+    """入包：同 id 且未满先叠，否则放最小空格。满包返回 None（并记日志）。"""
     for p, v in cur().bag.items():
         if v[0] == iid and v[1] + n <= stack_max:
             v[1] += n
             return p
-    p = 0
-    while p in cur().bag:
-        p += 1
+    p = bag_free_pos()
+    if p is None:
+        log("[bag] ！！背包已满（%d 格），装不下 %s x%d"
+            % (BAG_CAPACITY, bag_proto.item(iid)["name"], n))
+        return None
     cur().bag[p] = [iid, n]
     return p
+
+
+def bag_can_stack(iid, n, stack_max=99):
+    """已有同 id 且叠得上（不需要新格子）。"""
+    return any(v[0] == iid and v[1] + n <= stack_max for v in cur().bag.values())
 
 
 def send_push(conn, cid, cmd):
@@ -1023,6 +1044,8 @@ def apply_gm(line):
         n = int(rest[1]) if len(rest) > 1 else 1
         iid = val
         p = bag_add(iid, n)
+        if p is None:
+            return False, "背包已满（%d 格），发不进去" % BAG_CAPACITY
         save_state()
         push_all([28, 178])
         return True, "发放 %s x%d 到格%02x" % (bag_proto.item(iid)["name"], n, p)
@@ -1809,6 +1832,17 @@ def load_state(pl=None):
         pl.bag.clear()
         for k, v in bag.items():
             pl.bag[int(k)] = [int(v[0]), int(v[1])]
+    # ★ 老存档可能躺着 pos>=60 的物品（旧 bag_add 没有上限）。客户端只画 60 格，
+    #   这些格子永远隐形；读档时搬回 0~59 的空位，搬不下的保留并告警（GM 删格能清）。
+    for _p in [p for p in sorted(pl.bag) if p >= BAG_CAPACITY]:
+        _free = 0
+        while _free in pl.bag:
+            _free += 1
+        if _free < BAG_CAPACITY:
+            pl.bag[_free] = pl.bag.pop(_p)
+            log("[bag] 存档槽%d 越界（>=%d 隐形），搬到槽%d" % (_p, BAG_CAPACITY, _free))
+        else:
+            log("[bag] 存档槽%d 越界且背包已满，暂留（GM 删格可清）" % _p)
     sb = d.get("spirit_bag")
     if isinstance(sb, dict):
         pl.spirit_bag.clear()
@@ -2429,28 +2463,33 @@ def build_30():
         out += b"\xcd" + iid8.to_bytes(2, "big") + bytes([_wsb]) + b"\x01\x01"
     else:
         out += b"\x00\x00\x00\x00"
-    # ---- 尾部：真服固定 17 槽结构（2026-11-25 23:24~23:26 实时抓包逐包解析）----
-    # 全空基准 72B = 11 个装备槽块(11×4) + 空块(4) + 翅膀块(8) + 空块×3(12) + 坐骑块(4)
-    #   74B = 只剩坐骑     76B = 护符+坐骑    82B = 4 首饰+坐骑
-    #   92B = 2 槽空       96B = 11 件全满 + 翅膀 + 坐骑
-    # 老实现尾部写死 24 个 0 = 68B，比真服少 4 字节，整个尾部前移，
-    # 客户端按 17 槽解析会读串 —— 表现就是「装备穿上了、面板还是空的」。
+    # ---- 尾部：真服结构 = 第12块(4B) + 翅膀块(**固定 20B**) + 坐骑块(**固定 6B**) ----
+    # ★ 2026-11-26 01:30 真服原包重新量过，之前这里的块长是错的：
+    #   74B（11 件全脱，只剩翅膀+坐骑，00:45:20）：
+    #     44B(11 个空槽 4B) + 4B(第12块) + 20B(翅膀) + 6B(坐骑) = 74
+    #   96B（11 件全满，00:54:35）：
+    #     66B(11 个实槽 6B) + 4B + 20B + 6B = 96
+    #   翅膀块即使没翅膀也占 20B：`ce00061a82` + 15 个 00；
+    #   坐骑块即使没坐骑也占 6B。两块长度**恒定**，客户端靠它对齐尾部。
+    #   老实现写的是 翅膀 4B(空)/8B(有) + 多余 12B + 坐骑 4B，
+    #   于是 11 件全满只有 90B（真服 96B），全空只有 68B（真服 74B）——
+    #   客户端按固定块长解析，尾部一短就把中间的槽读串，
+    #   表现就是「服务端说穿满了、面板上腰带/护腕/护符还是空的」。
     out += b"\x00\x00\x00\x00"                     # 第 12 块：空
     _wing = (cur().wing[0] if getattr(cur(), "wing", None) else 0) or 0
     _wing = int(_wing) & 0xFFFFFFFF
     if _wing:
-        # 真服：`ce00061a82 00 00 00` = 天使羽翼 400002 + 槽 0 + 00 00
-        out += _enc30(_wing) + b"\x00\x00\x00"
+        # 真服：`ce00061a82` + 15×00 = 天使羽翼 400002，整块 20B
+        out += _enc30(_wing) + b"\x00" * 15
     else:
-        out += b"\x00\x00\x00\x00"
-    out += b"\x00" * 12                            # 第 13~15 块：空
+        out += b"\x00" * 20                        # 空翅膀同样占 20B
     _mount = (cur().mount[0] if getattr(cur(), "mount", None) else 0) or 0
     _mount = int(_mount) & 0xFFFF
     if _mount:
         # 真服：`cd2733 0d 01 01` = 筋斗云 10035 + 槽 13
         out += b"\xcd" + _mount.to_bytes(2, "big") + b"\x0d\x01\x01"
     else:
-        out += b"\x00\x00\x00\x00"                 # 第 16 块：坐骑槽
+        out += b"\x00" * 6                         # 空坐骑同样占 6B
     return bytes(out)
 
 
@@ -2892,8 +2931,9 @@ def builtin_resp(cmd, payload):
                 cur().equip.pop(_s, None)
             bp = bag_add(have, 1)
             save_state()
-            log("[equip] 37 第%d格 -> 槽%d 卸下 %s(id=%d)，回背包格%d（装备 %s）"
-                % (raw, slot, bag_proto.item(have)["name"], have, bp,
+            log("[equip] 37 第%d格 -> 槽%d 卸下 %s(id=%d)，回背包格%s（装备 %s）"
+                % (raw, slot, bag_proto.item(have)["name"], have,
+                   "满" if bp is None else "%02x" % bp,
                    "/".join("%d:%d" % (s, cur().equip.get(s, 0) or 0)
                             for s in sorted(cur().equip)) or "空"))
         else:
@@ -2908,38 +2948,20 @@ def builtin_resp(cmd, payload):
         # 以前只推 818/29/28/178，30 不推，面板停在「已穿上」的旧状态。
         return 37, b"", [29, 28, 30, 178]
     if cmd == 819:
-        # 819 = 客户端对装备栏某一格的操作请求，真服载荷是 [物品 id varint][槽位]：
-        #   23:52:30 C->S cmd=819 len=4 hex=cd28420b → 护符 10306 / 槽 11
-        #   23:52:31 C->S cmd=819 len=4 hex=cd28420c → 槽 12（另一件护符）
-        # 真服只会回 cmd=1 的文本包（04 bb + 「本服尚未恢复此功能」，len=29），
-        # **从不回 cmd=819 本身**。本地照回 819 空包时，客户端刚收到就
-        # SIGABRT 把进程带走（23:41:01，Zygote: exited due to signal (6)）——
-        # 它没有「819 成功」这条分支，空包体解析直接断言。
-        # 所以这里：本地照玩家预期真的卸下（只卸点中的那一格），
-        # 但回包用线上服同形的 cmd=1 文本，绝不发 819 应答。
-        slot = payload[-1] if payload else 0
-        iid = 0
-        if payload:
-            if payload[0] == 0xCE and len(payload) >= 5:
-                iid = int.from_bytes(payload[1:5], "big")
-            elif payload[0] == 0xCD and len(payload) >= 3:
-                iid = int.from_bytes(payload[1:3], "big")
-            elif payload[0] == 0xCC and len(payload) >= 2:
-                iid = payload[1]
-            else:
-                iid = payload[0]
-        have = cur().equip.get(slot)
-        if have and (not iid or have == iid):
-            cur().equip.pop(slot, None)
-            bag_add(have, 1)
-            save_state()
-            nm = bag_proto.item(have)["name"]
-            log("[equip] 819 槽%d 卸下 %s(id=%d) → 回 cmd=1 文本 + 29/28/30/178"
-                % (slot, nm, have))
-            return 1, err_text("已脱下%s" % nm), [29, 28, 30, 178]
-        log("[equip] 819 槽%d 没有可卸装备（payload=%s），只回文本"
-            % (slot, payload.hex()))
-        return 1, err_text("这个位置没有可脱下的装备"), []
+        # 819 = 客户端点装备栏某一格时的请求，载荷 [物品 id varint][槽位]：
+        #   23:52:30 C->S cmd=819 hex=cd28420b → 护符 10306 / 槽 11
+        #   23:52:31 C->S cmd=819 hex=cd28420c → 槽 12（另一件护符）
+        # ★ 线上服对它**只回文本，什么都不改**：连点 8 次（23:52:30~37），
+        #   每次都是同一条 29B `04bb` + 「本服尚未恢复此功能」，装备栏原样不动。
+        # 本地以前把 819 当成「卸下」：玩家只想看看武器，点一下武器就从身上掉了，
+        # 还往背包里多塞一件（用户反馈「点一下武器，武器槽就消失了 / 武器戒指多出来」）。
+        # 真正的卸下走 37（角色面板「卸下」按钮，hex=格号），不要在这里改状态。
+        # 另外**绝不能回 819 本身**：客户端没有「819 成功」分支，空包体直接 SIGABRT。
+        log("[equip] 819 点击装备格 payload=%s → 照线上服只回文本，不改装备（%s）"
+            % (payload.hex(),
+               "/".join("%d:%d" % (s, cur().equip.get(s, 0) or 0)
+                        for s in sorted(cur().equip)) or "空"))
+        return 1, b"\x04\xbb" + "本服尚未恢复此功能".encode("utf-8"), []
     if cmd == 837:
         # 837 = 打开衣柜（C->S 空包）→ 838 已拥有时装列表。
         # 以前这个号完全没处理：客户端发了 837 什么都没回来，衣柜界面就一直转圈。
@@ -3199,6 +3221,10 @@ def builtin_resp(cmd, payload):
             log("[shop] 购买失败：area=%d 商品%d x%d 需 %s %d，只有 %d"
                 % (area, iid, cnt, key, total, purse[0]))
             return 1, err_text("对应货币不足"), []
+        if bag_free_pos() is None and not bag_can_stack(iid, cnt):
+            log("[shop] 购买失败：背包已满（%d 格），%s x%d 放不下"
+                % (BAG_CAPACITY, bag_proto.item(iid)["name"], cnt))
+            return 1, err_text("背包已满"), []
         purse[0] -= total
         bag_add(iid, cnt)
         save_state()
@@ -4002,8 +4028,9 @@ def handle_game(conn, cid):
                                 % (qid_int, _iid, _qty))
                         else:
                             _slot = bag_add(_iid, _qty)
-                            log("[quest] %d 奖励物品 %d x%d -> 槽%d"
-                                % (qid_int, _iid, _qty, _slot))
+                            log("[quest] %d 奖励物品 %d x%d -> %s"
+                                % (qid_int, _iid, _qty,
+                                   "背包已满，未入包" if _slot is None else "槽%d" % _slot))
                     # 400501「物归原主」= 剧情发神装。真服这一环交完，30 包里
                     # 立刻就是 11108~11114 已穿戴（cd2b64..cd2b6a），说明是
                     # 直接进装备栏、不是进背包。本地照做：装备栏空就整套穿上，
