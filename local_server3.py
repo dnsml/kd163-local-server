@@ -1340,6 +1340,17 @@ ACC_SLOTS = (9, 10, 11, 12)
 # 以前只写 9 和 11，客户端装备栏里就空出 10、12 两格 —— 玩家反馈的「还有两个槽是空的」。
 ACC_PAIR = {9: 10, 10: 9, 11: 12, 12: 11}
 
+# ★ 2026-11-25 22:5x：装备栏 11 个格子的**客户端顺序**。
+# cmd=37（点装备格卸装备）的载荷就是这张表的下标，所以它必须是客户端的面板顺序，
+# 不是“槽位号 - 1”。真服 96B 的 30 原包（relay.log 23:52:25）首饰区顺序是
+#   0b(护符11) 0c(护符12) 09(戒指9) 0a(戒指10)
+# 也就是面板 4 格是「护符 / 护符 / 戒指 / 戒指」，戒指在后面两个。
+# 本地服以前按 ACC_SLOTS=(9,10,11,12) 发 30，把两对首饰在面板上画反了；
+# 37 又按「格号 + 1」当槽位找，于是玩家点护符格，掉的是戒指 ——
+# 就是 22:33:13 `37 hex=08` 那次（预期槽 12 护符，实际脱了槽 9 戒指）。
+CELL_SLOTS = (1, 2, 3, 4, 5, 6, 7,          # 0~6  主装备
+              11, 12, 9, 10)                # 7~10 首饰：护符×2、戒指×2
+
 
 def acc_slots_of(slot):
     """首饰槽 -> 需要一起写/一起清的槽（非首饰槽原样返回）。"""
@@ -2327,7 +2338,7 @@ def build_30():
     # 早先为了「保持 82B」去裁尾部填充，等于把后面的字段整体前移，
     # 客户端按尾部结构解析就会读错 —— 表现为穿戒指当场闪退。
     # 现在按真服语义来：有货 6B、空槽 4B，尾部填充保持 24B 不动。
-    for _as in ACC_SLOTS:
+    for _as in (11, 12, 9, 10):           # 与真服 96B 原包顺序一致（见 CELL_SLOTS）
         _aid = cur().equip.get(_as, 0) & 0xFFFF
         if _aid:
             out += b"\xcd" + _aid.to_bytes(2, "big") + bytes([_as]) + b"\x01\x01"
@@ -2761,23 +2772,32 @@ def builtin_resp(cmd, payload):
             % (payload.hex() or "-", cur().level))
         return 1859, b""
     if cmd == 37:
-        # 37 = 点装备栏某一格（1 字节格号，**0 基**）。本机客户端脱装备发的就是它：
-        #   22:26:46 C->S cmd=37 len=1 hex=06   22:27:40 hex=00
-        # relay.log 里没有 37 样本（那几次抓包没人点装备格），线上服同族的
-        # 35 是转职（35 -> 36 空 ACK），所以这里按玩家预期实现成**卸下**：
-        # 把格子里的东西放回背包，再推 818/30/29/28/178 刷新。
+        # 37 = 点装备栏某一格。载荷是该格在**客户端面板上的下标（0 基）**，
+        # 不是槽位号 —— 2026-11-25 22:32~22:33 真机 4 连击直接验证：
+        #   22:32:50 hex=03 → 槽 4 逍遥护手 ✓   22:32:51 hex=02 → 槽 3 ✓
+        #   22:32:53 hex=01 → 槽 2 ✓           22:32:54 hex=00 → 槽 1 ✓
+        # 主装备 0~6 = 槽 1~7，这没歧义；首饰 4 格（7~10）才是坑：
+        # 真服 96B 的 30 原包首饰顺序是 11,12,9,10，面板画的就是
+        # 「护符 / 护符 / 戒指 / 戒指」，所以下标 8 是护符 12、下标 9 是戒指 9。
+        # 以前按「格号 + 1」当槽位：hex=08 → 槽 9 → 点护符却脱了戒指，
+        # 就是玩家反馈的「戒指和护符弄错了」。映射统一走 CELL_SLOTS。
         raw = payload[0] if payload else 0
-        slot = raw + 1 if (raw + 1) in cur().equip else raw
-        have = cur().equip.get(slot)
+        slot = CELL_SLOTS[raw] if raw < len(CELL_SLOTS) else 0
+        have = cur().equip.get(slot) if slot else 0
         if have:
             for _s in acc_slots_of(slot):
                 cur().equip.pop(_s, None)
             bp = bag_add(have, 1)
             save_state()
-            log("[equip] 37 格%d -> 槽%d 卸下 %s(id=%d)，回背包格%d"
-                % (raw, slot, bag_proto.item(have)["name"], have, bp))
+            log("[equip] 37 第%d格 -> 槽%d 卸下 %s(id=%d)，回背包格%d（装备 %s）"
+                % (raw, slot, bag_proto.item(have)["name"], have, bp,
+                   "/".join("%d:%d" % (s, cur().equip.get(s, 0) or 0)
+                            for s in sorted(cur().equip)) or "空"))
         else:
-            log("[equip] 37 格%d -> 槽%d 没有装备，只回 ACK" % (raw, slot))
+            log("[equip] 37 第%d格 -> 槽%d 没有装备，只回 ACK（装备 %s）"
+                % (raw, slot,
+                   "/".join("%d:%d" % (s, cur().equip.get(s, 0) or 0)
+                            for s in sorted(cur().equip)) or "空"))
         return 37, b"", [818, 30, 29, 28, 178]
     if cmd == 819:
         # 819 = 客户端对装备栏某一格的操作请求，真服载荷是 [物品 id varint][槽位]：
