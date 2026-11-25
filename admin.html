@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-page-node-id="M2K1UURy1ypjv1SUqtV2Ue">
-<head data-page-node-id="TV0e4dArahTvv7WzQA1HYt">
-<meta charset="utf-8" data-page-node-id="pAaVAcX46SsoApiSeZKpB1">
-<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="OO0F8GZhWYMRQSWlwNBo0q">
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>口袋修仙 · 服务端管理后台</title>
 <style>
   :root{
@@ -80,69 +80,69 @@
   .lvbar i{display:block;height:100%;background:linear-gradient(90deg,#c9922f,#f5cf8a)}
 </style>
 </head>
-<body data-page-node-id="XSFdhTHcnXuwrWDd9U0GxN">
-<div class="wrap" data-page-node-id="3B83cBm1ZcGS6jHBNQJppS">
-  <header data-page-node-id="EAF8GXJCkqpF5hQEEHiB05">
-    <h1 data-page-node-id="48j2UlvaabWmgxKee3Fh4q">口袋修仙 <span data-page-node-id="lyij1iSWzwAGFZoTs4q4En">· 服务端管理后台</span></h1>
-    <div id="online" class="badge off" data-page-node-id="bJtUcFupts9BYBqyiG15rp"><i class="dot" data-page-node-id="CSYN9qIme9Ke7cbJqeqk9a"></i><span data-page-node-id="uzmHA33PGnlsCuXzI86Raf">未连接</span></div>
-    <div class="spacer" data-page-node-id="IkokRkI1Zc8JNo6gxYesHI"></div>
-    <div class="muted small" id="stamp" data-page-node-id="ZJzOacmT6YH33b1lcvIM1K">—</div>
+<body>
+<div class="wrap">
+  <header>
+    <h1>口袋修仙 <span>· 服务端管理后台</span></h1>
+    <div id="online" class="badge off"><i class="dot"></i><span>未连接</span></div>
+    <div class="spacer"></div>
+    <div class="muted small" id="stamp">—</div>
   </header>
 
-  <section data-page-node-id="AHYE3CKyXDXmhg6ZdcEeBm">
-    <h2 data-page-node-id="0N1FwyrtOefBdIxzsilVeR">角色数值</h2>
-    <div class="grid cards" id="cards" data-page-node-id="xBk0hPVAGttkGyb3aclktM"></div>
+  <section>
+    <h2>角色数值</h2>
+    <div class="grid cards" id="cards"></div>
   </section>
 
-  <section data-page-node-id="mHnj1LvJb0AqiAgsybfHLS">
-    <h2 data-page-node-id="hLDx6uqYXGfztd4RifB65g">背包 <span class="muted small" id="bagnum" data-page-node-id="wVScJwPR6cuB75MOv1NWdi"></span></h2>
-    <div class="bag" id="bag" data-page-node-id="rQz98A8mfselr5d6VmPCxm"></div>
+  <section>
+    <h2>背包 <span class="muted small" id="bagnum"></span></h2>
+    <div class="bag" id="bag"></div>
   </section>
 
-  <section data-page-node-id="j8AR4EoJEmQFjKmdH2oGD0">
-    <h2 data-page-node-id="EJjxGYqAGAsHfWXIzZ7SIN">发放道具</h2>
-    <div class="search" data-page-node-id="ZC5eguPlEmdGsas66VWg2H">
-      <input class="kw" id="kw" placeholder="输入道具名搜索，如：元宝 / 见闻录 / 礼包 / 妖丹" data-page-node-id="0ggYIbuCI5XFSeYzaAGxC6">
-      <input class="qty" id="qty" type="number" value="1" min="1" data-page-node-id="oyk0eP8YwdEp0DPqGJ26Ff">
-      <button class="primary" id="give" data-page-node-id="mZHC2k7q9ZbeB3TuzQ4dWs">发放</button>
+  <section>
+    <h2>发放道具</h2>
+    <div class="search">
+      <input class="kw" id="kw" placeholder="输入道具名搜索，如：元宝 / 见闻录 / 礼包 / 妖丹">
+      <input class="qty" id="qty" type="number" value="1" min="1">
+      <button class="primary" id="give">发放</button>
     </div>
-    <div class="results" id="results" style="display:none" data-page-node-id="ngGMRuu9Es4ldTli3CXD2s"></div>
+    <div class="results" id="results" style="display:none"></div>
   </section>
 
-  <section data-page-node-id="UgqpArYoiNLFwIwxLvDuwc">
-    <h2 data-page-node-id="GRsMNSsutUoqnGcZukzhaY">GM 指令台</h2>
-    <div class="search" data-page-node-id="GzpzCHNaXHyoICP6MUMBCg">
-      <input class="kw" id="gm" placeholder="例：元宝 +100000 / 绑定元宝 =9999 / 物品 20735 10 / 删除 3 / 清包" data-page-node-id="WLkCueBm26D1Knl425S68u">
-      <button class="gold" id="gmrun" data-page-node-id="2IIDtBJ9DORc6d0qv0NdiM">执行</button>
+  <section>
+    <h2>GM 指令台</h2>
+    <div class="search">
+      <input class="kw" id="gm" placeholder="例：元宝 +100000 / 绑定元宝 =9999 / 物品 20735 10 / 删除 3 / 清包">
+      <button class="gold" id="gmrun">执行</button>
     </div>
-    <div class="row" style="margin-top:10px" data-page-node-id="Hwyyg2jCuK8cpYsYmenPuC">
-      <button data-gm="元宝 +100000" data-page-node-id="OPeE6hEU0ZRmNfAzYzxJJI">元宝 +10万</button>
-      <button data-gm="绑定元宝 +100000" data-page-node-id="CHH9Tf4w6G8uzJx98XTeDB">绑元 +10万</button>
-      <button data-gm="铜钱 +1000000" data-page-node-id="KJABRrVhDB71UuJOd0r9El">铜钱 +100万</button>
-      <button data-gm="阅历 +10000" data-page-node-id="cpn7TF73VxIBz5m81WfJQ4">阅历 +1万</button>
-      <button class="danger" data-gm="清包" data-page-node-id="mueFU2B9T3JCNSYdueYmoK">清空背包</button>
+    <div class="row" style="margin-top:10px">
+      <button data-gm="元宝 +100000">元宝 +10万</button>
+      <button data-gm="绑定元宝 +100000">绑元 +10万</button>
+      <button data-gm="铜钱 +1000000">铜钱 +100万</button>
+      <button data-gm="阅历 +10000">阅历 +1万</button>
+      <button class="danger" data-gm="清包">清空背包</button>
     </div>
 
-    <h2 style="margin-top:18px" data-page-node-id="Mbmil5AHEDzUKeGyKUvU86">测试加速</h2>
-    <div class="row" data-page-node-id="UDYJ258G2wapCizKcAHmTl">
-      <button data-gm="伤害" data-page-node-id="NJnTSiveLVdBPo9gC0LKOL">查伤害倍率</button>
-      <button data-gm="伤害 3" data-page-node-id="OXFC9eNNmAQiajo9c6oBqE">伤害 ×3</button>
-      <button class="gold" data-gm="伤害 5" data-page-node-id="xGH24vwFknv53gLe1m3cSp">伤害 ×5</button>
-      <button data-gm="伤害 10" data-page-node-id="RTFCEZqoTEsvnnXW3m8zHo">伤害 ×10</button>
-      <button data-gm="伤害 1" data-page-node-id="iWEmqGI4MhLRJB4RhqAn3s">恢复 ×1</button>
+    <h2 style="margin-top:18px">测试加速</h2>
+    <div class="row">
+      <button data-gm="伤害">查伤害倍率</button>
+      <button data-gm="伤害 3">伤害 ×3</button>
+      <button class="gold" data-gm="伤害 5">伤害 ×5</button>
+      <button data-gm="伤害 10">伤害 ×10</button>
+      <button data-gm="伤害 1">恢复 ×1</button>
     </div>
-    <p class="hint" data-page-node-id="fYdmlFXV8xnnn2fROO2GAP">倍率只放大服务端折算的每回合伤害，让一场战斗 1~2 回合结束；角色面板攻击力不变，属正常。下一场战斗生效。塔里出不来时点下面这个。</p>
-    <div class="row" data-page-node-id="aQhGRfzSnRolpsqQnUHG3l">
-      <button data-gm="出塔" data-page-node-id="YtHA5BUHIQqKiYLJeGYmcl">出塔 / 离开副本</button>
+    <p class="hint">倍率只放大服务端折算的每回合伤害，让一场战斗 1~2 回合结束；角色面板攻击力不变，属正常。下一场战斗生效。塔里出不来时点下面这个。</p>
+    <div class="row">
+      <button data-gm="出塔">出塔 / 离开副本</button>
     </div>
   </section>
 
-  <section data-page-node-id="3w69TlQ0iUhD7FFAIxOgFL">
-    <h2 data-page-node-id="DDwGYsLWeqldKK1LqfFzqW">服务端日志</h2>
-    <pre id="log" data-page-node-id="HgGjqaQJ30iHadC2yeWVQ1">加载中…</pre>
+  <section>
+    <h2>服务端日志</h2>
+    <pre id="log">加载中…</pre>
   </section>
 </div>
-<div class="toast" id="toast" data-page-node-id="gkw2RHSgw4DgrSLIDzFSKH"></div>
+<div class="toast" id="toast"></div>
 
 <script>
 const FIELDS = [
