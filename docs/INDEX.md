@@ -151,6 +151,7 @@ docs/
 `test_newbie_char.py`（建角防覆盖/三件套/神装槽位/30 原包）、`test_login_snapshot.py`（17 货币、17/88 称号）、
 `test_account_flow.py`（账号四流程，分 phase1/phase2）、`check_semantics.py`（17/28/30 字段语义与长度断言）、
 `test_state_store.py`（SQLite 存档：rev/隔离/重启/懒迁移/闸门/快照）。
+`test_story_set_818.py`（400501 自动穿神装必推 818、GM 穿脱也推 818）。
 
 **协议与可行性（11-22）**
 | 文档 | 内容 |

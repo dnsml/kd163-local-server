@@ -827,13 +827,14 @@ def apply_gm(line):
     # 本地角色走到 400903「强化神装」时装备栏是空的，锻造界面就提示「没有东西强化」，
     # 用这条指令把整套穿上（真服 400501 交完 30 包里就是这 7 件已穿戴）。
     if line in ("神装", "穿神装", "套装", "godset"):
-        cls = cur().cls if 1 <= cur().cls <= 5 else 1
-        base = 10000 + cls * 1000 + 108
-        for slot in range(1, 8):
-            cur().equip[slot] = base + slot - 1
+        # ★ 2026-11-26：以前 `for slot in range(1, 8)` 把武器写进槽 7（协议层字节），
+        #   build_30 不认 → 神装了却没有武器。统一走 equip_story_set（按 kind2 落槽）。
+        _got, _bs = equip_story_set(cur())
         save_state()
-        push_all([17, 28, 30])
-        return True, "已穿上职业%d神装 %d~%d" % (cls, base, base + 6)
+        push_all([818, 29, 28, 30])
+        return True, "已穿上职业神装 %d~%d（%d 件：%s）" % (
+            _bs, _bs + 6, _got,
+            "/".join("%d:%d" % (s, cur().equip[s]) for s in sorted(cur().equip)))
     # 穿上四件首饰（戒指 9/10 = 10305 飞仙戒指，护符 11/12 = 10306 飞仙护符）。
     # 用途：早期「点装备格」被当成卸下的那版 bug 把首饰弄丢过，重登后面板
     # 右半边只显示一件戒指一件护符，别的格是空的 —— 用这条一次补齐四格，
@@ -849,10 +850,10 @@ def apply_gm(line):
         # ★ force=True：save_state 默认「状态指纹没变就不写盘」，
         #   这里装备没变时会把 ver=2 一起跳过，老档就一直停在 ver=None。
         save_state(force=True)
-        # 只推 29/28/30 —— 和 182 穿戴同一套回包。别推 17：17 是登录快照，
+        # 只推 29/28/30/818 —— 和 182 穿戴同一套回包。别推 17：17 是登录快照，
         # 中途重发会把客户端面板按 17 里的基础属性重算（强化/首饰加成全部丢掉，
-        # 实测气血 3049→1271、攻击 376→151）。
-        push_all([29, 28, 30])
+        # 实测气血 3049→1271、攻击 376→151）。818 是装备列表，缺了面板四格还是空的。
+        push_all([818, 29, 28, 30])
         return True, "已穿上四件首饰（戒指 9/10、护符 11/12）"
     # 强化必定成功（测试材料/上限用）；「概率」恢复按等级+石头判定
     if line in ("必成", "强化必成", "luckon"):
@@ -1035,6 +1036,15 @@ def apply_gm(line):
         tk = panel_now()
         return True, ("装备属性合计 %s ｜ 29包 %s"
                       % ({k: round(v, 2) for k, v in sorted(a.items())}, tk))
+
+    # 重推装备栏全量（818）。服务端改装备（剧情神装/GM 穿脱）后客户端面板不会自己刷，
+    # 只有收到 818 才会重建 11 个格子的列表；老号已经「模型穿着、面板空着」的，
+    # 用这条指令当场补一次，不必重登。
+    if line in ("装备栏", "equipbar", "刷新装备"):
+        push_all([818, 29, 30])
+        return True, ("已重推装备栏 %s"
+                      % ("/".join("%d:%d" % (s, i) for s, i in sorted(cur().equip.items()))
+                         or "空"))
 
     # ---- 妖灵 / 宠物（真服 1410~1413 那条线）----
     #   妖灵              列出身家
@@ -1233,7 +1243,9 @@ def apply_gm(line):
             return False, "%s kind2=%s 没有对应装备槽" % (it["name"], it.get("kind2"))
         cur().equip[slot] = val
         save_state()
-        push_all([29, 28, 30, 178])
+        # ★ 2026-11-26 22:0x：必须带 818。面板 11 个格子是按 818 的列表画的，
+        #   只推 29/28/30 会出现「模型穿着、面板全空」（用户 21:50 的截图）。
+        push_all([818, 29, 28, 30, 178])
         return True, "槽%d 穿上 %s(id=%d)" % (slot, it["name"], val)
 
     if key in ("脱装备", "卸装备", "unequip"):
@@ -1241,9 +1253,19 @@ def apply_gm(line):
             old = cur().equip.get(val)
             cur().equip.pop(val, None)
             save_state()
-            push_all([29, 28, 30, 178])
+            push_all([818, 29, 28, 30, 178])
             return True, "槽%d 卸下 id=%d" % (val, old)
         return False, "槽%d 本来就是空的" % val
+
+    # 武器协议槽字节 A/B：`武器槽 7` / `武器槽 8`。
+    # 818/30 里武器那一条的槽字节跟着武器走（11235→08、11328→07），
+    # 新武器收录不到时用它现场试哪个字节能让面板武器格亮起来。
+    if key in ("武器槽", "weaponslot", "wslot"):
+        if val not in (7, 8):
+            return False, "只支持 7 或 8"
+        cur().weapon_wire = val
+        push_all([818, 30])
+        return True, "武器协议槽已设为 %02x（已重推 818/30）" % val
 
     pkey = GM_ALIAS.get(key, key)
     if pkey in PURSES():
@@ -4662,6 +4684,12 @@ def handle_game(conn, cid):
                             % ("/".join("%d:%d" % (s, cur().equip[s])
                                         for s in sorted(cur().equip)),
                                cur().cls if 1 <= cur().cls <= 5 else 1))
+                        # ★ 2026-11-26 22:0x：剧情神装是**服务端直接穿**，客户端
+                        #   并不知道这 7 件已经上身。不补 818 的话，模型（30）穿着
+                        #   神装、角色面板 11 格全空 —— 用户反馈的「太虚星君给的
+                        #   装备不显示」就是这个。818 是装备列表全量，先发它，
+                        #   再发 29/28/30 刷属性与外观。
+                        send_push(conn, cid, 818)
                     # ★ 2026-11-24 16:0x：400702「前世仙宠」交任务发宠物。
                     # 真服 15:41:13 现场（relay.log 984 行）：
                     #   214(400702) -> 957(82B 功夫熊猫) -> 29 -> 28 -> 30 -> 210
