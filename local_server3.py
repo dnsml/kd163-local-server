@@ -30,6 +30,7 @@ import equip_attr     # Equip.xml/StrengthenAddOn/Suite/Formula/Mall 全配置�
 import pet_proto      # 宠物 / 妖灵（961/962、946/947、1410~1413）
 import player as player_mod   # 每个连接一份角色状态（threading.local）
 import state_store    # 角色存档后端（SQLite，KD_STATE_BACKEND=json 可回退旧文件）
+import account_policy # 账号白名单（accounts.json / KD_ALLOW_ACCOUNTS）
 from player import cur, new as new_player, ctx as player_ctx
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -38,8 +39,20 @@ TEMPLATES = os.path.join(HERE, "templates.json")
 LOGFILE = os.path.join(HERE, "logs", "server.log")
 os.makedirs(os.path.join(HERE, "logs"), exist_ok=True)
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 9000
-CERT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "patch", "srv.pem")
-KEY = sys.argv[3] if len(sys.argv) > 3 else os.path.join(HERE, "patch", "srv.key")
+
+
+def _path_arg(p):
+    """命令行里的证书路径：相对路径按**项目目录**解析，不依赖启动时的 cwd。
+
+    systemd / 计划任务常常从 / 或其它目录拉起进程，传 `patch/exact.pem`
+    时若按 cwd 解析会找不到证书，表现为 TLS 握手直接失败。
+    """
+    p = str(p)
+    return p if os.path.isabs(p) else os.path.join(HERE, p)
+
+
+CERT = _path_arg(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(HERE, "patch", "srv.pem")
+KEY = _path_arg(sys.argv[3]) if len(sys.argv) > 3 else os.path.join(HERE, "patch", "srv.key")
 
 # 通用提示（cmd=1）payload = [u16BE 模板id][UTF-8 文本]，真服抓包实测格式（模板 1211）
 NOTICE_TEXT = "该功能暂未开放"
@@ -627,7 +640,10 @@ GAME_LOCK = threading.Lock()
 # GM 指令文件。测试脚本用 KD163_GM_CMD 指到临时文件，避免和正在跑的服抢同一条指令
 # （两个进程盯同一个 gm.cmd 时，谁先扫到谁执行，回执也就落在各自的日志里）。
 GM_CMD = os.environ.get("KD163_GM_CMD") or os.path.join(HERE, "logs", "gm.cmd")
-STATUS_JSON = os.path.join(HERE, "logs", "status.json")
+# 在线状态快照。测试/临时实例用 KD163_STATUS_JSON 指到临时文件，
+# 否则会把正式服的 status.json 覆盖成临时库的数值（后台面板会跳）。
+STATUS_JSON = (os.environ.get("KD163_STATUS_JSON")
+               or os.path.join(HERE, "logs", "status.json"))
 
 GM_ALIAS = {
     "元宝": "yuanbao", "绑定元宝": "bind_yuanbao",
@@ -3827,6 +3843,7 @@ def handle_tls(raw_sock, cid):
             body += chunk  # noqa
 
         path = line.split(" ")[1] if " " in line else "/"
+        status = "200 OK"
         if path.startswith("/auth"):
             user = ""
             try:
@@ -3834,23 +3851,33 @@ def handle_tls(raw_sock, cid):
                 user = j.get("username") or ""
             except Exception:
                 pass
-            if user and user not in ACCOUNTS:
-                ACCOUNTS[user] = next_id[0]
-                next_id[0] += 1
-            tok = new_token()
-            # 字段与真服完全一致：account_id 是数字，uid 字符串，token 43 字符
-            resp = json.dumps({
-                "account_id": int(ACCOUNTS.get(user, 13)),
-                "uid": user or "0",
-                "token": tok,
-                "expires_at": int(time.time()) + 30 * 86400,
-                "ok": True,
-            }, separators=(",", ":")).encode()
-            log("c%03d /auth 放行 uid=%s account_id=%s token=%s…"
-                % (cid, user or "?", ACCOUNTS.get(user, 13), tok[:10]))
+            if not account_policy.allowed(user):
+                # 白名单开启时，不在名单里的账号连令牌都不发。
+                # 注意：本服没有密码体系，白名单只能拦「陌生账号」，
+                # 拦不住「知道名单内账号的人」——公网开放前要清楚这一点。
+                log("c%03d /auth 拒绝 uid=%s（不在白名单）" % (cid, user or "?"))
+                resp = json.dumps({"ok": False, "msg": "account not allowed"},
+                                  separators=(",", ":")).encode()
+                status = "403 Forbidden"
+            else:
+                if user and user not in ACCOUNTS:
+                    ACCOUNTS[user] = next_id[0]
+                    next_id[0] += 1
+                tok = new_token()
+                # 字段与真服完全一致：account_id 是数字，uid 字符串，token 43 字符
+                resp = json.dumps({
+                    "account_id": int(ACCOUNTS.get(user, 13)),
+                    "uid": user or "0",
+                    "token": tok,
+                    "expires_at": int(time.time()) + 30 * 86400,
+                    "ok": True,
+                }, separators=(",", ":")).encode()
+                log("c%03d /auth 放行 uid=%s account_id=%s token=%s…"
+                    % (cid, user or "?", ACCOUNTS.get(user, 13), tok[:10]))
         else:
             resp = b'{"ok":false,"msg":"not found"}'
-        conn.sendall(b"HTTP/1.1 200 OK\r\nServer: nginx\r\n"
+        conn.sendall(("HTTP/1.1 %s\r\n" % status).encode()
+                     + b"Server: nginx\r\n"
                      b"Content-Type: application/json; charset=utf-8\r\nCache-Control: no-store\r\n"
                      b"Content-Length: " + str(len(resp)).encode() + b"\r\n"
                      b"Connection: close\r\n\r\n" + resp)
@@ -3974,6 +4001,14 @@ def handle_game(conn, cid):
                 # 还是上一个账号的数据。
                 if cmd == 17 and payload:
                     _acct = account_from_login(payload)
+                    # ★ 2026-11-26：白名单在游戏登录这一层再拦一次。
+                    #   /auth 已经拒绝的账号，正常客户端根本拿不到令牌、走不到这里；
+                    #   但自组包可以跳过 /auth 直接发 17，所以这里必须再判一次。
+                    if _acct and not account_policy.allowed(_acct):
+                        log("c%03d [acct] ！！账号 %s 不在白名单，拒绝登录" % (cid, _acct))
+                        conn.sendall(pack(1, seq, struct.pack(">H", 1211)
+                                          + "该账号未开通".encode("utf-8")))
+                        continue
                     if _acct:
                         log("c%03d [acct] 登录账号 %s" % (cid, _acct))
                         switch_account(_acct)
@@ -4033,6 +4068,10 @@ def handle_game(conn, cid):
                     if not _acct2:
                         log("c%03d [create] ！！建角请求没有账号，拒绝建角"
                             "（防写进主号存档）" % cid)
+                        conn.sendall(pack(1, seq, b"\x01\xa0"))
+                        continue
+                    if not account_policy.allowed(_acct2):
+                        log("c%03d [create] ！！账号 %s 不在白名单，拒绝建角" % (cid, _acct2))
                         conn.sendall(pack(1, seq, b"\x01\xa0"))
                         continue
                     if _acct2 != cur().acct:
@@ -5695,6 +5734,7 @@ def main():
     srv.bind(("0.0.0.0", PORT))
     srv.listen(16)
     log("服务端 v3 监听 :%d（TLS /auth + 明文游戏协议）" % PORT)
+    log("账号白名单：%s" % account_policy.describe())
     log("无角色试验：账号=%s 变体=%d（空=关闭，登录该账号只回「账号在/角色空」的 17）"
         % (FRESH_ACCT or "关闭", FRESH_V))
     cid = 0

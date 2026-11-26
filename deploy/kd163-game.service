@@ -1,0 +1,20 @@
+[Unit]
+Description=kd163 game server (TLS /auth + game protocol, port 9000)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=kd163
+Group=kd163
+WorkingDirectory=/opt/kd163
+Environment=PYTHONIOENCODING=utf-8
+Environment=KD_STATE_BACKEND=sqlite
+# 白名单默认读 /opt/kd163/accounts.json；要用环境变量就取消下一行注释
+#Environment=KD_ALLOW_ACCOUNTS=1784366,900000102
+ExecStart=/usr/bin/python3 local_server3.py 9000 patch/exact.pem patch/exact.key
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
