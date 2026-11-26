@@ -80,7 +80,9 @@ check("新号 28 不再残留「萌新」", "萌新".encode("utf-8") not in b_ne
 check("新号 28 带自己的账号", b"900000005" in b_new)
 _shift = (len(sfield("900000005")) - 8) + (len(sfield("呼延若梦")) - 7)
 check("新号 28 等级=1", b_new[18 + _shift] == 1, "off=%d 值=%d" % (18 + _shift, b_new[18 + _shift]))
-check("新号 28 职业=6", b_new[16 + _shift] == 6, "值=%d" % b_new[16 + _shift])
+# 头部三连：16=性别(1男/0女) 17=职业 18=等级（2026-11-24 修正后语义）
+check("新号 28 性别=1", b_new[16 + _shift] == 1, "值=%d" % b_new[16 + _shift])
+check("新号 28 职业=6", b_new[17 + _shift] == 6, "值=%d" % b_new[17 + _shift])
 
 print("\n[4] 17 包同样不残留「萌新」")
 b17 = L.build_17()

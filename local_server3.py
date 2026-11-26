@@ -29,6 +29,7 @@ import wing_proto     # 翅膀形象卡（1922/1931/1932 三个穿戴结果包�
 import equip_attr     # Equip.xml/StrengthenAddOn/Suite/Formula/Mall 全配置驱动
 import pet_proto      # 宠物 / 妖灵（961/962、946/947、1410~1413）
 import player as player_mod   # 每个连接一份角色状态（threading.local）
+import state_store    # 角色存档后端（SQLite，KD_STATE_BACKEND=json 可回退旧文件）
 from player import cur, new as new_player, ctx as player_ctx
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -56,6 +57,10 @@ def log(msg):
                 f.write(line + "\n")
         except Exception:
             pass
+
+
+# 存档后端的日志也写进 server.log（state_store 不能反向 import 本模块，会循环）
+state_store.set_logger(log)
 
 
 def load_seq():
@@ -1047,6 +1052,31 @@ def apply_gm(line):
         return True, ("槽%s 卸下 %s" % (arg[1].strip(),
                                        pet_proto.name_of(old) if old else "空"))
 
+    if line.startswith("存档") or line.startswith("stateinfo"):
+        _pl = cur()
+        if state_store.enabled():
+            try:
+                _d, _rev = state_store.load(store_key(_pl))
+            except Exception as e:
+                return False, "读库失败：%s" % e
+            if _d is None:
+                return True, ("账号 %s 库里没有存档（%s）"
+                              % (store_key(_pl), os.path.basename(state_store.DB_FILE)))
+            return True, ("账号 %s 后端=sqlite rev=%d 等级=%s 背包=%d件 库=%s 更新时间=%s"
+                          % (store_key(_pl), _rev, _d.get("level"),
+                             len(_d.get("bag") or {}),
+                             os.path.basename(state_store.DB_FILE),
+                             time.strftime("%H:%M:%S", time.localtime(
+                                 state_store.updated(store_key(_pl))))))
+        _p = state_path(_pl)
+        return True, ("账号 %s 后端=json 文件=%s 存在=%s 大小=%s"
+                      % (store_key(_pl), os.path.basename(_p), os.path.exists(_p),
+                         os.path.getsize(_p) if os.path.exists(_p) else 0))
+
+    if line.startswith("备份") or line.startswith("statebackup"):
+        backup_current(cur(), force=True)
+        return True, "已强制备份当前角色（backups/）"
+
     if line.startswith("领宠") or line.startswith("givepet"):
         arg = line.split(None, 1)
         pid = 10000
@@ -1767,12 +1797,114 @@ PRIMARY_ACCOUNT = "1784366"
 
 
 def state_path(pl=None):
-    """某个角色的存档路径。不传就用当前线程的角色。"""
+    """某个角色的**旧 JSON 存档**路径。不传就用当前线程的角色。
+
+    ★ 2026-11-26：存档默认已经搬到 SQLite（state_store.py）。
+    这个函数只做三件事：
+      1. `KD_STATE_BACKEND=json` 回退模式下的真实读写路径；
+      2. SQLite 首次读档时找不到行 → 到这里读老 JSON 并懒迁移进库；
+      3. 备份/运维工具按老习惯找文件。
+    业务代码不要再直接 open() 它，统一走 read_state_payload() / save_state()。
+    """
     pl = pl or cur()
     a = pl.acct
     if not a or a == PRIMARY_ACCOUNT:
         return STATE_FILE
     return os.path.join(HERE, "player_state_%s.json" % a)
+
+
+def store_key(pl=None):
+    """SQLite 主键：账号。空账号一律算主号（与旧 state_path 的例外一致）。"""
+    pl = pl or cur()
+    return str(pl.acct or PRIMARY_ACCOUNT)
+
+
+def state_exists(pl=None):
+    """这个账号有没有角色存档（不看内存，只看存储）。"""
+    pl = pl or cur()
+    if state_store.enabled():
+        try:
+            if state_store.exists(store_key(pl)):
+                return True
+        except Exception as e:
+            log("[state] 查库失败，回退看 JSON：%s" % e)
+    return os.path.exists(state_path(pl))
+
+
+def _read_json_state(pl):
+    try:
+        with open(state_path(pl), encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else None
+    except Exception:
+        return None
+
+
+def read_state_payload(pl=None):
+    """读一个角色的存档。返回 (dict, rev)；没有存档返回 (None, 0)。
+
+    SQLite 模式下如果库里没有这个账号、但磁盘上还有老的
+    `player_state*.json`，会读出来并**当场写进库**（懒迁移）——
+    这样不用停机跑迁移脚本，老账号第一次登录就自动搬过来，
+    中途回滚成 KD_STATE_BACKEND=json 也不丢东西。
+    """
+    pl = pl or cur()
+    if state_store.enabled():
+        try:
+            d, rev = state_store.load(store_key(pl))
+        except Exception as e:
+            log("[state] 读库失败，回退读 JSON：%s" % e)
+            d, rev = None, 0
+        jpath = state_path(pl)
+        # ★ 写库失败时会回退写老 JSON（见 save_state）。那种情况下 JSON 比库里新，
+        #   必须让 JSON 赢一次并回灌进库，否则那次改动就像没发生过。
+        jnewer = False
+        if d is not None:
+            try:
+                if os.path.exists(jpath):
+                    jnewer = os.path.getmtime(jpath) > state_store.updated(store_key(pl)) + 1
+            except Exception:
+                jnewer = False
+        if d is not None and not jnewer:
+            return d, rev
+        dj = _read_json_state(pl)
+        if dj is None:
+            return d, rev
+        if d is not None:
+            log("[state] 账号 %s 的 JSON 比库里新（上次写库失败留的兜底），按 JSON 回灌"
+                % store_key(pl))
+        try:
+            rev = state_store.save(store_key(pl), dj, rev if d is not None else 0)
+            log("[state] 老存档 player_state%s.json 已迁入 SQLite（账号 %s rev=%d）"
+                % (("_%s" % pl.acct) if pl.acct and pl.acct != PRIMARY_ACCOUNT else "",
+                   store_key(pl), rev))
+        except Exception as e:
+            log("[state] 懒迁移失败（本次仍按 JSON 内容用）：%s" % e)
+            rev = rev if d is not None else 0
+        return dj, rev
+    return _read_json_state(pl), 0
+
+
+def backup_current(pl=None, force=False):
+    """落盘/洗号前留一份快照，后端无关。
+
+    SQLite 模式下把当前库里的那一行导出成 JSON 存进 backups/，
+    保持和旧 backup_state() 一样的「10 分钟一份、每人 20 份」规则，
+    出事了可以直接把 JSON 塞回去（save 支持整份 dict）。
+    """
+    pl = pl or cur()
+    key = store_key(pl)
+    if state_store.enabled():
+        try:
+            d, _ = state_store.load(key)
+            if d is None:
+                d = _read_json_state(pl)
+            if d:
+                state_store.snapshot(key, d, force=force)
+        except Exception as e:
+            log("[state] 备份失败：%s" % e)
+        return
+    backup_state(state_path(pl), force=force)
 
 
 def switch_account(acct):
@@ -1789,16 +1921,16 @@ def switch_account(acct):
         return False
     pl.acct = acct
     p = state_path(pl)
-    if not os.path.exists(p):
+    if not state_exists(pl):
         player_mod.reset_newbie(pl)
         pl.acct = acct
         log("[acct] 账号 %s 还没有角色存档（%s），已置为 Lv1 空号，等待建角"
-            % (acct, os.path.basename(p)))
+            % (acct, "SQLite" if state_store.enabled() else os.path.basename(p)))
         return True
     load_state()
     save_state()
-    log("[acct] 切换到账号 %s（存档 %s）Lv%d %s"
-        % (acct, os.path.basename(p), pl.level,
+    log("[acct] 切换到账号 %s（%s）Lv%d %s"
+        % (acct, "SQLite" if state_store.enabled() else os.path.basename(p), pl.level,
            bag_proto.item(pl.equip.get(1))["name"] if pl.equip.get(1) else "无武器"))
     return True
 
@@ -1833,11 +1965,11 @@ def create_character(name, sex=1, pl=None, force=False):
             "不覆盖存档" % (pl.acct or "主号", pl.name, pl.level, len(pl.bag)))
         return False, ("该账号已有角色 %r（Lv%d），不能重复建角"
                        % (pl.name, pl.level))
-    _sp = state_path(pl)            # 先取路径：reset_newbie 之后 acct 可能被清
-    player_mod.reset_newbie(pl)
     # ★ 2026-11-26：洗号前强制留一份快照（不吃 10 分钟节流）。
     #   走 force=True 的后台建角是唯一会覆盖已有角色的路径，必须能回滚。
-    backup_state(_sp, force=True)
+    #   ★ 必须在 reset_newbie() **之前**备份：备份读的是库里现有的那一行。
+    backup_current(pl, force=True)
+    player_mod.reset_newbie(pl)
     pl.name = name
     pl.sex = 2 if int(sex or 1) == 2 else 1
     pl.has_char = True
@@ -1928,7 +2060,7 @@ def account_from_login(payload):
 
 
 def load_state(pl=None):
-    """从磁盘读【当前角色】的存档。
+    """从存储读【当前角色】的存档（默认 SQLite，见 state_store.py）。
 
     先把角色重置为 Player 的默认值再套存档：换账号 / 重连时不能残留上一个号的
     等级、背包、VIP，否则两个号数据会糊在一起。
@@ -1936,17 +2068,17 @@ def load_state(pl=None):
     pl = pl or cur()
     dflt = player_mod.Player()
     for k in player_mod.Player.__slots__:
-        if k in ("acct", "cid", "authed", "loaded", "saved_sig"):
+        if k in ("acct", "cid", "authed", "loaded", "saved_sig", "rev"):
             continue
         setattr(pl, k, copy.deepcopy(getattr(dflt, k)))
     pl.loaded = False           # 读盘失败就不能算「已加载」，save_state 会拒绝写
     pl.saved_sig = None
-    try:
-        with open(state_path(pl), encoding="utf-8") as f:
-            d = json.load(f)
-    except Exception:
+    pl.rev = 0
+    d, _rev = read_state_payload(pl)
+    if d is None:
         return
-    pl.loaded = True            # ★ 只有真读到文件才算加载成功
+    pl.rev = int(_rev or 0)     # 落盘时带回去做乐观锁
+    pl.loaded = True            # ★ 只有真读到存档才算加载成功
     _migrated_dirty = False     # 读档时改过结构（槽位/越界背包）→ 末尾强制落盘一次
     # ★ 2026-11-26：Player() 默认名改成空串（不再默认「萌新」演示号），
     #   这里必须给老存档兜一个名字，否则 player_state.json（45 级那份，name 字段是 null）
@@ -2229,12 +2361,31 @@ def save_state(force=False):
     if not force:
         if not pl.authed or not pl.loaded or not pl.acct or not pl.has_char:
             return
-    path = state_path(pl)
     d = state_dict()
     sig = json.dumps(d, ensure_ascii=False, sort_keys=True)
     if not force and sig == pl.saved_sig:
         return                              # 内容没变，不用写盘也不用备份
-    backup_state(path)
+    backup_current(pl)
+    if state_store.enabled():
+        _last = None
+        for _try in range(3):
+            try:
+                pl.rev = state_store.save(store_key(pl), d, getattr(pl, "rev", 0))
+                pl.saved_sig = sig
+                return
+            except state_store.Stale as e:
+                # 同一个账号两个连接都写了：重读 rev 再写一次（内存里的这份更新）
+                log("[state] rev 冲突，重读后重写：%s" % e)
+                try:
+                    _d2, _r2 = state_store.load(store_key(pl))
+                    pl.rev = int(_r2 or 0)
+                except Exception:
+                    pl.rev = 0
+            except Exception as e:
+                _last = e
+                time.sleep(0.05 * (_try + 1))
+        log("[state] 写库连续失败：%s（改写道 JSON 兜底，下次读档会回灌）" % _last)
+    path = state_path(pl)
     tmp = path + ".tmp"
     try:
         with open(tmp, "w", encoding="utf-8") as f:

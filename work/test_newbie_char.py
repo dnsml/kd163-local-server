@@ -25,6 +25,10 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# 本用例的 fixture 是临时 JSON 文件（patch 了 state_path），固定跑 JSON 后端；
+# SQLite 后端的读档/落盘由 work/test_state_store.py 覆盖。
+os.environ["KD_STATE_BACKEND"] = "json"
+
 import local_server3 as sv                     # noqa: E402
 from player import ctx, new as new_player      # noqa: E402
 

@@ -59,15 +59,30 @@ def tail(path, n=60):
         return ""
 
 
+def db_state(acct=None):
+    """从 SQLite 读一份存档。后台数值源顺序：status.json → 库 → 老 JSON。
+
+    ★ 2026-11-26：存档已迁到 server_state.db（state_store.py），
+      player_state.json 只剩「迁移前的老文件 + 写库失败时的兜底」，
+      再拿它当主数值源会显示上次迁移前的旧数字。
+    """
+    try:
+        import state_store
+        d, _ = state_store.load(acct or "1784366")
+        return d or {}
+    except Exception:
+        return {}
+
+
 def state_payload():
     """优先用 logs/status.json（游戏服每次变动都写，且是「当前在线角色」）。
 
     ★ 2026-11-25：以前拿 player_state.json 当数值源，多账号时那是主号/初始化文件，
       面板上的等级、元宝、背包全是别人的（实际角色 Lv43 面板显示 Lv45）。
-      现在 status.json 有 level+bag 就直接用它，只有它缺字段时才回退 player_state.json。
+      现在 status.json 有 level+bag 就直接用它，否则依次回退 SQLite / 老 JSON。
     """
     st = read_json(STATUS, {})
-    ps = read_json(STATE, {})
+    ps = db_state() or read_json(STATE, {})
     if st.get("level") and st.get("bag"):
         ps = st
     bag = ps.get("bag") or {}
@@ -154,6 +169,15 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(500, "admin.html 打不开: %s" % e, "text/plain; charset=utf-8")
         if u.path == "/api/state":
             return self._send(200, state_payload())
+        if u.path == "/api/accounts":
+            try:
+                import state_store
+                return self._send(200, {"backend": state_store.backend(),
+                                        "db": os.path.basename(state_store.DB_FILE),
+                                        "accounts": state_store.accounts(),
+                                        "online": state_store.online_list()})
+            except Exception as e:
+                return self._send(500, {"error": "读库失败: %s" % e})
         if u.path == "/api/items":
             kw = (q.get("q", [""])[0] or "").strip().lower()
             if not kw:

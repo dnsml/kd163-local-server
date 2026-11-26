@@ -28,6 +28,8 @@ ROOT = os.path.dirname(HERE)
 HOST, PORT = "127.0.0.1", 9000
 TOKEN = b"+jRY5oMSUYC44DPcEVBfdWlHuF0FzRC_t5eHoE3iZPsM"
 SNAP = os.path.join(ROOT, "logs", "accept_snapshot.json")
+# 这是对着运行中的服验收，必须看正式库（不落自检临时库）
+os.environ.setdefault("KD_STATE_DB", os.path.join(ROOT, "server_state.db"))
 
 OLD_ACCT = "17843661"          # 已有账号（百里海熠 Lv7）
 NEW_ACCT = "91" + time.strftime("%H%M%S")
@@ -92,6 +94,15 @@ def check(tag, cond, extra=""):
 
 
 def state(acct):
+    """读某个账号的存档：默认走后端（SQLite），KD_STATE_BACKEND=json 时读文件。"""
+    try:
+        sys.path.insert(0, ROOT)
+        import state_store
+        if state_store.enabled():
+            d, _ = state_store.load(acct)
+            return d
+    except Exception as e:
+        print("     (读库失败，回退文件：%s)" % e)
     p = os.path.join(ROOT, "player_state_%s.json" % acct)
     if not os.path.exists(p):
         return None

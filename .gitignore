@@ -26,6 +26,12 @@ patch/*账号密码*
 # ---- 3. 玩家存档（含账号、等级、背包、任务进度）----
 player_state*.json
 state_before_probe.json
+# 2026-11-26 起存档默认在 SQLite（state_store.py）：server_state.db 一行一个账号，
+# 和 player_state*.json 一样是玩家数据，绝不入库。WAL/SHM 是它的临时文件。
+server_state.db
+server_state.db-*
+*.db-wal
+*.db-shm
 
 # ---- 4. 日志与抓包 ----
 # 日志是核心分析资料（真服/他服完整包序），.log 全部保留；

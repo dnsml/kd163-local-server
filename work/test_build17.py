@@ -14,6 +14,9 @@ import sys
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, HERE)
+# 本用例靠「建角后 player_state_<账号>.json 是否生成」来判断落档，
+# 属于老 JSON 后端的格式测试；SQLite 后端由 test_state_store.py 覆盖。
+os.environ["KD_STATE_BACKEND"] = "json"
 
 import player as player_mod
 import local_server3 as srv
@@ -44,7 +47,8 @@ with player_mod.ctx(pl):
 check("包长 197", len(b) == 197, "len=%d" % len(b))
 check("账号字段", b[1:9] == b"\xa7" + b"1784366", b[1:9].hex())
 check("昵称字段", b[9:16] == b"\xa6" + "萌新".encode("utf-8"), b[9:16].hex())
-check("职业 off16", b[16] == pl.cls, "cls=%d b[16]=%d" % (pl.cls, b[16]))
+check("性别 off16", b[16] == (1 if pl.sex == 1 else 0), "sex=%d b[16]=%d" % (pl.sex, b[16]))
+check("职业 off17", b[17] == pl.cls, "cls=%d b[17]=%d" % (pl.cls, b[17]))
 check("等级 off18", b[18] == pl.level, "lv=%d b[18]=%d" % (pl.level, b[18]))
 check("尾部结束符", b[-1] == 0xA0, hex(b[-1]))
 
@@ -56,8 +60,8 @@ shift = len(b2) - 197
 check("长度按 shift 收缩", shift == -4, "len=%d shift=%d" % (len(b2), shift))
 check("账号字段不动", b2[1:9] == b"\xa7" + b"1784366", b2[1:9].hex())
 check("昵称内容", b2[9:12] == b"\xa2" + b"ab", b2[9:12].hex())
-check("职业平移到 16+shift", b2[16 + shift] == pl2.cls,
-      "b[%d]=%d" % (16 + shift, b2[16 + shift]))
+check("职业平移到 17+shift", b2[17 + shift] == pl2.cls,
+      "b[%d]=%d" % (17 + shift, b2[17 + shift]))
 check("等级平移到 18+shift", b2[18 + shift] == pl2.level,
       "b[%d]=%d" % (18 + shift, b2[18 + shift]))
 check("结束符仍在末尾", b2[-1] == 0xA0, hex(b2[-1]))
@@ -115,7 +119,8 @@ check("未转职 cls=6", tp.cls == 6, "cls=%d" % tp.cls)
 check("昵称回读", tp.name == "测试角色", tp.name)
 check("性别=2", tp.sex == 2, "sex=%d" % tp.sex)
 check("has_char", tp.has_char is True)
-check("背包空", len(tp.bag) == 0, "%d 格" % len(tp.bag))
+check("背包是新人三件套", sorted(v[0] for v in tp.bag.values()) == [20190, 20432, 21001],
+      "%d 格 %s" % (len(tp.bag), [v[0] for v in tp.bag.values()]))
 check("钱 0", tp.bind_yuanbao[0] == 0 and tp.tongqian[0] == 0,
       "绑元=%d 铜钱=%d" % (tp.bind_yuanbao[0], tp.tongqian[0]))
 

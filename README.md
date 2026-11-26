@@ -32,7 +32,7 @@ adb reverse tcp:8080 tcp:80       # 资源 CDN（注意是 8080→80，不是 80
 客户端会弹建角界面（男/女 + 昵称 + 创建），创建完直接是干净的 Lv1 未转职号，
 身边没有熊猫、背包空、钱 0 —— 这是设计行为，不是缺数据。
 
-> 仓库里**不带玩家存档**（`player_state*.json` 全在 .gitignore 里），所以 clone 下来第一次
+> 仓库里**不带玩家存档**（`server_state.db` 与 `player_state*.json` 全在 .gitignore 里），所以 clone 下来第一次
 > 登录一定是新号。想跳过建角，可以写 GM：`printf '建角 小林 男\n' > logs/gm.cmd`（主号），
 > 或 `printf '@账号 建角 小林 男\n' > logs/gm.cmd`（指定账号）。
 
@@ -108,7 +108,8 @@ python -c "m=open('logs/relay.log','rb').read();b=open('logs/relay.log.bak_1233'
 ```
 local_server3.py     主服务端：登录/建角/场景/任务/背包/战斗/GM/推送（唯一入口）
 battle.py            战斗内核：151/148/149/150、伤害与回合、血条折算
-player.py            角色状态（每连接一份，落盘 player_state_*.json）
+player.py            角色状态（每连接一份）
+state_store.py       存档后端：SQLite 一行一账号（WAL + rev 乐观锁）
 bag_proto.py         背包 177/178、物品 150 掉落
 equip_attr.py        面板属性：装备/强化/套装/妖灵合成 cmd=29
 pet_proto.py         宠物妖灵：946/947/961~965/1409~1414

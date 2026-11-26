@@ -6,6 +6,7 @@
 """
 import contextlib
 import json
+import os
 from pathlib import Path
 import struct
 import sys
@@ -52,8 +53,15 @@ class PetOwnershipTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        # 这套 fixture 是老 JSON 存档（patch 了 state_path 指向临时文件），
+        # 所以显式跑 JSON 后端；SQLite 后端的完整读档/落盘由 test_state_store.py 覆盖。
+        os.environ["KD_STATE_BACKEND"] = "json"
         pet_proto.load()
         sv._load_equip_str()
+
+    @classmethod
+    def tearDownClass(cls):
+        os.environ.pop("KD_STATE_BACKEND", None)
 
     def setUp(self):
         self.stack = contextlib.ExitStack()

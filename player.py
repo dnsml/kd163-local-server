@@ -35,6 +35,9 @@ class Player(object):
         # 具体用哪个只有客户端自己知道 —— 817 一上报就记下来，
         # 之后 818/30 全按这个字节回，避免同一件武器回两个槽。
         "weapon_wire",
+        # 存档版本号（SQLite player.rev）。读档时记下，落盘时带回去做乐观锁：
+        # 同一个账号两个连接同时写，后写的能发现「我拿到的是旧版本」。
+        "rev",
     )
 
     def __init__(self):
@@ -98,6 +101,8 @@ class Player(object):
         self.bag_sent = None
         # 0 = 客户端还没通过 817 告诉我们武器用哪个协议槽字节
         self.weapon_wire = 0
+        # 存档版本（见 state_store）；0 = 还没从库里读过这一行
+        self.rev = 0
 
     def purses(self):
         """货币键 -> 可变列表（GM 与商城共用同一份引用）。"""
@@ -192,4 +197,5 @@ def reset_newbie(p=None):
     p.has_char = False
     p.loaded = False
     p.saved_sig = None
+    p.rev = 0
     return p

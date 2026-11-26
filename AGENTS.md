@@ -46,7 +46,7 @@ docs/
 
 ## 3. 禁止提交
 
-- 存档：`player_state*.json`、`data/**`
+- 存档：`player_state*.json`、`server_state.db`（含 `-wal`/`-shm`）、`data/**`
 - 日志副本：`logs/*.bak_*`、`logs/relay_out*`、`logs/server_before*`、`logs/server_prev*`
   （`relay.log` / `server.log` 是追加写的，改前 cp 出来的东西必然是前缀副本，没有独有信息）
 - 截图、`*.apk`、`res_update/**`、`srvres/**`、`tools/**`
