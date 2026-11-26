@@ -921,7 +921,7 @@ def apply_gm(line):
             s = battle.BattleSession(
                 mob_id, BT, cur().cls, cur().level,
                 pet=pet_proto.active_pet(cur().pets), name=cur().name,
-                attrs=_ba, dmg_mult=DMG_MULT)
+                attrs=_ba, dmg_mult=DMG_MULT, sex=cur().sex)
             s.player_mp_max = max(0, panel_attr("mp_max"))
             s.player_mp = s.player_mp_max
             BATTLE_SESS[cid] = s
@@ -2410,9 +2410,17 @@ def build_20_ack(acct, name, sex=1, cls=6):
 
     结构和真服逐字节对齐：0x14 开头 + 账号 + 昵称 + 性别 + 职业 + 固定尾。
     尾里那些数字（等级/属性/坐标）是 Lv1 未转职号的现场值，直接用。
+
+    ★ 2026-11-26 18:5x：性别字段**必须走协议编码 1 男 / 0 女**。
+      以前直接写内部值 `sex`（1 男 / 2 女），女号这里就发了 `02`。
+      客户端拿 `(cls=6, sex=2)` 去 Class.xml 查不到（表里只有 sex=1/0），
+      回落成第一行「御剑·男」→ 建完号首帧就是**转职后形象**，
+      左上角头像也是御剑男；直到收 28/29（那里写的是 0 女）才刷成女新手。
+      这正是「接三个礼包一下就刷成女角色新号」的原因。
     """
+    _sx = 1 if int(sex or 1) == 1 else 0
     return (b"\x14" + sfield(acct or "") + sfield(name or "")
-            + bytes([int(sex) & 0xFF, int(cls) & 0xFF]) + CREATE_ACK_TAIL)
+            + bytes([_sx, int(cls) & 0xFF]) + CREATE_ACK_TAIL)
 
 
 def build_17(scene=None):
@@ -3831,7 +3839,7 @@ def handle_game(conn, cid):
                         battle_sess = battle.BattleSession(
                             _ids[0], BT, cur().cls, cur().level,
                             pet=pet_proto.active_pet(cur().pets), name=cur().name,
-                            attrs=_ba)
+                            attrs=_ba, sex=cur().sex)
                         battle_sess.player_mp_max = max(0, panel_attr("mp_max"))
                         battle_sess.player_mp = battle_sess.player_mp_max
                         BATTLE_SESS[cid] = battle_sess
@@ -3859,7 +3867,7 @@ def handle_game(conn, cid):
                         battle_sess = battle.BattleSession(
                             mob_id, BT, cur().cls, cur().level,
                             pet=pet_proto.active_pet(cur().pets), name=cur().name,
-                            attrs=_ba, dmg_mult=DMG_MULT)
+                            attrs=_ba, dmg_mult=DMG_MULT, sex=cur().sex)
                         # 151 里的蓝必须与 29 面板同源：客户端是拿「当前法力」跟
                         # Skill.xml 的 consume_mp 比，面板/战斗蓝不一致会出现
                         # 「面板有蓝却提示法力不足」。含 MP_ADD 补偿。
