@@ -27,8 +27,14 @@ class Player(object):
         "pets",
         "spirit_bag", "spirit_slot",
         "quest_active", "quest_ready", "done_quests",
+        "title",                 # 当前佩戴的称号 id（0=没有）；只有用掉称号卡才会有
         "scene", "pos_x", "pos_y",
         "bag_sent",              # 上次推给客户端的背包快照，只用来算差异日志
+        # 客户端 817 上报的「当前武器用的协议槽字节」（7 或 8）。
+        # 武器在内存里永远存槽 8，但协议上 7/8 两个字节客户端都认，
+        # 具体用哪个只有客户端自己知道 —— 817 一上报就记下来，
+        # 之后 818/30 全按这个字节回，避免同一件武器回两个槽。
+        "weapon_wire",
     )
 
     def __init__(self):
@@ -42,25 +48,30 @@ class Player(object):
         # 上次写盘内容的指纹，用来避免「值没变也写一遍」（顺带当 dirty 用）
         self.saved_sig = None
         # 角色名 / 性别 / 是否已建角。
-        # 以前名字是写死在 17 包模板里的「萌新」，所有号都叫萌新；
-        # has_char=False 表示「账号在、角色还没建」，这种号不许落盘，等建角流程初始化。
-        self.name = "萌新"
+        # ★ 2026-11-26：这里以前是一套「Lv10 演示号」默认值（有角色、10 级、
+        #   4030 绑元、3 件演示道具）。只要有一条代码路径忘了读档/建角就直接 cur()，
+        #   就会凭空冒出一个能进游戏的假角色，还会把真存档写坏（11-24 那份 Lv45 就是这么没的）。
+        #   现在 Player() 只代表「一个还没初始化的连接」：
+        #     has_char=False / Lv0 / 空背包 / 全 0 货币
+        #   真正的角色只有两条路来：load_state()（读已有存档）或 create_character()
+        #   （建角，内部走 reset_newbie()）。忘了初始化就只会是空号，不会变成演示号。
+        self.name = ""
         self.sex = 1             # 1=男 2=女（客户端 create_role 只有男女两项）
-        self.has_char = True     # 默认值当「演示号」，真新号由 reset_newbie() 置 False
+        self.has_char = False    # 默认没有角色；建角/读档才会置 True
         # 职业 6 = 未转职（真服未转职号 151 的 b[2]=06，技能 60101/60201）
         self.cls = 6
-        self.level = 10
-        self.exp = 5765
-        self.exp_need = 8549
+        self.level = 0
+        self.exp = 0
+        self.exp_need = 0        # 0 表示「还没有角色」，升级循环里会判 exp_need > 0
         self.mp_add = [0]
-        self.coin_bound = [10240]
-        self.bind_yuanbao = [4030]
+        self.coin_bound = [0]
+        self.bind_yuanbao = [0]
         self.tongqian = [0]
-        self.yuanbao = [869]
+        self.yuanbao = [0]
         self.yueli = [0]
         self.vip_level = [0]
         self.vip_until = [0.0]
-        self.bag = {0: [20190, 10], 1: [20432, 1], 2: [21001, 1]}
+        self.bag = {}
         self.equip = {}
         self.enhance = {}
         self.wing = [None]
@@ -73,6 +84,9 @@ class Player(object):
         self.spirit_slot = {}
         self.quest_active = 0
         self.quest_ready = False
+        # 0 = 没有任何称号。称号不是「等级到了就有」，必须用称号卡激活。
+        # 17 的 idx24 与 88 的末尾 varint 都读这一个值。
+        self.title = 0
         self.done_quests = set()
         self.scene = 101
         # 最后所在坐标（115 上报的 x/y，一格 1 字节）。
@@ -82,6 +96,8 @@ class Player(object):
         self.pos_y = 7
         # 只用于「背包变动」日志：None 表示这次连接还没推过背包
         self.bag_sent = None
+        # 0 = 客户端还没通过 817 告诉我们武器用哪个协议槽字节
+        self.weapon_wire = 0
 
     def purses(self):
         """货币键 -> 可变列表（GM 与商城共用同一份引用）。"""
@@ -167,6 +183,7 @@ def reset_newbie(p=None):
     p.spirit_slot = {}
     p.quest_active = 0
     p.quest_ready = False
+    p.title = 0
     p.done_quests = set()
     p.scene = 101              # ★ 新号只出生在蓬莱仙境，不看老号的存档场景
     p.pos_x, p.pos_y = 21, 7   # 与 17 模板默认落点一致

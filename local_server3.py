@@ -10,6 +10,7 @@ kd163 自建服务端 v3（不再依赖真服）
 用法：python local_server3.py [port] [cert] [key]
 """
 import os
+import re
 import sys
 import json
 import time
@@ -424,8 +425,12 @@ def build_88():
     结果新建的 Lv1 号头顶就挂着「神界新丁」。
     """
     b = bytearray(b"\xd0\x88\x00\x07" + b"\x00" * 14)   # 18B 固定段
-    if cur().level >= 5:
-        b += bytes.fromhex("cd0b7c")      # 主号抓包值（21B）
+    _t = int(cur().title or 0) & 0xFFFF
+    if _t:
+        # ★ 2026-11-26 14:4x：以前只要 Lv≥5 就回死值 cd0b7c（2940，另一个号的
+        #   称号），于是「一上线自带神界新丁、打个怪又消失」。现在只回存档里
+        #   真用掉称号卡得到的 title；没有就是 19B 空表。
+        b += b"\xcd" + _t.to_bytes(2, "big")
     else:
         b += b"\x00"                      # 空 → 19B
     return bytes(b)
@@ -527,10 +532,10 @@ def send_push(conn, cid, cmd):
                if wing_proto.supported(cur().wing[0]) else "空面板"))
         return
     if cmd in (87, 88):
-        # 称号列表必须动态：Lv<5 是 19B（无称号），Lv>=5 才是 21B（带 cd0b7c
-        # 「神界新丁」）。以前 send_push 走 TPL_PUSH 的 21B 固定包，
-        # 低等级号被推 88 就会凭空多一个称号；而升级跨过 5 级时没人推 88，
-        # 客户端称号栏又停在「没有称号」——用户看到的就是「称号消失」。
+        # 称号表必须动态：没戴称号是 19B，戴了才是 21B（末尾 cd + 称号 id）。
+        # ★ 2026-11-26 14:4x 改：以前按「Lv>=5 就给 cd0b7c」，
+        #   等于等级到了自动发一个别人的称号；现在只看存档 title
+        #   （用称号卡才有），没戴就回 19B 空表。
         body = build_88()
         conn.sendall(pack(88, 0, body))
         log("c%03d .. push cmd=88     len=%d [称号 Lv%d %s]"
@@ -769,6 +774,26 @@ def apply_gm(line):
         save_state()
         push_all([17, 28, 30])
         return True, "已穿上职业%d神装 %d~%d" % (cls, base, base + 6)
+    # 穿上四件首饰（戒指 9/10 = 10305 飞仙戒指，护符 11/12 = 10306 飞仙护符）。
+    # 用途：早期「点装备格」被当成卸下的那版 bug 把首饰弄丢过，重登后面板
+    # 右半边只显示一件戒指一件护符，别的格是空的 —— 用这条一次补齐四格，
+    # 顺便验证 30 包在「首饰全满」时仍然按 0c/0b/09/0a 的顺序写。
+    if line in ("首饰", "穿首饰", "四首饰", "acc"):
+        # ★ 第二件必须用不同 id：load_state 里有一条「同 id 首饰成对去重」的老逻辑
+        #   （当年为修成对镜像 bug 加的），9/10 写同一个 id 会在下次读档时被删掉一格。
+        #   真服同族有三档：戒指 10305/10307/10309、护符 10306/10308/10310。
+        cur().equip[9] = 10305
+        cur().equip[10] = 10307
+        cur().equip[11] = 10306
+        cur().equip[12] = 10308
+        # ★ force=True：save_state 默认「状态指纹没变就不写盘」，
+        #   这里装备没变时会把 ver=2 一起跳过，老档就一直停在 ver=None。
+        save_state(force=True)
+        # 只推 29/28/30 —— 和 182 穿戴同一套回包。别推 17：17 是登录快照，
+        # 中途重发会把客户端面板按 17 里的基础属性重算（强化/首饰加成全部丢掉，
+        # 实测气血 3049→1271、攻击 376→151）。
+        push_all([29, 28, 30])
+        return True, "已穿上四件首饰（戒指 9/10、护符 11/12）"
     # 强化必定成功（测试材料/上限用）；「概率」恢复按等级+石头判定
     if line in ("必成", "强化必成", "luckon"):
         FORGE_LUCK[0] = False
@@ -1372,11 +1397,37 @@ SLOT_OF_KIND2 = {1: 8, 2: 8, 3: 8, 4: 8, 5: 8,      # 武器只有槽 8 一个
 #   Equip.xml 也没有任何字段能区分，所以只能按「真服原样 id → 字节」收录。
 #   没抓到过的武器仍回落 08：08 已被 11235 证明是合法武器字节，
 #   回落只会让外观编号不精确，不会把武器画到别的部位。
-WEAPON_SLOT_BYTE = {11235: 0x08, 11328: 0x07}
+# ★ 2026-11-26 11:3x 又补一条：12114 逍遥匕首[一阶]（item_kind2=2）客户端 **817 自己上报 07**
+#   `cd2f52 07`，和 30 包里武器块的第三字节必须同一值。
+#   所以这张表只是「还没被客户端上报过时的兜底」——
+#   真正权威的是客户端每局登录时 817 里带的那个字节（记在 player.weapon_wire）。
+WEAPON_SLOT_BYTE = {11235: 0x08, 11328: 0x07, 12114: 0x07,
+                    11114: 0x07}
+# ★ 11114「御剑剑[一阶]」：真服 15:39:25 那串 30 原包（400501 交完发神装）
+#   `...cd2b69060101 0000…(16B) cd2b6a070101 0000…` —— 武器字节是 **07**，
+#   本地以前没收录、回落 08，武器格和真服对不上。
+
+
+def weapon_wire_slot():
+    """当前武器的协议槽字节：客户端 817 上报过就用它，否则查表，最后回落 08。
+
+    以前固定按 id 查表，12xxx 匕首没收录就回落 08，
+    而客户端自己认为是 07 —— 818 里同一件武器回了 7 和 8 两条，
+    客户端装备栏的武器格就对不上，点上去只发 819、什么都不发生。
+    """
+    hint = getattr(cur(), "weapon_wire", 0) or 0
+    if hint in (0x07, 0x08):
+        return hint
+    return WEAPON_SLOT_BYTE.get(cur().equip.get(8, 0) & 0xFFFF, 0x08)
 
 
 # 首饰槽（30 包槽 6 与槽 7 之间那 16 字节就是这 4 个槽：空 4B、有装备 6B）
 ACC_SLOTS = (9, 10, 11, 12)
+
+# 内部装备槽全集：1~6 主装备、8 武器、9~12 首饰。
+# ★ 槽 7 不在里面：它是**协议层**的武器字节（见 WEAPON_SLOT_BYTE），
+#   2026-11-26 之前武器真挂在 7，老档的 enhance 里因此可能残留 enhance[7]。
+EQUIP_SLOTS = (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12)
 
 # ★ 2026-11-25 23:25 真服抓包定性（推翻「成对镜像」的旧结论）：
 #   23:25:24  C->S 182 hex=3a01  → 30 只多了一条 cd28420c0101（护符，槽12）
@@ -1437,8 +1488,14 @@ def equip_slot_for(kind2):
 
 
 def equip_slots():
-    """当前要下发给客户端的槽位列表（1~7 固定 + 已穿首饰）。"""
-    out = [1, 2, 3, 4, 5, 6, 7]
+    """当前要下发给客户端的槽位列表（6 个主槽 + 武器协议槽 + 已穿首饰）。
+
+    武器槽位字节跟着武器走：11235→08、11328→07（真服 818 原包实证）。
+    以前固定写 7，带 11235 时客户端会把它当成「槽 7 的另一件」，武器格照样空。
+    """
+    out = [1, 2, 3, 4, 5, 6]
+    _w = cur().equip.get(8, 0) & 0xFFFF
+    out.append(weapon_wire_slot() if _w else 0x08)
     for s in ACC_SLOTS:
         if cur().equip.get(s):
             out.append(s)
@@ -1576,6 +1633,19 @@ USE_EFFECTS = {
 GIFTS = {
     21001: [(30059, 1), (20717, 2), (20053, 5), (21002, 1)],
 }
+# 称号卡：item_id -> 称号 id。
+#   30059「神界新丁」item_kind2=83（称号卡），level_limit=5，
+#   description「等级达到5级可使用此荣誉称号」；称号 id 1019 来自线上服
+#   17 包头部 idx24（cd03fb），与该号头顶实际显示的「神界新丁」对得上。
+# ★ 称号不是「等级到了自动给」：以前 17 模板写死 1019，所有 Lv≥5 的号
+#   一上线就自带，玩家反馈「我都没用这个卡，怎么头上就有，一打怪又没了」。
+#   现在只有真的用掉这张卡，player.title 才会变成 1019。
+TITLE_CARD = {30059: 1019}
+# 新号三件套（玄女送的新人礼包）：真服新号 178 原包 23B 逐字节解出来的
+#   40 03 | 00 cd4ede 00 01 0a | 01 cd4fd0 00 01 01 | 02 cd5209 00 01 01
+#   cd 是两字节定长编码：0x4ede=20190 绑定铜钱卡×10、0x4fd0=20432 10绑定元宝×1、
+#   0x5209=21001 5级新丁礼包×1（三条 bind=01 都是绑定）。
+NEWBIE_GIFT = ((20190, 10), (20432, 1), (21001, 1))
 # 「用不了」的准确原因（按 item_kind2 / item_id）。
 # 这些子系统的协议还没抓到正样本，服务端【不消耗】道具 —— 免得像天使羽翼那样
 # 点一下就没了、也没有任何效果。提示要说清楚卡在哪，别让玩家以为是服务器坏了。
@@ -1667,7 +1737,7 @@ def switch_account(acct):
     return True
 
 
-def create_character(name, sex=1, pl=None):
+def create_character(name, sex=1, pl=None, force=False):
     """给某个账号建一个 Lv1 角色并落盘（群主在后台代玩家建角）。
 
     ★ 这是「没有自助注册」下的正解：账号由群主发，角色由群主建。
@@ -1676,6 +1746,9 @@ def create_character(name, sex=1, pl=None):
     build_17_fresh 的注释）。所以先走服务端代建，玩家登录即进游戏。
 
     昵称规则与客户端 create_role.xml 的输入框一致：1~10 个字符、不能有空格。
+
+    ★ force=False（默认）：账号已有角色时**拒绝**，绝不覆盖存档。
+      后台确实要洗号时才传 force=True。
     """
     pl = pl or cur()
     name = str(name or "").strip()
@@ -1685,17 +1758,65 @@ def create_character(name, sex=1, pl=None):
         return False, "昵称最多 10 个字（客户端输入框 maxlength=10）"
     if any(c.isspace() for c in name):
         return False, "昵称不能含空格"
+    # ★ 2026-11-26 13:41 事故：账号 1784366 已有 Lv45 角色（御剑战甲、背包 32 件、
+    #   绑铜 298120、元宝 924），客户端又弹了一次建角界面，这里直接 reset_newbie
+    #   + force 落盘，把 Lv45 冲成了 Lv1 —— 玩家回来就是「背包空了、装备没了」。
+    #   建角**必须**拒绝覆盖已有角色，除非后台明确要求（force=True）。
+    if pl.has_char and int(pl.level or 0) > 0 and not force:
+        log("[char] ！！拒绝建角：账号 %s 已有角色 %r Lv%d（背包%s件），"
+            "不覆盖存档" % (pl.acct or "主号", pl.name, pl.level, len(pl.bag)))
+        return False, ("该账号已有角色 %r（Lv%d），不能重复建角"
+                       % (pl.name, pl.level))
+    _sp = state_path(pl)            # 先取路径：reset_newbie 之后 acct 可能被清
     player_mod.reset_newbie(pl)
+    # ★ 2026-11-26：洗号前强制留一份快照（不吃 10 分钟节流）。
+    #   走 force=True 的后台建角是唯一会覆盖已有角色的路径，必须能回滚。
+    backup_state(_sp, force=True)
     pl.name = name
     pl.sex = 2 if int(sex or 1) == 2 else 1
     pl.has_char = True
     pl.loaded = True
     pl.authed = True
+    # ★ 2026-11-26：新角色真的带上玄女给的三件套。
+    #   以前新号背包是空的，客户端里那三件是 TPL_PUSH[178] 录制的**假快照**
+    #   （177 兜底回模板时盖上去的），服务端根本没有 → 点使用没反应、
+    #   换成动态 178 又「变成别的物品」。真服新号 178 原包（23B）就是这三件：
+    #     槽0 20190 绑定铜钱卡 x10 / 槽1 20432 10绑定元宝 x1 / 槽2 21001 5级新丁礼包 x1
+    #   现在按真实物品入包，177/181 拿到的就是它们本身。
+    for _gid, _gn in NEWBIE_GIFT:
+        _gp = bag_add(_gid, _gn)
+        if _gp is None:
+            log("[char] ！！新人礼包 %d x%d 装不下（背包满）" % (_gid, _gn))
+    log("[char] 新人礼包入包 %s"
+        % "/".join("%s x%d" % (bag_proto.item(g)["name"], n)
+                   for g, n in NEWBIE_GIFT))
     save_state(force=True)          # 新角色必须强制落盘（闸门会拦住普通写入）
     log("[char] ★ 建角 账号=%s 昵称=%r 性别=%d -> Lv1 未转职"
         % (pl.acct or "主号", pl.name, pl.sex))
     return True, "已建角：账号 %s 昵称 %r 性别 %s，Lv1 未转职" % (
         pl.acct or "主号", pl.name, "女" if pl.sex == 2 else "男")
+
+
+def equip_story_set(pl=None):
+    """400501「物归原主」剧情发的那套神装，按部位落到**正确的内部槽**。
+
+    11108~11113 是防具（kind2 6~11 → 槽 1~6），11114 是武器（kind2 1 → 槽 **8**）。
+    ★ 2026-11-26：以前写成 `for _s in range(1, 8)` 顺序写槽 1~7，
+      武器就落到槽 7（协议层字节，不是内部槽）→ build_30 不认 → 面板武器格空着，
+      玩家看到的就是「太虚星君给的装备不显示」。现在一律走 SLOT_OF_KIND2。
+    返回 (穿了几件, 基础 id)。
+    """
+    pl = pl or cur()
+    cls = pl.cls if 1 <= int(pl.cls or 0) <= 5 else 1
+    base = 10000 + cls * 1000 + 108
+    got = 0
+    for k in range(7):
+        iid = base + k
+        slot = SLOT_OF_KIND2.get(int(bag_proto.item(iid).get("kind2") or 0))
+        if slot:
+            pl.equip[slot] = iid
+            got += 1
+    return got, base
 
 
 def rename_character(name, pl=None):
@@ -1757,14 +1878,22 @@ def load_state(pl=None):
     except Exception:
         return
     pl.loaded = True            # ★ 只有真读到文件才算加载成功
-    pl.name = str(d.get("name") or pl.name)
+    _migrated_dirty = False     # 读档时改过结构（槽位/越界背包）→ 末尾强制落盘一次
+    # ★ 2026-11-26：Player() 默认名改成空串（不再默认「萌新」演示号），
+    #   这里必须给老存档兜一个名字，否则 player_state.json（45 级那份，name 字段是 null）
+    #   读出来 17 包里的角色名是空的。
+    pl.name = str(d.get("name") or pl.name or "萌新")
     pl.sex = int(d.get("sex", pl.sex) or pl.sex)
     pl.has_char = bool(d.get("has_char", True))
     pl.exp = int(d.get("exp", pl.exp))
     pl.level = int(d.get("level", pl.level))
     pl.cls = int(d.get("class", pl.cls))
     pl.coin_bound[0] = int(d.get("coin", pl.coin_bound[0]))
-    pl.exp_need = int(d.get("need", pl.exp_need))
+    pl.exp_need = int(d.get("need", pl.exp_need) or 0)
+    # 存档里有 level 就说明这是真角色；缺 need 的老档按等级补一个非 0 值，
+    # 避免 exp_need=0 让升级循环永远不成立（0 现在专指「还没有角色的空连接」）。
+    if not pl.exp_need:
+        pl.exp_need = max(200, int(200 * (1.18 ** max(0, pl.level - 1))))
     pl.bind_yuanbao[0] = int(d.get("bind_yuanbao", pl.bind_yuanbao[0]))
     pl.tongqian[0] = int(d.get("tongqian", pl.tongqian[0]))
     pl.yuanbao[0] = int(d.get("yuanbao", pl.yuanbao[0]))
@@ -1784,6 +1913,9 @@ def load_state(pl=None):
         pl.wardrobe.update(int(x) for x in wd)
     pl.quest_active = int(d.get("quest_active", 0) or 0)
     pl.quest_ready = bool(d.get("quest_ready", False))
+    # ★ 老存档没有 title 字段 = 没戴称号（0）。以前 17 模板里写死 1019，
+    #   所有 Lv≥5 的号一上线就自带「神界新丁」，用没用卡都一样。
+    pl.title = int(d.get("title", 0) or 0)
     # ★ 场景 + 坐标（老号回到最后一次下线的地点）。老存档没有 scene/pos_* 字段，
     #   走默认 101 / 21,7 —— 与这轮改动之前的表现完全一致，不会把老号扔到别处。
     #   场景 id 必须校验存在：配置表删过地图或者手改坏存档时，宁可回蓬莱也别进虚空。
@@ -1811,20 +1943,42 @@ def load_state(pl=None):
     # ★ 旧版本把一件首饰同时写进成对两格（9+10 / 11+12），读档时清掉多出来的那格。
     # 首饰四格是四件独立物品，同一件不可能同时占两格；留着会让面板多一件、
     # 卸下时两格一起消失、178 和面板对不上账（客户端 SIGABRT 闪退）。
-    for _a, _b in ((9, 10), (11, 12)):
-        if pl.equip.get(_a) and pl.equip.get(_a) == pl.equip.get(_b):
-            pl.equip.pop(_b, None)
+    # ★ 2026-11-26 12:44：这条只对「老格式存档」跑（ver<2）。新格式下两枚同款
+    #   戒指是合法的（玩家自己穿两件一模一样的），再按 id 去重会静默吃掉一件。
+    if int(d.get("ver") or 1) < 2:
+        for _a, _b in ((9, 10), (11, 12)):
+            if pl.equip.get(_a) and pl.equip.get(_a) == pl.equip.get(_b):
+                pl.equip.pop(_b, None)
     # ★ 2026-11-26：武器槽从 7 改成 8（真服 30 包 `cd2be3 08 01 01` 实证）。
     # 老存档里武器还挂在 7，读档时搬过来，否则玩家一登录武器就"凭空消失"。
     if pl.equip.get(7) and not pl.equip.get(8):
         pl.equip[8] = pl.equip.pop(7)
+        _migrated_dirty = True
     elif pl.equip.get(7) and pl.equip.get(8):
         pl.equip.pop(7, None)      # 两格都有：槽 8 才是真的，7 是旧镜像
+        _migrated_dirty = True
     eh = d.get("enhance")
     if isinstance(eh, dict):
         pl.enhance.clear()
         for k, v in eh.items():
             pl.enhance[int(k)] = int(v)
+    # ★ 2026-11-26：槽 7 是**协议层**武器字节，不是内部槽（武器内部槽 = 8）。
+    #   enh_power_add/sum_strengthen 都是「按已穿装备遍历再查 enhance[槽]」，所以
+    #   残留的 enhance[7] 不进属性；但 min_enh_lv()（29.field11 抢强化大师档位）
+    #   曾直接遍历 enhance.values()，条目数一凑够就按错的集合算档。
+    #   老档里 +N 记在 7 的，说明是「武器挂 7 那个年代」强化出来的，
+    #   等级要跟着武器搬到 8，否则玩家重登就白掉强化。
+    if 7 in pl.enhance:
+        _lv7 = pl.enhance.pop(7)
+        _migrated_dirty = True
+        if _lv7 > 0 and 8 not in pl.enhance:
+            pl.enhance[8] = _lv7
+            log("[enhance] 武器强化 +%d 跟随武器搬到槽8（老档记在协议槽7）"
+                % _lv7)
+    for _s in [s for s in pl.enhance if s not in EQUIP_SLOTS]:
+        pl.enhance.pop(_s, None)
+        _migrated_dirty = True
+        log("[enhance] 孤立强化记录 槽%d 已清理（不是装备槽）" % _s)
     bag = d.get("bag")
     # ★ 空背包也必须清空：以前写成 `and bag`，空号存档（bag={}）会被跳过，
     # 于是 Lv1 新角色读档后继承了 Player() 默认那 3 件演示道具。
@@ -1840,6 +1994,7 @@ def load_state(pl=None):
             _free += 1
         if _free < BAG_CAPACITY:
             pl.bag[_free] = pl.bag.pop(_p)
+            _migrated_dirty = True
             log("[bag] 存档槽%d 越界（>=%d 隐形），搬到槽%d" % (_p, BAG_CAPACITY, _free))
         else:
             log("[bag] 存档槽%d 越界且背包已满，暂留（GM 删格可清）" % _p)
@@ -1892,6 +2047,12 @@ def load_state(pl=None):
     # 记下刚读到的内容指纹：登录后如果什么都没改，退出时不会重复写盘/重复备份
     with player_ctx(pl):
         pl.saved_sig = json.dumps(state_dict(), ensure_ascii=False, sort_keys=True)
+    # ★ 读档时做过槽位迁移（武器 7->8、强化 7->8、越界背包搬位）就必须落盘一次：
+    #   指纹是按**迁移后**的内存算的，跟磁盘上的旧内容对不上，但闸门会认为「没变」，
+    #   于是存档里永远留着槽 7 —— 后台/GM 直接读文件就会看到武器挂在协议槽上。
+    if _migrated_dirty and pl.acct and pl.has_char:
+        save_state(force=True)
+        log("[state] 读档迁移结果已落盘（武器槽/强化槽/背包越界）")
 
 
 BACKUP_DIR = os.path.join(HERE, "backups")
@@ -1899,20 +2060,29 @@ BACKUP_EVERY = 600.0        # 同一角色最多 10 分钟存一份快照
 BACKUP_KEEP = 20            # 每个角色保留最近 20 份
 
 
-def backup_state(path):
+def backup_state(path, force=False):
     """写盘前留一份快照。
 
     2026-11-24 01:43 出过事：一个没登录的连接用默认值（Lv10/3 件）把 Lv45 存档
     整个盖掉，玩家进度直接没了。刷盘前留快照是最省事的保险，别省这一步。
+
+    ★ 2026-11-26 修两处：
+      1. 目录匹配用 `base + "_"` 前缀，`player_state.json` 的 base 是
+         `player_state`，会把**别的账号**的快照（player_state_1784366_…）
+         也算成「自己的最新快照」，于是主号 10 分钟内永远被当成刚备份过 → 跳过。
+         11:48~13:45 主号一份快照都没有，13:41 被误建角冲掉时无处可救。
+         现在只认 `base_YYYYMMDD_HHMMSS.json` 这个精确格式。
+      2. force=True：建角/洗号这种破坏性操作前必须留档，不吃 10 分钟节流。
     """
     if not os.path.exists(path):
         return
     try:
         os.makedirs(BACKUP_DIR, exist_ok=True)
         base = os.path.basename(path).replace(".json", "")
+        pat = re.compile(r"^%s_\d{8}_\d{6}\.json$" % re.escape(base))
         now = time.time()
-        old = sorted(f for f in os.listdir(BACKUP_DIR) if f.startswith(base + "_"))
-        if old:
+        old = sorted(f for f in os.listdir(BACKUP_DIR) if pat.match(f))
+        if old and not force:
             last = os.path.join(BACKUP_DIR, old[-1])
             if now - os.path.getmtime(last) < BACKUP_EVERY:
                 return
@@ -1920,12 +2090,13 @@ def backup_state(path):
                            % (base, time.strftime("%Y%m%d_%H%M%S")))
         with open(path, "rb") as src, open(dst, "wb") as out:
             out.write(src.read())
-        old = sorted(f for f in os.listdir(BACKUP_DIR) if f.startswith(base + "_"))
+        old = sorted(f for f in os.listdir(BACKUP_DIR) if pat.match(f))
         for f in old[:-BACKUP_KEEP]:
             try:
                 os.remove(os.path.join(BACKUP_DIR, f))
             except OSError:
                 pass
+        log("[state] 已备份存档 -> backups/%s" % os.path.basename(dst))
     except Exception as e:
         log("[state] 备份失败：%s" % e)
 
@@ -1948,6 +2119,9 @@ def state_dict():
             "quest_active": cur().quest_active,
             "quest_ready": cur().quest_ready,
             "quest_done": sorted(cur().done_quests),
+            # 当前佩戴的称号（0=没有）。称号只能靠「用称号卡」激活，
+            # 不是等级到了自动给 —— 17/88 两个包都读这一个字段。
+            "title": int(cur().title or 0),
             # ★ 场景 + 坐标：老号登录要回到最后一次下线的地点（用户 2026-11-24 要求）。
             #   以前只存了 scene，坐标每次都是 17 模板里的 21,7，落点永远一样。
             "scene": int(cur().scene or DEFAULT_SCENE),
@@ -1958,7 +2132,11 @@ def state_dict():
             "bag": {str(k): v for k, v in cur().bag.items()},
             "pets": list(cur().pets),
             "spirit_bag": {str(k): v for k, v in cur().spirit_bag.items()},
-            "spirit_slot": {str(k): v for k, v in cur().spirit_slot.items()}}
+            "spirit_slot": {str(k): v for k, v in cur().spirit_slot.items()},
+            # ★ 存档版本：ver>=2 表示「首饰四格是四件独立物品」的新格式，
+            #   读档时不再跑那条老的「同 id 成对去重」（它会把玩家真穿着的
+            #   两枚同款戒指吃掉一枚）。见 load_state。
+            "ver": 2}
 
 
 def save_state(force=False):
@@ -2028,7 +2206,9 @@ def add_reward(exp, coin):
     真服只实证到 8549=10->11）。"""
     pass  # [player] 状态走 cur()，无需 global
     cur().exp += exp
-    while cur().exp >= cur().exp_need and cur().level < 80:
+    # ★ exp_need=0 是「还没有角色」的空连接（Player() 默认值）。
+    #   不判这一条，`exp >= 0` 恒成立 + `exp -= 0` 就是死循环，整个服会卡在这里。
+    while cur().exp_need > 0 and cur().exp >= cur().exp_need and cur().level < 80:
         cur().exp -= cur().exp_need
         cur().level += 1
         cur().exp_need = int(cur().exp_need * 1.18)
@@ -2312,6 +2492,46 @@ def build_17(scene=None):
         _px, _py = 5, 7
     b[at(28)] = _px
     b[at(29)] = _py
+    # ★ 2026-11-26 14:35：17 也是「角色快照」，模板里带的是抓包那个号的
+    #   绑铜 2,304,000 / 绑元 4,050 / 元宝 1,749 / 称号 1019。
+    #   客户端登录时先按 17 记账，28 再把真值推下去 → 每次上线都弹一次
+    #   「绑定铜币-2,2xx,xxx / 元宝-1749 / 绑定元宝-4050」，看着像被扣钱。
+    #   称号更明显：17 挂上「神界新丁」，第一次交任务收到 88 就被换掉。
+    #
+    #   ★ 这里必须**定宽**写，不能走 token 重编码：17 的装备段是定长 6B 步进，
+    #   货币字段一缩短，后面整段前移，客户端按偏移读装备就会错位。
+    #   模板里这几格的原宽度：
+    #     idx18 绑铜 ce+4B(5) / idx19 绑元 cd+2B(3) / idx20 铜钱 1B
+    #     idx21 元宝 cd+2B(3) / idx22 VIP 1B / idx24 称号 cd+2B(3)
+    #   值超出该宽度（绑元/元宝 >65535、铜钱 >255）时才退回 token 重编码。
+    _coin, _by, _tq, _yb = (cur().coin_bound[0], cur().bind_yuanbao[0],
+                            cur().tongqian[0], cur().yuanbao[0])
+    if (_by <= 0xFFFF and _yb <= 0xFFFF and _tq <= 0xFF
+            and _coin <= 0xFFFFFFFF):
+        b[at(38)] = 0xCE
+        b[at(39):at(43)] = _coin.to_bytes(4, "big")
+        b[at(43)] = 0xCD
+        b[at(44):at(46)] = _by.to_bytes(2, "big")
+        b[at(46)] = _tq & 0xFF
+        b[at(47)] = 0xCD
+        b[at(48):at(50)] = _yb.to_bytes(2, "big")
+        b[at(50)] = int(cur().vip_level[0]) & 0xFF
+        # 称号：只认存档里「真用掉称号卡」得到的 title，不再按等级自动给。
+        # 没有就写 cd 0000（保持 3B，长度不变）。
+        b[at(52)] = 0xCD
+        b[at(53):at(55)] = (int(cur().title or 0) & 0xFFFF).to_bytes(2, "big")
+    else:
+        try:
+            tk = grant.tokenize(bytes(b))
+            tk[18]["value"] = _coin
+            tk[19]["value"] = _by
+            tk[20]["value"] = _tq
+            tk[21]["value"] = _yb
+            tk[22]["value"] = cur().vip_level[0]
+            tk[24]["value"] = int(cur().title or 0)
+            b = bytearray(grant.render(tk))
+        except Exception as e:
+            log("[17] 货币/称号写入失败，保留模板值：%s" % e)
     return bytes(b)
 
 def build_306(cls=None):
@@ -2458,8 +2678,9 @@ def build_30():
             out += b"\x00\x00\x00\x00"
     iid8 = cur().equip.get(8, 0) & 0xFFFF
     if iid8:
-        # 第三字节跟武器走：11328→07、11235→08（真服原样，见 WEAPON_SLOT_BYTE）
-        _wsb = WEAPON_SLOT_BYTE.get(iid8, 0x08)
+        # 第三字节跟武器走：11328→07、11235→08、12114(匕首)→07。
+        # 优先用客户端 817 上报过的字节（见 weapon_wire_slot），保证和 818 同源。
+        _wsb = weapon_wire_slot()
         out += b"\xcd" + iid8.to_bytes(2, "big") + bytes([_wsb]) + b"\x01\x01"
     else:
         out += b"\x00\x00\x00\x00"
@@ -2488,9 +2709,37 @@ def build_30():
     if _mount:
         # 真服：`cd2733 0d 01 01` = 筋斗云 10035 + 槽 13
         out += b"\xcd" + _mount.to_bytes(2, "big") + b"\x0d\x01\x01"
-    else:
-        out += b"\x00" * 6                         # 空坐骑同样占 6B
+    # ★ 2026-11-26 14:0x：**没坐骑就不要再补 6 个 0**。
+    #   真服 15:39:25（这套 11108~11114 神装、无翅膀无坐骑）的 30 是 **82B**：
+    #     6 块防具(36) + 首饰 4 空槽(16) + 武器 cd2b6a070101(6) + 24B 尾部
+    #     = 第12块 4B + 翅膀 20B，**坐骑块整块不存在**。
+    #   本地以前无条件补 6B → 88B，客户端按尾部固定块长解析对不上，
+    #   整个 30 被丢掉，表现就是「模型穿着整套衣服、面板 11 格全空」。
+    #   只有真有坐骑（_mount 非 0，96B 那类样本）时才写这 6B。
     return bytes(out)
+
+
+def internal_slot_for_818(slot):
+    """协议槽 -> 内部槽。武器在内存里统一存槽 8，但协议上 7 和 8 都可能是武器。
+
+    真服原包（都是线上服抓的，不是推测）：
+      817 C->S `07 cd2b65 02 cd2b66 03 cd2b64 01 cd2b67 04 cd2b68 05 cd2b69 06 cd2b6a 07`
+          → 7 条，槽位 02/03/01/04/05/06/07，第七条是 cd2b6a 落在 **07**；
+      817 C->S `01 cd2be3 08`              → 11235 天枢剑落在 **08**；
+      818 S->C `0108cd2be3...`（29B）      → 武器回包槽位字节 = **08**；
+      818 S->C 309B 最后一条 `07cd2c40...` → 11328 玉衡剑槽位字节 = **07**。
+    所以 7/8 是两个独立格子，具体落哪格跟着武器 id 走（见 WEAPON_SLOT_BYTE）。
+    查内存时两者都映射到内部槽 8；回包的槽位字节用调用方传进来的协议槽，
+    别在这里改写（以前直接把协议槽当内部槽查，武器格才会回成 id=0）。
+    """
+    return 8 if slot in (7, 8) else slot
+
+
+def wire_slot_for_818(slot):
+    """内部槽 -> 客户端协议槽。武器（内部 8）按客户端上报/武器 id 决定回 7 还是 8。"""
+    if slot == 8:
+        return weapon_wire_slot()
+    return slot
 
 
 def build_818(pairs):
@@ -2501,13 +2750,14 @@ def build_818(pairs):
     """
     out = bytearray([len(pairs) & 0xFF])
     for slot in pairs:
-        iid = cur().equip.get(slot, 0) & 0xFFFF
+        _is = internal_slot_for_818(slot)
+        iid = cur().equip.get(_is, 0) & 0xFFFF
         # 每条恒 28B = [槽位 1B][物品 id 3B 定长 varint][0x01][23 个 0x00]
         # 真服 7 条 = 197B、1 条 = 29B，长度必须严格对上。
         # offset 6 是强化等级（真服强化前后只差这一字节：00 -> 01）。
         rec = bytearray(bytes([slot & 0xFF]) + b"\xcd" + iid.to_bytes(2, "big")
                         + b"\x01" + b"\x00" * 23)
-        rec[6] = cur().enhance.get(slot, 0) & 0xFF
+        rec[6] = cur().enhance.get(_is, 0) & 0xFF
         out += rec
     return bytes(out)
 
@@ -2708,11 +2958,14 @@ FIELD_INDEX = {
 
 
 def min_enh_lv():
-    """全身最低强化等级（29.field11 / 强化大师取档口径）。空装备栏算 0。"""
-    vals = [int(v) for v in cur().enhance.values() if int(v) > 0]
-    if not vals or len(vals) < len(cur().equip):
-        return 0
-    return min(vals)
+    """全身最低强化等级（29.field11 / 强化大师取档口径）。空装备栏算 0。
+
+    ★ 2026-11-26：以前是 `enhance.values()` 里取最小、再拿条目数跟装备件数比，
+    和 equip_attr.addon_effect 的 min_level() 是两套算法 —— enhance 里只要多一条
+    孤立记录（老档的槽 7），两边就会给出不同的「强化大师」档位。
+    现在统一走 equip_attr.min_level：只看**已穿装备**的槽，首饰没强化就是 0。
+    """
+    return equip_attr.min_level(cur().equip, cur().enhance)
 
 
 def panel_now():
@@ -2948,14 +3201,19 @@ def builtin_resp(cmd, payload):
         # 以前只推 818/29/28/178，30 不推，面板停在「已穿上」的旧状态。
         return 37, b"", [29, 28, 30, 178]
     if cmd == 819:
-        # 819 = 客户端点装备栏某一格时的请求，载荷 [物品 id varint][槽位]：
+        # 819 = 客户端点装备格（武器格 / 首饰格走这个，装甲格走 37）。
         #   23:52:30 C->S cmd=819 hex=cd28420b → 护符 10306 / 槽 11
-        #   23:52:31 C->S cmd=819 hex=cd28420c → 槽 12（另一件护符）
-        # ★ 线上服对它**只回文本，什么都不改**：连点 8 次（23:52:30~37），
-        #   每次都是同一条 29B `04bb` + 「本服尚未恢复此功能」，装备栏原样不动。
-        # 本地以前把 819 当成「卸下」：玩家只想看看武器，点一下武器就从身上掉了，
-        # 还往背包里多塞一件（用户反馈「点一下武器，武器槽就消失了 / 武器戒指多出来」）。
-        # 真正的卸下走 37（角色面板「卸下」按钮，hex=格号），不要在这里改状态。
+        #   11:31:xx C->S cmd=819 hex=cd2f5208 → 匕首 12114 / 槽 08
+        # 线上服对它只回文本「本服尚未恢复此功能」（23:52:30~37 连点 8 次实证）。
+        # ★ 2026-11-26 12:00 结论（真机实证，别再动这里）：
+        #   之前「武器点了没反应」的真实根因不在 819，而在 **818 把同一件武器
+        #   回了槽 7 和槽 8 两条**（客户端自己 817 报 07，本地按 id 表又加了一条 08）。
+        #   客户端装备栏状态对不上，点武器就落到 819 这个「无效点击」分支上。
+        #   818 按内部槽去重后（见 817 分支），真机点武器发的是 **37 hex=0a**：
+        #   11:59:22 `cmd=37 hex=0a -> 槽8 卸下 逍遥匕首`，面板正常重绘。
+        #   所以 819 保持线上服原样：只回文本、一件都不脱。
+        #   以前把 819 当卸下，玩家只想看看武器，点一下就从身上掉了、还多塞一件到背包
+        #   （用户反馈「点一下武器，武器槽就消失了 / 武器戒指多出来」）。
         # 另外**绝不能回 819 本身**：客户端没有「819 成功」分支，空包体直接 SIGABRT。
         log("[equip] 819 点击装备格 payload=%s → 照线上服只回文本，不改装备（%s）"
             % (payload.hex(),
@@ -3038,6 +3296,19 @@ def builtin_resp(cmd, payload):
                 % (pos, bag_proto.item(iid)["name"], use, cur().vip_level[0],
                    cur().vip_level[0], vip_days10(),
                    time.strftime("%Y-%m-%d", time.localtime(cur().vip_until[0]))))
+        elif iid in TITLE_CARD:
+            # 称号卡：消耗 1 张 → 佩戴该称号。必须 ≥ level_limit(5) 级，
+            # 否则不消耗、只提示（Item.xml 30059 level_limit=5）。
+            _tid = TITLE_CARD[iid]
+            if int(cur().level) < 5:
+                log("[title] 格%02x %s 使用失败：Lv%d < 5"
+                    % (pos, bag_proto.item(iid)["name"], cur().level))
+                return 1, err_text("等级达到5级才能使用此称号"), []
+            cur().title = int(_tid)
+            # 88 = 称号表（客户端头顶/称号栏都吃这一个包），178 = 同步背包消耗。
+            follow = [88, 178]
+            log("[title] 格%02x %s x%d -> 佩戴称号 %d（存档 title=%d）"
+                % (pos, bag_proto.item(iid)["name"], use, _tid, cur().title))
         elif eff:
             key, per = eff
             amount = per * use
@@ -3255,6 +3526,15 @@ def handle_tls(raw_sock, cid):
             pass
         return
 
+    # ★ 2026-11-26 11:1x 诊断：「安全连接验证失败」时握手是成功的，客户端收到证书后
+    #   直接关闭（一个字节请求都不发）。这里记下版本/套件，区分「协议不兼容」和
+    #   「客户端 pinning 不认证书」——后者表现为握手成功但 recv 立刻返回 0 字节。
+    try:
+        log("c%03d TLS 握手成功 version=%s cipher=%s"
+            % (cid, conn.version(), (conn.cipher() or ("?",))[0]))
+    except Exception:
+        pass
+
     try:
         conn.settimeout(30)
         data = b""
@@ -3265,7 +3545,10 @@ def handle_tls(raw_sock, cid):
             data += chunk
         head, _, body = data.partition(b"\r\n\r\n")
         line = head.split(b"\r\n")[0].decode("latin1") if head else ""
-        log("c%03d TLS 请求: %s" % (cid, line))
+        log("c%03d TLS 请求: %s（收到 %d 字节头）" % (cid, line, len(data)))
+        if not data:
+            log("c%03d ！！握手后客户端立刻关闭、未发任何请求 → 客户端不认这张证书"
+                "（pinning/信任链），不是协议版本问题" % cid)
 
         # 读满 Content-Length
         clen = 0
@@ -3364,6 +3647,12 @@ def handle_game(conn, cid):
     # 真服登录应答 17 之后会**主动**推 113(场景对象表) + 117(1B)，不等客户端请求。
     # 本服以前要等 1265 才补 113，登录加载条就一直转圈（2026-11-23 实证 21:48:09）。
     login_pushed = [False]
+    # ★ 2026-11-26 13:1x：登录后补推过 29+30 没有。
+    #   登录回放里既没有 29（属性）也没有 30（装备外观），而「回放跑完再补」那段
+    #   挂在 `ptr >= len(SEQ)` 上，客户端经常在中途就不再发新 seq（13:09 实测：
+    #   发完 1265 就只发心跳），ptr 永远到不了末尾 → 饰品 4 格、鞋子全空，
+    #   要等玩家脱一次装备触发 37 才补上。改挂在 1265（初始化最后一步）后面。
+    equip_pushed = [False]
     # 登录回放里的 113/1266 会被跳过（由 1265 统一按 cur_map 下发），
     # 所以初始视为「未下发」，第一次 1265 一定补一份当前场景的对象表。
     last_113 = None
@@ -3423,6 +3712,13 @@ def handle_game(conn, cid):
                     if _acct:
                         log("c%03d [acct] 登录账号 %s" % (cid, _acct))
                         switch_account(_acct)
+                    else:
+                        # ★ 2026-11-26：Player() 不再默认给一个 Lv10 演示号，
+                        #   账号解析失败就是「空连接」-> has_char=False -> 回 01a0 让客户端建角。
+                        #   这条日志是唯一的排查入口：正常登录不该出现。
+                        log("c%03d [acct] ！！登录包没解析出账号（payload=%s），"
+                            "按空连接处理（不会再用演示角色顶替）"
+                            % (cid, payload.hex()[:80]))
                     pl.authed = True
                     # 读档后按存档场景重设本会话地图：17 与 113 必须同源。
                     cur_map = int(cur().scene or DEFAULT_SCENE)
@@ -3470,6 +3766,16 @@ def handle_game(conn, cid):
                         conn.sendall(pack(117, 0, CREATE_PUSH_117))
                         log("c%03d [create] -> cmd=20 建角应答 %dB + 113/117；%s"
                             % (cid, len(_ack), _msg))
+                    elif "已有角色" in _msg:
+                        # 已有角色：不回错误文本把玩家晾在建角界面，直接按「登录成功」
+                        # 应答 + 推进地图，客户端就带着原角色进游戏（与原存档无关，纯读）。
+                        _ack = build_20_ack(cur().acct, cur().name, cur().sex, cur().cls)
+                        conn.sendall(pack(20, seq, _ack))
+                        conn.sendall(pack(113, 0, CREATE_PUSH_113))
+                        conn.sendall(pack(117, 0, CREATE_PUSH_117))
+                        log("c%03d [create] ！！账号已有角色 %r Lv%d，拒绝覆盖 → "
+                            "改为按原角色应答 %dB + 113/117"
+                            % (cid, cur().name, cur().level, len(_ack)))
                     else:
                         log("c%03d [create] 建角失败：%s" % (cid, _msg))
                         conn.sendall(pack(1, seq, b"\x01\xa0"))
@@ -3837,11 +4143,30 @@ def handle_game(conn, cid):
                             break
                     if not slots:
                         slots = [1, 2, 3, 4, 5, 6, 7]
-                    # ★ 2026-11-25：客户端 817 只上报 7 个主装备槽，首饰槽（9/10/11/12）
-                    #   它不报；而真服 818 是带首饰的 11 条（len=309 样本实测）。
-                    #   只按上报回 7 条，客户端装备栏的首饰格就一直是空的 ——
-                    #   玩家反馈的「还有两个槽是空的」。
-                    #   这里把服务端实际穿着的首饰槽补进来，顺序沿用客户端的。
+                    # ★ 2026-11-26 11:37 死结在这里：
+                    #   客户端 817 上报的武器槽是 **07**（cd2f52 12114 匕首 → 07），
+                    #   而本地 equip_slots() 按 id 表回落 08，于是拼完变成 [.., 7, 8, 9, 12]，
+                    #   同一件武器回了两条 818。客户端按条数建列表，武器格状态就对不上：
+                    #   点武器只发 819（不是 37），服务端回一句文本 → 玩家看到「点了没反应」。
+                    # 修法：① 记下客户端说的武器字节；② 按内部槽去重，一件装备只回一条。
+                    _w = cur().equip.get(8, 0) & 0xFFFF
+                    for _s in slots[:]:
+                        if _s in (7, 8) and _w:
+                            cur().weapon_wire = _s & 0xFF
+                            log("[equip] 817 客户端上报武器槽=%02x（武器 id=%d）→ 记为本次会话武器协议槽"
+                                % (_s, _w))
+                            break
+                    # 去重：协议槽 7/8 都算内部槽 8，同一内部槽只留一条；
+                    # 武器那条的字节统一用客户端上报值（没有就查表）。
+                    _seen = set()
+                    _uniq = []
+                    for _s in slots:
+                        _k = 8 if _s in (7, 8) else _s
+                        if _k in _seen:
+                            continue
+                        _seen.add(_k)
+                        _uniq.append(weapon_wire_slot() if _k == 8 else _s)
+                    slots = _uniq
                     for _s in equip_slots():
                         if _s not in slots:
                             slots.append(_s)
@@ -3869,6 +4194,14 @@ def handle_game(conn, cid):
                         conn.sendall(pack(43, seq, _b43))
                         log("c%03d -> cmd=43  seq=%-4d len=%d [角色详情 真服原包]"
                             % (cid, seq, len(_b43)))
+                    # ★ 43 里带一套属性块（录制时的），会把面板上的气血/攻击/
+                    #   闪避/命中… 覆盖成旧值。所以 43 之后必须再补一条动态 29，
+                    #   顺序不能反：818 → 43 → 29 → 30。
+                    _b29role = build_29()
+                    if _b29role:
+                        conn.sendall(pack(29, 0, _b29role))
+                        log("c%03d -> cmd=29  seq=0    len=%d [角色面板补推属性 Lv%d]"
+                            % (cid, len(_b29role), cur().level))
                     # ★ 打开角色面板顺带补一条 30：真服装备变化时就推，本地以前
                     #   只有穿脱之后才推，重登直接开面板看不到首饰/武器（空槽）。
                     _b30role = build_30()
@@ -3876,6 +4209,7 @@ def handle_game(conn, cid):
                         conn.sendall(pack(30, 0, _b30role))
                         log("c%03d -> cmd=30  seq=0    len=%d [角色面板补推装备 %d件]"
                             % (cid, len(_b30role), len(cur().equip)))
+                    equip_pushed[0] = True   # 已推过，1265 那边不再重复
                     continue
                 if cmd == 1154:
                     # 货币目录：真服 9 次样本全是同一份 69B，21 项 id(1B)+值(u16) 全 0，
@@ -4043,13 +4377,12 @@ def handle_game(conn, cid):
                     # 直接进装备栏、不是进背包。本地照做：装备栏空就整套穿上，
                     # 否则后面 400903「强化神装」锻造界面会是「没有东西强化」。
                     if qid_int == 400501 and not cur().equip:
-                        _cls = cur().cls if 1 <= cur().cls <= 5 else 1
-                        _bs = 10000 + _cls * 1000 + 108
-                        for _s in range(1, 8):
-                            cur().equip[_s] = _bs + _s - 1
+                        _got, _bs = equip_story_set(cur())
                         save_state()
-                        log("[quest] 400501 神装入装备栏 %d~%d（职业%d）"
-                            % (_bs, _bs + 6, _cls))
+                        log("[quest] 400501 神装入装备栏 %s（职业%d）"
+                            % ("/".join("%d:%d" % (s, cur().equip[s])
+                                        for s in sorted(cur().equip)),
+                               cur().cls if 1 <= cur().cls <= 5 else 1))
                     # ★ 2026-11-24 16:0x：400702「前世仙宠」交任务发宠物。
                     # 真服 15:41:13 现场（relay.log 984 行）：
                     #   214(400702) -> 957(82B 功夫熊猫) -> 29 -> 28 -> 30 -> 210
@@ -4130,7 +4463,7 @@ def handle_game(conn, cid):
                     else:
                         _slot826 = 8
                     send_push(conn, cid, 30)
-                    conn.sendall(pack(818, 0, build_818([_slot826])))
+                    conn.sendall(pack(818, 0, build_818([wire_slot_for_818(_slot826)])))
                     send_push(conn, cid, 178)
                     send_push(conn, cid, 29)
                     conn.sendall(pack(28, 0, build_28()))
@@ -4287,7 +4620,7 @@ def handle_game(conn, cid):
                                power_now(), raw.hex()))
                     # 成功/失败都要整轮刷新：818 等级、29 战力、28 货币、178 背包、30 外观
                     send_push(conn, cid, 178)
-                    conn.sendall(pack(818, 0, build_818([slot])))
+                    conn.sendall(pack(818, 0, build_818([wire_slot_for_818(slot)])))
                     send_push(conn, cid, 29)
                     conn.sendall(pack(28, 0, build_28()))
                     send_push(conn, cid, 30)
@@ -4337,6 +4670,23 @@ def handle_game(conn, cid):
                         last_113 = cur_map
                         log("c%03d .. push cmd=113 len=%d [场景 %s(%d) 对象表]"
                             % (cid, len(body113), scene_name(cur_map), cur_map))
+                    # ★ 初始化走到 1265 说明客户端已经把场景建完、进了游戏，
+                    #   这时候推 29/30 才不会被加载流程吃掉。此后客户端只发心跳，
+                    #   再没有别的时机，所以必须在这里补一次。
+                    if not equip_pushed[0] and cur().has_char:
+                        _b29 = build_29()
+                        if _b29:
+                            conn.sendall(pack(29, 0, _b29))
+                            log("c%03d .. push cmd=29 len=%d [登录补推属性 Lv%d 生命%d 攻%d-%d]"
+                                % (cid, len(_b29), cur().level,
+                                   panel_attr("hp_max"), panel_attr("attack_min"),
+                                   panel_attr("attack_max")))
+                        _b30 = build_30()
+                        if _b30:
+                            conn.sendall(pack(30, 0, _b30))
+                            log("c%03d .. push cmd=30 len=%d [登录补推装备 %d件]"
+                                % (cid, len(_b30), len(cur().equip)))
+                        equip_pushed[0] = True
                     continue
 
                 if cmd == 32513:
@@ -4606,6 +4956,17 @@ def handle_game(conn, cid):
                         #   首饰 4 格 / 鞋子 / 武器就一直空着（左列 6 个主槽靠 17 的
                         #   外观数据还能画出来，所以只有右半边是空的）。
                         #   真服是「装备一变就推 30」，本地在登录序列走完后补一条。
+                        # ★ 2026-11-26 12:5x：登录回放里**没有 29**（属性面板），
+                        #   客户端只能拿 17 的基础值自己算 → 刚上线时气血/攻击是
+                        #   「没穿装备」的数（实测 1271 / 151-185，实际 3626 / 376-416），
+                        #   穿脱一次任意装备才恢复正常。登录尾部补一条动态 29。
+                        _b29login = build_29()
+                        if _b29login:
+                            conn.sendall(pack(29, 0, _b29login))
+                            log("c%03d .. push cmd=29 len=%d [登录补推属性 Lv%d 生命%d 攻%d-%d]"
+                                % (cid, len(_b29login), cur().level,
+                                   panel_attr("hp_max"), panel_attr("attack_min"),
+                                   panel_attr("attack_max")))
                         _b30login = build_30()
                         if _b30login:
                             conn.sendall(pack(30, 0, _b30login))
@@ -4811,6 +5172,33 @@ def handle_game(conn, cid):
                             % (cid, len(_b947u),
                                pet_proto.strap_key(spirit_strap())))
                         push_spirit(conn, cid)
+                    continue
+
+                # ★ 2026-11-26 12:2x：登录「转圈」的真正原因 —— 客户端给每个外发请求
+                #   都记一笔 loading（引擎日志 `loading begin, m_depth = N`），收到应答
+                #   才 `loading end`。下面这几条是客户端登录必发、而本服没实现的查询，
+                #   真服对它们统一回 cmd=1（29B「本服尚未恢复此功能」），本地以前静默
+                #   丢弃 → m_depth 永远减不到 0 → 整个登录卡满 5 秒超时才放行：
+                #     `loading end, m_depth = 0` 后紧跟 `query server capability failed: -2`
+                #   证据 relay.log 14:49:51（真服原始顺序）：
+                #     1384 seq=6  -> cmd=1 seq=6
+                #     1125 seq=12 -> cmd=1 seq=12
+                #     1134 seq=13 -> cmd=1 seq=13
+                #      22  seq=26 -> cmd=1 seq=26
+                #      663 seq=32 -> cmd=1 seq=32
+                #   注意必须**echo 同一个 seq**（真服如此），回错 seq 客户端照样不认。
+                #   ★ 542 是本 APK 版本独有的「查询服务器能力」（0x21E，len=0）。
+                #   真服抓包里没出现过（那个包是别的客户端版本），但它和上面几条
+                #   同性质：不回就一直挂在 m_depth 上，5 秒后打
+                #   `query server capability failed: 4`。实测只差这一条时，
+                #   深度仍要等 5 秒才归零，所以一并按「未开通」回。
+                LOGIN_NOOP = (22, 542, 663, 1125, 1134, 1384)
+                if cmd in LOGIN_NOOP:
+                    _nb = bytes.fromhex(
+                        "04bbe69cace69c8de5b09ae69caae681a2e5a48de6ada4e58a9fe883bd")
+                    conn.sendall(pack(1, seq, _nb))
+                    log("c%03d -> cmd=1      seq=%-4d len=%d [未开通功能 %d，同真服]"
+                        % (cid, seq, len(_nb), cmd))
                     continue
 
                 # 真服登录初始化里有 7 个应答，本服以前全部走「无模板静默丢弃」。

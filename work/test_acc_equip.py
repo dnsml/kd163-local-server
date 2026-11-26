@@ -26,8 +26,10 @@
 6. 817 回显带首饰槽（客户端重登后不会再被清空）
 7. 819（点装备格）= 线上服只回 `04bb` +「本服尚未恢复此功能」，**一件都不脱**
    —— 回 819 空包会让客户端 SIGABRT 闪退（23:41:01 实测）；
-   本地以前把 819 当卸下，玩家点一下武器就从身上掉了，还会多出一件到背包
-8. 37 点首饰格 → 只卸那一格；格 08→槽9、格 06→槽12、格 0a→槽8 武器
+   「武器点了没反应」的根因是 818 把同一件武器回了 7/8 两条，不是 819
+8. 818 按内部槽去重：协议槽 7/8 是同一个武器槽，同一件武器只回一条，
+   槽字节跟客户端 817 上报一致（12114 匕首 -> 07）；去重后真机点武器发 37 hex=0a
+9. 37 点首饰格 → 只卸那一格；格 08→槽9、格 06→槽12、格 0a→槽8 武器
 
 ⚠️ 用独立测试账号 9112001 的存档，跑完删除，不动玩家主号。
 """
@@ -175,6 +177,19 @@ def parse_30(body):
     return recs
 
 
+def parse_818(body):
+    """818 体：[条数] + 每条 28B（[槽][cd][id hi][id lo][01] + 23×00）。"""
+    if not body:
+        return []
+    n, out = body[0], []
+    for k in range(n):
+        r = body[1 + k * 28: 1 + (k + 1) * 28]
+        if len(r) < 28:
+            break
+        out.append((r[0], int.from_bytes(r[2:4], "big")))
+    return out
+
+
 def main():
     port = int(sys.argv[sys.argv.index("--port") + 1]) if "--port" in sys.argv else 9112
     nostart = "--no-start" in sys.argv
@@ -257,8 +272,8 @@ def main():
         hp_ring1 = hp_of(d.get(29))
         b30_r1 = d.get(30) or b""
         check("182 穿戒指回 ACK", 182 in d, "cmd 顺序 %s" % cmds[:10])
-        check("第 1 枚戒指只进槽9（30 = 90B，没有槽10）",
-              len(b30_r1) == 90 and RING_HEX + b"\x09\x01\x01" in b30_r1
+        check("第 1 枚戒指只进槽9（30 = 84B，没有槽10）",
+              len(b30_r1) == 84 and RING_HEX + b"\x09\x01\x01" in b30_r1
               and RING_HEX + b"\x0a\x01\x01" not in b30_r1,
               "%dB 记录=%s" % (len(b30_r1), parse_30(b30_r1)))
 
@@ -269,8 +284,8 @@ def main():
         for c, _, p in pks:
             d.setdefault(c, p)
         b30_r2 = d.get(30) or b""
-        check("第 2 枚戒指进槽10（两格各一枚，30 = 92B）",
-              len(b30_r2) == 92
+        check("第 2 枚戒指进槽10（两格各一枚，30 = 86B）",
+              len(b30_r2) == 86
               and RING_HEX + b"\x09\x01\x01" in b30_r2
               and RING_HEX + b"\x0a\x01\x01" in b30_r2,
               "%dB 记录=%s" % (len(b30_r2), parse_30(b30_r2)))
@@ -289,15 +304,15 @@ def main():
         print("      30=%dB 记录=%s" % (len(b30), recs))
         print("      29 生命 两枚戒指 %s -> 两枚护符 %s" % (hp_ring1, hp_both))
 
-        check("30 = 96B（7 装备 + 4 首饰槽，实槽 6B / 空槽 4B + 翅膀 20B + 坐骑 6B）",
-              len(b30) == 96, "%dB" % len(b30))
+        check("30 = 90B（7 装备 + 4 首饰槽，实槽 6B / 空槽 4B + 翅膀 20B，没坐骑不补 6B）",
+              len(b30) == 90, "%dB" % len(b30))
         check("30 含护符槽11 cd28420b0101", AMULET_HEX + b"\x0b\x01\x01" in b30)
         check("30 含护符槽12 cd28420c0101", AMULET_HEX + b"\x0c\x01\x01" in b30)
         check("30 含戒指槽9  cd2841090101", RING_HEX + b"\x09\x01\x01" in b30)
         check("30 含戒指槽10 cd28410a0101", RING_HEX + b"\x0a\x01\x01" in b30)
         slots = [s_ for s_, _ in recs]
-        check("30 槽位顺序 = 1..6,护符12/11,戒指9/10,8（真服 96B 原包顺序）",
-              slots[:6] == [1, 2, 3, 4, 5, 6] and slots[-1] == 8
+        check("30 槽位顺序 = 1..6,护符12/11,戒指9/10,武器字节跟随 id（12114→07）",
+              slots[:6] == [1, 2, 3, 4, 5, 6] and slots[-1] == 7
               and slots[6:-1] == [12, 11, 9, 10],
               str(slots))
 
@@ -322,12 +337,13 @@ def main():
         check("817 回显里带首饰槽", AMULET_HEX in b817r and RING_HEX in b817r,
               "len=%d" % len(b817r))
 
-        # ---- 7. 819 = 客户端「点装备格」，线上服只回文本、一件都不脱 ----
-        # 线上服 23:52:30~37 连点 8 次，每次都是同一条 29B `04bb` +「本服尚未恢复此功能」，
-        # 装备栏原样不动。本地以前照玩家预期真的卸下，结果玩家只想看看武器，
-        # 点一下就从身上掉了、还往背包多塞一件（反馈「点一下武器，武器槽就消失了」）。
+        # ---- 7. 819 = 客户端「点装备格」的无效分支：线上服只回文本、一件都不脱 ----
+        # 线上服 23:52:30~37 连点 8 次，每次都是同一条 29B `04bb` +「本服尚未恢复此功能」。
+        # ★ 2026-11-26 12:00 真机定性：「武器点了没反应」的根因不在 819，而是 818
+        #   把同一件武器回了槽 7 和槽 8 两条，客户端装备栏状态错乱才落到这个分支。
+        #   818 去重后真机点武器发的是 37 hex=0a（11:59:22 日志），面板正常重绘。
+        #   所以 819 保持线上服原样，绝不能改成「卸下」（点一下就从身上掉，玩家投诉过）。
         s.sendall(pack(819, 25, RING_HEX + b"\x09"))
-        s.sendall(pack(819, 26, AMULET_HEX + b"\x0b"))
         pks = recv_packets(s, wait=2.0)
         cmds = [c for c, _, _ in pks]
         d = {}
@@ -335,7 +351,7 @@ def main():
             d.setdefault(c, p)
         btxt819 = d.get(1) or b""
         want819 = b"\x04\xbb" + "本服尚未恢复此功能".encode("utf-8")
-        print("      [819 点戒指/护符格] cmd 顺序 %s  text=%s"
+        print("      [819 点戒指格] cmd 顺序 %s  text=%s"
               % (cmds[:8], btxt819.hex()))
         # ★ 23:41:01 实测：本地回 819 空包，客户端收到就 SIGABRT 闪退
         # （logcat: Zygote Process exited due to signal (6)）。线上服从不回 819 本身。
@@ -359,6 +375,27 @@ def main():
         check("819 之后护符仍在槽 11（818 回显含 cd2842）",
               AMULET_HEX in b818_after, "818=%dB" % len(b818_after))
 
+        # ---- 8b. 818 按内部槽去重：协议槽 7/8 是同一个武器槽，只能回一条 ----
+        # 这是 2026-11-26 11:37 的死结：817 上报武器 07，equip_slots() 又按
+        # 12xxx 未收录回落 08，818 同时回 7 和 8 两条 → 客户端武器格状态错乱、
+        # 点上去只发 819。现在按内部槽去重，武器字节统一用客户端上报值。
+        s.sendall(pack(817, 28, b"\x01" + WEAPON_HEX + b"\x07"))
+        pks = recv_packets(s, wait=1.5)
+        d = {}
+        for c, _, p in pks:
+            d.setdefault(c, p)
+        b818w = d.get(818) or b""
+        _recs = parse_818(b818w)
+        _wrecs = [(s, i) for s, i in _recs if i == WEAPON]
+        print("      [817 只报武器 07] 818 条数=%d 武器记录=%s"
+              % (len(_recs), _wrecs))
+        check("818 武器只回一条（7/8 去重，不再同一件回两次）",
+              len(_wrecs) == 1, str(_wrecs))
+        check("818 武器槽字节跟客户端 817 上报一致（07）",
+              bool(_wrecs) and _wrecs[0][0] == 0x07, str(_wrecs))
+        check("818 里没有第二条 id=12114 的记录",
+              sum(1 for _, i in _recs if i == WEAPON) == 1, str(_recs))
+
         # ---- 9. 37 = 点装备格卸下（客户端 0 基格号：00 -> 槽 1）----
         # 这是真机脱装备真正发的命令，以前服务端没分支直接丢，表现「脱不下来」。
         s.sendall(pack(37, 25, b"\x00"))
@@ -376,14 +413,13 @@ def main():
         # 所以「衣服真的脱了」要看 30 里那件消失，而不是看 818。
         check("37 卸下后 30 里没有该装备", b"\xcd\x2f\x4c" not in b30_37,
               "30=%dB" % len(b30_37))
-        check("37 卸下后 30 = 94B（11 件少一件 + 翅膀/坐骑块固定）",
-              len(b30_37) == 94, "30=%dB" % len(b30_37))
+        check("37 卸下后 30 = 88B（11 件少一件 + 翅膀 20B，没坐骑）",
+              len(b30_37) == 88, "30=%dB" % len(b30_37))
         check("37 卸下的装备回到背包（178 含 cd2f4c = 12108）",
               b"\xcd\x2f\x4c" in b178_37, "178=%dB" % len(b178_37))
 
         # ---- 10. 37 的字节是「客户端面板格号」，首饰 4 格是 护符11/12、戒指9/10 ----
-        # ★ 819 已经改成「只回文本不脱装」，所以戒指/护符本来就还在身上，
-        #   不再需要「从背包重新戴上」那一步（那是当年把 819 当卸下时的补丁）。
+        # ★ 819 只回文本不脱装，所以戒指/护符本来就还在身上。
         check("37 卸槽1 之后两枚戒指仍在（819 没有偷卸）",
               RING_HEX + b"\x09\x01\x01" in b30_37
               and RING_HEX + b"\x0a\x01\x01" in b30_37, str(parse_30(b30_37)))
@@ -455,17 +491,18 @@ def main():
             b178_l = d.get(178) or b""
             print("      [182 穿武器] cmd 顺序 %s  30=%dB 记录=%s"
                   % ([c for c, _, _ in pks][:7], len(b30_l), parse_30(b30_l)))
-            check("182 穿匕首（kind2=2）进槽 8",
-                  WEAPON_HEX + b"\x08\x01\x01" in b30_l, str(parse_30(b30_l)))
+            check("182 穿匕首（kind2=2）进内部槽 8，协议字节 07",
+                  WEAPON_HEX + b"\x07\x01\x01" in b30_l, str(parse_30(b30_l)))
             # ★ 2026-11-26 00:54 真服「全脱→全穿」整轮实测：30 包武器块第三字节
-            #   跟着武器走，11235 天枢剑[二阶]=08、11328 玉衡剑[三阶]=07，
-            #   两把在 Item.xml 里都是 item_kind2=1，只能按 id 收录。
+            #   跟着武器走，11235 天枢剑[二阶]=08、11328 玉衡剑[三阶]=07；
+            #   11:37 本机客户端 817 对 12114 匕首上报的也是 07。
             #   这里做源码断言，防止有人图省事又写回固定 08。
             _src = open(os.path.join(HERE, "local_server3.py"),
                         encoding="utf-8").read()
-            check("30 包武器字节按真服映射（11328→07、11235→08 且回落 08）",
-                  "WEAPON_SLOT_BYTE = {11235: 0x08, 11328: 0x07}" in _src
-                  and "WEAPON_SLOT_BYTE.get(iid8, 0x08)" in _src)
+            check("30 武器字节：12114→07 收录 + 其余回落 08 + 优先用 817 上报值",
+                  "12114: 0x07" in _src
+                  and "return WEAPON_SLOT_BYTE.get(cur().equip.get(8, 0) & 0xFFFF, 0x08)" in _src
+                  and "hint = getattr(cur(), \"weapon_wire\", 0) or 0" in _src)
             # 真服 182 穿戴只推 29/28/30/178，不推 818（818 是 817 的回执）
             check("182 穿戴不主动推 818（与线上服一致）", 818 not in d,
                   "cmd=%s" % [c for c, _, _ in pks][:8])
