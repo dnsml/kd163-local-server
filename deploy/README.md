@@ -32,6 +32,13 @@ python3 local_http.py 80 127.0.0.1
 
 两个都正常监听再往下。80 端口非 root 需要 `CAP_NET_BIND_SERVICE`（unit 里已配）。
 
+也可以直接用仓库里的开服脚本（不需要 systemd）：
+
+```bash
+chmod +x deploy/start.sh
+sudo deploy/start.sh start      # start|stop|restart|status
+```
+
 ## 3. 装 systemd
 
 ```bash

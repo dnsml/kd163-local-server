@@ -67,6 +67,8 @@ BACKUP_KEEP = 20            # 每个角色保留最近 20 份
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS player (
+    -- 展示用编号（后台「ID」列）。不是主键，主键仍是账号；老库启动时自动补列+回填。
+    id          INTEGER,
     acct        TEXT PRIMARY KEY,
     name        TEXT,
     level       INTEGER NOT NULL DEFAULT 0,
@@ -165,11 +167,29 @@ def init():
         con = _connect()
         try:
             con.executescript(SCHEMA)
+            _migrate_id(con)
         finally:
             con.close()
         _READY[0] = True
         log("[state_store] SQLite 就绪 %s%s"
             % (os.path.basename(DB_FILE), "（自检临时库）" if TEST_MODE else ""))
+
+
+def _migrate_id(con):
+    """老库补 id 列并按账号顺序回填。幂等，每次启动跑一遍也不贵。"""
+    cols = [r[1] for r in con.execute("PRAGMA table_info(player)").fetchall()]
+    if "id" not in cols:
+        con.execute("ALTER TABLE player ADD COLUMN id INTEGER")
+        log("[state_store] player 表补 id 列")
+    rows = con.execute("SELECT acct FROM player WHERE id IS NULL OR id=0 ORDER BY acct"
+                       ).fetchall()
+    if not rows:
+        return
+    nxt = int(con.execute("SELECT COALESCE(MAX(id),0) FROM player").fetchone()[0]) + 1
+    for (acct,) in rows:
+        con.execute("UPDATE player SET id=? WHERE acct=?", (nxt, acct))
+        nxt += 1
+    log("[state_store] 回填账号编号 %d 个" % len(rows))
 
 
 # ---------------- 结构映射 ----------------
@@ -244,12 +264,14 @@ def save(acct, data, rev=0):
         con.execute("BEGIN IMMEDIATE")
         row = con.execute("SELECT rev FROM player WHERE acct=?", (acct,)).fetchone()
         if row is None:
+            nid = int(con.execute(
+                "SELECT COALESCE(MAX(id),0)+1 FROM player").fetchone()[0])
             con.execute(
-                "INSERT INTO player (acct, name, level, cls, sex, exp, exp_need,"
+                "INSERT INTO player (id, acct, name, level, cls, sex, exp, exp_need,"
                 " scene, x, y, bind_copper, bind_gold, copper, gold, vip, title,"
                 " bag_count, rev, data, created_at, updated_at)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (acct,) + cols + (1, payload, now, now))
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (nid, acct) + cols + (1, payload, now, now))
             con.execute("COMMIT")
             return 1
         cur_rev = int(row[0] or 0)
@@ -332,12 +354,12 @@ def accounts():
     con = _connect()
     try:
         rows = con.execute(
-            "SELECT acct, name, level, cls, gold, copper, bind_gold, bind_copper,"
-            " bag_count, rev, updated_at FROM player ORDER BY level DESC, acct"
+            "SELECT id, acct, name, level, cls, gold, copper, bind_gold, bind_copper,"
+            " bag_count, rev, updated_at FROM player ORDER BY id"
         ).fetchall()
     finally:
         con.close()
-    keys = ("acct", "name", "level", "cls", "gold", "copper", "bind_gold",
+    keys = ("id", "acct", "name", "level", "cls", "gold", "copper", "bind_gold",
             "bind_copper", "bag", "rev", "updated_at")
     return [dict(zip(keys, r)) for r in rows]
 

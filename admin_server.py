@@ -241,7 +241,7 @@ class Handler(BaseHTTPRequestHandler):
                 for acct, ent in reg.items():
                     if acct in by:
                         continue
-                    row = {"acct": acct, "name": "", "level": 0, "cls": 0,
+                    row = {"id": 0, "acct": acct, "name": "", "level": 0, "cls": 0,
                            "gold": 0, "copper": 0, "bind_gold": 0, "bind_copper": 0,
                            "bag": 0, "rev": 0, "updated_at": ""}
                     accs.append(row)
@@ -352,7 +352,7 @@ class Handler(BaseHTTPRequestHandler):
                     account_policy.set_note(acct, note[:40])
                 return self._send(200, {
                     "ok": True, "acct": acct, "password": pwd,
-                    "msg": "账号 %s 已生成（密码只显示这一次，请立刻发给玩家）" % acct})
+                    "msg": "账号 %s 已生成，密码 %s（发给玩家即可）" % (acct, pwd)})
             acct = str(body.get("acct") or "").strip()
             if not ACCT_RE.match(acct):
                 return self._send(400, {"error": "账号格式不对"})
@@ -362,7 +362,7 @@ class Handler(BaseHTTPRequestHandler):
                     return self._send(404, {
                         "error": "账号 %s 没有密码记录（老白名单账号不校验密码）" % acct})
                 return self._send(200, {"ok": True, "acct": acct, "password": pwd,
-                                        "msg": "已重置 %s 的密码（只显示这一次）" % acct})
+                                        "msg": "已把 %s 的密码重置为 %s" % (acct, pwd)})
             if action == "delete":
                 had = account_policy.remove_account(acct)
                 has_char = False

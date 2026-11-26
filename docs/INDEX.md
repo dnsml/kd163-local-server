@@ -154,6 +154,7 @@ docs/
 `test_story_set_818.py`（400501 自动穿神装必推 818、GM 穿脱也推 818）、
 `test_allowlist.py`（白名单：/auth 403、登录 17 拦截、不建行、热加载、fail closed）、
 `test_account_auth.py`（账号密码/票据/后台登录：401/403/CSRF/哈希存储）。
+打包：`work/build_release.py` → `dist/kd163-server-<时间>.zip`（只含运行时文件，附部署说明与 manifest）。
 
 **协议与可行性（11-22）**
 | 文档 | 内容 |

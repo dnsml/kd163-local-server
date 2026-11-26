@@ -61,7 +61,8 @@ class PolicyTest(unittest.TestCase):
         AP = self.AP
         acct, pwd = AP.new_account()
         self.assertEqual(len(acct), 8)
-        self.assertEqual(len(pwd), 10)
+        self.assertEqual(pwd, AP.DEFAULT_PASSWORD, "默认密码应统一")
+        self.assertEqual(pwd, "123")
         self.assertTrue(re.match(r"^[23456789abcdefghjkmnpqrstuvwxyz]{8}$", acct))
         raw = open(self.cfg, encoding="utf-8").read()
         self.assertNotIn(pwd, raw, "密码不能明文落盘")
@@ -78,10 +79,12 @@ class PolicyTest(unittest.TestCase):
     def test_reset_and_remove(self):
         AP = self.AP
         acct, pwd = AP.new_account()
+        self.assertTrue(AP.set_password(acct, "oldpass"))
+        self.assertIs(AP.verify(acct, "oldpass"), True)
         a2, pwd2 = AP.reset_password(acct)
         self.assertEqual(a2, acct)
-        self.assertNotEqual(pwd2, pwd)
-        self.assertIs(AP.verify(acct, pwd), False)
+        self.assertEqual(pwd2, "123")
+        self.assertIs(AP.verify(acct, "oldpass"), False)
         self.assertIs(AP.verify(acct, pwd2), True)
         self.assertTrue(AP.remove_account(acct))
         self.assertFalse(AP.allowed(acct), "删账号后不应再放行")
