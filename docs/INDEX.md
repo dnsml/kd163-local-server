@@ -152,7 +152,8 @@ docs/
 `test_account_flow.py`（账号四流程，分 phase1/phase2）、`check_semantics.py`（17/28/30 字段语义与长度断言）、
 `test_state_store.py`（SQLite 存档：rev/隔离/重启/懒迁移/闸门/快照）。
 `test_story_set_818.py`（400501 自动穿神装必推 818、GM 穿脱也推 818）、
-`test_allowlist.py`（白名单：/auth 403、登录 17 拦截、不建行、热加载、fail closed）。
+`test_allowlist.py`（白名单：/auth 403、登录 17 拦截、不建行、热加载、fail closed）、
+`test_account_auth.py`（账号密码/票据/后台登录：401/403/CSRF/哈希存储）。
 
 **协议与可行性（11-22）**
 | 文档 | 内容 |

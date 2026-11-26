@@ -28,7 +28,8 @@ sys.path.insert(0, HERE)
 
 import bag_proto          # 道具名查询
 import item_rules         # 道具效果/价格（后台展示用）
-import account_policy     # 账号白名单（accounts.json）
+import account_policy     # 账号白名单 / 账号密码（accounts.json）
+import admin_auth         # 后台管理员账号与会话（admin.json）
 
 # 账号/昵称格式：和 account_from_login / create_role 的限制保持一致。
 # 账号带空格或换行会被当 GM 指令拆开，所以这里必须卡死。
@@ -40,9 +41,12 @@ STATUS = os.path.join(HERE, "logs", "status.json")
 GM_CMD = os.path.join(HERE, "logs", "gm.cmd")
 SERVER_LOG = os.path.join(HERE, "logs", "server.log")
 HTML = os.path.join(HERE, "admin.html")
+LOGIN_HTML = os.path.join(HERE, "admin_login.html")
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8899
 # 默认只给本机开。要让局域网里别人也能看，设环境变量 KD163_ADMIN_HOST=0.0.0.0
 HOST = os.environ.get("KD163_ADMIN_HOST", "127.0.0.1") or "127.0.0.1"
+# 是否强制登录：对外绑定（非 127.0.0.1）必须登录；本机配了 admin.json 也登录。
+AUTH_REQUIRED = [False]
 
 
 def read_json(path, default):
@@ -165,29 +169,94 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:
             pass
 
+    # ---------------- 登录态 ----------------
+    def _cookie_token(self):
+        raw = self.headers.get("Cookie") or ""
+        for part in raw.split(";"):
+            k, _, v = part.strip().partition("=")
+            if k == "kd_admin":
+                return v
+        return ""
+
+    def _user(self):
+        return admin_auth.check(self._cookie_token())
+
+    def _need_login(self):
+        """没登录就回 401（页面则给登录页）。返回 True 表示可以继续。"""
+        if not AUTH_REQUIRED[0] or self._user():
+            return True
+        self._send(401, {"error": "未登录", "login": True})
+        return False
+
+    def _serve_login(self):
+        try:
+            with open(LOGIN_HTML, encoding="utf-8") as f:
+                return self._send(200, f.read(), "text/html; charset=utf-8")
+        except Exception as e:
+            return self._send(500, "登录页打不开: %s" % e, "text/plain; charset=utf-8")
+
+    def _set_cookie(self, code, body, cookie):
+        raw = json.dumps(body, ensure_ascii=False).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(raw)))
+        self.send_header("Set-Cookie", cookie)
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        try:
+            self.wfile.write(raw)
+        except Exception:
+            pass
+
     def do_GET(self):
         u = urlparse(self.path)
         q = parse_qs(u.query)
-        if u.path in ("/", "/index.html"):
+        if u.path in ("/", "/index.html", "/login"):
+            if AUTH_REQUIRED[0] and not self._user():
+                return self._serve_login()
             try:
                 with open(HTML, encoding="utf-8") as f:
                     return self._send(200, f.read(), "text/html; charset=utf-8")
             except Exception as e:
                 return self._send(500, "admin.html 打不开: %s" % e, "text/plain; charset=utf-8")
+        if u.path == "/api/ping":
+            return self._send(200, {"ok": True})
+        if u.path == "/api/me":
+            if not self._need_login():
+                return
+            return self._send(200, {"user": self._user() or "",
+                                    "required": AUTH_REQUIRED[0]})
+        if not self._need_login():
+            return
         if u.path == "/api/state":
             return self._send(200, state_payload())
         if u.path == "/api/accounts":
             try:
                 import state_store
                 allow, src = account_policy.load(force=True)
+                reg = account_policy.registry()
                 accs = state_store.accounts()
+                by = {str(a["acct"]): a for a in accs}
+                # 后台刚生成、玩家还没进游戏建角的账号：库里没有行，也要列出来
+                for acct, ent in reg.items():
+                    if acct in by:
+                        continue
+                    row = {"acct": acct, "name": "", "level": 0, "cls": 0,
+                           "gold": 0, "copper": 0, "bind_gold": 0, "bind_copper": 0,
+                           "bag": 0, "rev": 0, "updated_at": ""}
+                    accs.append(row)
+                    by[acct] = row
                 for a in accs:
-                    a["allowed"] = (allow is None or str(a["acct"]) in allow)
+                    acct = str(a["acct"])
+                    a["allowed"] = account_policy.allowed(acct)
+                    a["has_pass"] = account_policy.needs_password(acct)
+                    ent = reg.get(acct) or {}
+                    a["created_at"] = ent.get("created_at") or ""
+                    a["note"] = ent.get("note") or ""
                     a["online"] = False
                 for o in state_store.online_list():
-                    for a in accs:
-                        if a["acct"] == o["acct"]:
-                            a["online"] = True
+                    if o["acct"] in by:
+                        by[o["acct"]]["online"] = True
                 return self._send(200, {
                     "backend": state_store.backend(),
                     "db": os.path.basename(state_store.DB_FILE),
@@ -216,8 +285,6 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/log":
             n = int(q.get("n", ["60"])[0] or 60)
             return self._send(200, {"text": tail(SERVER_LOG, max(1, min(n, 400)))})
-        if u.path == "/api/ping":
-            return self._send(200, {"ok": True})
         return self._send(404, {"error": "not found"})
 
     def do_POST(self):
@@ -228,6 +295,34 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             return self._send(400, {"error": "bad json: %s" % e})
 
+        # ---- 登录/登出（登录本身不需要已登录）----
+        ip = (self.client_address or ("?", 0))[0]
+        if u.path == "/api/login":
+            wait = admin_auth.wait_seconds(ip)
+            if wait:
+                return self._send(429, {"error": "失败次数太多，%d 秒后再试" % wait})
+            user = str(body.get("user") or "")
+            pwd = str(body.get("pass") or "")
+            if not admin_auth.verify(user, pwd):
+                admin_auth.throttle(ip, False)
+                return self._send(401, {"error": "管理员账号或密码不对"})
+            admin_auth.throttle(ip, True)
+            tok = admin_auth.issue(user)
+            return self._set_cookie(
+                200, {"ok": True, "user": user},
+                "kd_admin=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=%d"
+                % (tok, admin_auth.TOKEN_TTL))
+        if u.path == "/api/logout":
+            admin_auth.revoke(self._cookie_token())
+            return self._set_cookie(200, {"ok": True},
+                                    "kd_admin=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0")
+
+        if not self._need_login():
+            return
+        # 防 CSRF：跨站表单发不出自定义头；前端所有 POST 都会带这个头
+        if self.headers.get("X-Requested-With") != "KDAdmin":
+            return self._send(403, {"error": "缺少 X-Requested-With 头"})
+
         if u.path == "/api/gm":
             lines = body.get("lines")
             if not lines and body.get("line"):
@@ -236,6 +331,52 @@ class Handler(BaseHTTPRequestHandler):
             if not lines:
                 return self._send(400, {"error": "缺少指令"})
             return self._send(200, {"results": run_gm(lines)})
+
+        # 游戏账号：生成（随机账号+随机密码）/ 重置密码 / 删除
+        if u.path == "/api/account":
+            action = str(body.get("action") or "").strip()
+            if action == "create":
+                # 第一次生成账号会「从无文件变成有文件」：白名单随之生效。
+                # 这时必须把库里现有角色都写进 allow，否则老玩家会被一起锁在门外。
+                if not os.path.exists(account_policy.FILE):
+                    try:
+                        import state_store
+                        seed = {str(a["acct"]) for a in state_store.accounts()}
+                        if seed:
+                            account_policy.save(seed, is_open=False)
+                    except Exception:
+                        pass
+                acct, pwd = account_policy.new_account()
+                note = str(body.get("note") or "").strip()
+                if note:
+                    account_policy.set_note(acct, note[:40])
+                return self._send(200, {
+                    "ok": True, "acct": acct, "password": pwd,
+                    "msg": "账号 %s 已生成（密码只显示这一次，请立刻发给玩家）" % acct})
+            acct = str(body.get("acct") or "").strip()
+            if not ACCT_RE.match(acct):
+                return self._send(400, {"error": "账号格式不对"})
+            if action == "reset":
+                _a, pwd = account_policy.reset_password(acct)
+                if not pwd:
+                    return self._send(404, {
+                        "error": "账号 %s 没有密码记录（老白名单账号不校验密码）" % acct})
+                return self._send(200, {"ok": True, "acct": acct, "password": pwd,
+                                        "msg": "已重置 %s 的密码（只显示这一次）" % acct})
+            if action == "delete":
+                had = account_policy.remove_account(acct)
+                has_char = False
+                try:
+                    import state_store
+                    has_char = state_store.exists(acct)
+                except Exception:
+                    pass
+                msg = "已删除账号 %s（不能再登录）" % acct
+                if has_char:
+                    msg += "；角色存档还在，需要的话用「删角色」一并清掉"
+                return self._send(200, {"ok": True, "msg": msg if had else
+                                        "账号 %s 不在账号表里，已从白名单移除" % acct})
+            return self._send(400, {"error": "action 只支持 create/reset/delete"})
 
         # 账号管理：建角 / 删角色 / 踢下线（最终都走 GM，保证只有游戏服写存档）
         if u.path == "/api/char":
@@ -267,20 +408,16 @@ class Handler(BaseHTTPRequestHandler):
     def _allow(self, body):
         action = str(body.get("action") or "").strip().lower()
         if action == "off":
+            # 注意：这里**不删文件**。accounts.json 里还存着账号密码，
+            # 删掉等于把玩家密码一起清了。改成写 open=true：任何账号都能进，
+            # 但已有账号的密码依旧校验。
             try:
-                if os.path.exists(account_policy.FILE):
-                    os.remove(account_policy.FILE)
-            except OSError as e:
-                # Windows 上偶尔会出现「文件其实删掉了，但 remove 仍抛 0x2」
-                # （杀毒/文件过滤驱动）。以「现在还在不在」为准，不要误报失败。
-                if os.path.exists(account_policy.FILE):
-                    return self._send(500, {"error": "关闭失败: %s" % e})
-            account_policy.load(force=True)
-            return self._send(200, {"ok": True, "policy": account_policy.describe(),
-                                    "allow": None,
-                                    "note": "白名单已关闭：所有账号都能登录"
-                                            + ("（环境变量 KD_ALLOW_ACCOUNTS 仍生效）"
-                                               if os.environ.get("KD_ALLOW_ACCOUNTS") else "")})
+                desc = account_policy.set_open(True)
+            except Exception as e:
+                return self._send(500, {"error": "关闭失败: %s" % e})
+            return self._send(200, {"ok": True, "policy": desc, "allow": None,
+                                    "note": "白名单已放开：新账号可直接登录；"
+                                            "已有账号的密码仍然校验"})
         if action == "sync":
             try:
                 import state_store
@@ -289,7 +426,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(500, {"error": "读库失败: %s" % e})
             if not allow:
                 return self._send(400, {"error": "库里还没有角色，拒绝生成空名单"})
-            account_policy.save(allow)
+            account_policy.save(allow, is_open=False)
             return self._send(200, {"ok": True, "policy": account_policy.describe(),
                                     "allow": sorted(allow),
                                     "note": "已用库里现有 %d 个角色生成名单" % len(allow)})
@@ -309,7 +446,7 @@ class Handler(BaseHTTPRequestHandler):
             allow -= set(accts)
         else:
             return self._send(400, {"error": "action 只支持 add/remove/sync/off"})
-        account_policy.save(allow)
+        account_policy.save(allow, is_open=False)
         note = ""
         if was_off and action == "add":
             note = "白名单已开启：名单外账号将无法登录（要全开请点「关闭白名单」）"
@@ -318,13 +455,31 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
+    loopback = HOST in ("127.0.0.1", "localhost", "::1")
+    require_env = os.environ.get("KD_ADMIN_REQUIRE") == "1"
+    gen = admin_auth.ensure(HOST, force=require_env)
+    AUTH_REQUIRED[0] = admin_auth.configured() or (not loopback) or require_env
+
     srv = ThreadingHTTPServer((HOST, PORT), Handler)
     shown = "127.0.0.1" if HOST in ("0.0.0.0", "::") else HOST
     # flush：cmd 窗口重定向时 python 会缓冲，没这行要等很久才看到「已启动」
     print("后台已启动: http://%s:%d  (Ctrl+C 退出)" % (shown, PORT), flush=True)
     if HOST in ("0.0.0.0", "::"):
-        print("已对局域网开放，同网段设备用本机内网 IP 访问，如 http://192.168.x.x:%d" % PORT,
-              flush=True)
+        print("已对公网/局域网开放，用 http://<本机IP>:%d 访问" % PORT, flush=True)
+    if gen:
+        print("=" * 64, flush=True)
+        print(" 已生成后台管理员账号（只显示这一次，请立刻保存）", flush=True)
+        print("   用户名：%s" % gen[0], flush=True)
+        print("   密码  ：%s" % gen[1], flush=True)
+        print("   文件  ：%s" % admin_auth.FILE, flush=True)
+        print(" 改密码：python work/admin_password.py set admin 新密码", flush=True)
+        print("=" * 64, flush=True)
+    elif AUTH_REQUIRED[0]:
+        print("后台登录已开启：用户名 %s（密码在 %s）"
+              % (admin_auth.load().get("user", "admin"), admin_auth.FILE), flush=True)
+    else:
+        print("后台登录未开启（仅本机绑定）。对外用：KD163_ADMIN_HOST=0.0.0.0 启动，"
+              "会自动生成管理员密码；走 Nginx 反代时加 KD_ADMIN_REQUIRE=1", flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

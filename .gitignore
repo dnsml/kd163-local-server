@@ -30,8 +30,9 @@ state_before_probe.json
 # 和 player_state*.json 一样是玩家数据，绝不入库。WAL/SHM 是它的临时文件。
 server_state.db
 server_state.db-*
-# 白名单（账号列表）按部署环境各自维护，不进仓库
+# 白名单/账号密码（哈希）与后台管理员密码都按部署环境维护，不进仓库
 accounts.json
+admin.json
 *.db-wal
 *.db-shm
 
