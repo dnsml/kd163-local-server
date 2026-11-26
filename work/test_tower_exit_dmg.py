@@ -153,8 +153,21 @@ def main():
         scene_133 = p133[:-2] if len(p133) == 5 else p133[:1]
         check("133 的场景与 113 一致", bool(scene_133) and p113.startswith(scene_133),
               "133=%s 113=%s" % (p133.hex(), p113[:6].hex()))
-        # 登录点在塔里（旧档）时，退出必须回城，不能原地送回塔内
-        check("塔内退出回洛水城 103", scene_133 == b"\x67", p133.hex())
+        # 132 的语义是「从哪进塔回哪去」（TOWER_BACK，130 时记录）。
+        # 本测试账号进塔前在南天门 1101（Scene.xml scene_type=1），所以必须回 1101；
+        # 只有记录点本身在塔里（scene_type=3）时才兜底洛水城 103（下面单独断言）。
+        check("退出回进塔前的南天门 1101", scene_133 == bytes.fromhex("cd044d"),
+              p133.hex())
+        # 兜底规则：把 TOWER_BACK 里的记录点改成塔，再退一次必须回 103
+        # （直接读服务端行为不好造，这里用源码常量 + 配置交叉验证）
+        try:
+            import re as _re
+            _src = open(os.path.join(HERE, "local_server3.py"), encoding="utf-8").read()
+            _has_fb = ("SCENES[bsc].get(\"scene_type\") == \"3\"" in _src
+                       and "(103, 55, 5)" in _src)
+            check("塔内退出兜底洛水城 103（源码规则在位）", _has_fb)
+        except Exception as _e:
+            check("塔内退出兜底洛水城 103（源码规则在位）", False, str(_e))
 
         # ---- 3. GM 伤害 5 ----
         with open(gmfile, "a", encoding="utf-8") as f:

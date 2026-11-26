@@ -151,7 +151,7 @@ def build_pet_seg(pet=None):
 
 
 def build_open(mob_id, hp=None, player_hp=None, player_mp=None, cls=1,
-               pet=None, name=None):
+               pet=None, name=None, sex=1):
     """151 开战包（结构对齐真服 39B 样本）。
 
     [12:14] 玩家当前/最大血、[14:16] 当前/最大蓝、[22] 怪物数、
@@ -166,8 +166,12 @@ def build_open(mob_id, hp=None, player_hp=None, player_mp=None, cls=1,
     hp = max(1, int(hp if hp is not None else 80))
     player_hp = max(1, int(player_hp if player_hp is not None else 76))
     player_mp = max(0, int(player_mp if player_mp is not None else 47))
+    # ★ 2026-11-26 18:5x：[10] 是**性别**（1 男 / 0 女），模板恒为 01。
+    #   女号进战斗一直演成男新手，就是这里固定抄了模板的 01。
+    _sx = 1 if int(sex or 1) == 1 else 0
     head = bytearray(OPEN_TMPL[:12])
     head[2] = int(cls) & 0xFF
+    head[10] = _sx
     # ★ 2026-11-24 14:05：模板头 `01 0c 06 a6"萌新" 01 00` 里的 0xA6+「萌新」
     # 是**玩家昵称**。以前整段抄模板，新建角色一进战斗，左边单位名还叫「萌新」
     # （用户实测）。现在按实际昵称动态拼，昵称为「萌新」时与原模板逐字节一致。
@@ -191,7 +195,7 @@ def build_open(mob_id, hp=None, player_hp=None, player_mp=None, cls=1,
             nm += _cb
         head = bytearray(b"\x01\x0c"
                          + bytes([int(cls) & 0xFF, 0xA0 | len(nm)]) + nm
-                         + OPEN_TMPL[10:12])   # 固定跟 `01 00`
+                         + bytes([_sx, OPEN_TMPL[11]]))   # [10]=性别 [11]=固定 00
     return (bytes(head)
             + enc_val(player_hp) + enc_val(player_hp)
             + enc_val(player_mp) + enc_val(player_mp)
@@ -398,10 +402,12 @@ class BattleSession(object):
     """一场战斗。服务端算两边真实血量，客户端只负责把血条演出来。"""
 
     def __init__(self, mob_id, tables, cls=1, lv=2, hp_ratio=1.0, pet=None,
-                 name=None, attrs=None, dmg_mult=1.0):
+                 name=None, attrs=None, dmg_mult=1.0, sex=1):
         self.tables = tables
         self.pet = pet or None
         self.player_name = name
+        # ★ 2026-11-26 18:5x：1 男 / 2 女（内部值），build_open 里转成协议 1/0。
+        self.sex = int(sex or 1)
         self.mob_id = int(mob_id)
         info = tables.mob(self.mob_id)
         self.name = info["name"]
@@ -514,7 +520,7 @@ class BattleSession(object):
         return build_open(self.mob_id, self.max_hp,
                           self.disp_player_hp_max, self.player_mp_max,
                           cls=self.cls, pet=self.pet,
-                          name=self.player_name)
+                          name=self.player_name, sex=self.sex)
 
     def on_action(self, payload):
         """处理一次 146，返回 (148 bytes, is_end, result)。
