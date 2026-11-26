@@ -68,7 +68,9 @@ sudo -u kd163 python3 work/admin_password.py set admin 你的密码
 2. Nginx 反代 + HTTPS：反代到 `127.0.0.1:8899`，并给 unit 加
    `Environment=KD_ADMIN_REQUIRE=1`，否则后台会以为来源是本机而跳过登录。
 
-> 后台密码走的是明文 HTTP（除 Nginx 那层），公网务必套 HTTPS。
+> 后台密码走的是明文 HTTP：要么套 Nginx + HTTPS，要么给后台自己开 TLS：
+> `KD_ADMIN_TLS=1`（默认用 `patch/exact.pem|key`，可用 `KD_ADMIN_CERT/KEY` 换），
+> 之后访问 `https://IP:8899`。登录密码不会写进日志。
 
 ## 5. 游戏账号（随机账号 + 随机密码）
 

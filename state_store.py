@@ -108,6 +108,17 @@ _LOCK = threading.Lock()
 _READY = [False]
 STRICT = os.environ.get("KD_STATE_STRICT", "") not in ("", "0")
 
+# 账号只允许这些字符（与客户端 account_from_login / 后台 ACCT_RE 一致）。
+# SQL 本身全部参数化，这里是第二道防线：非法账号连库都不碰，避免任何拼接类漏洞。
+_ACCT_RE = re.compile(r"^[A-Za-z0-9_.-]{1,64}$")
+
+
+def _check_acct(acct):
+    acct = str(acct or "")
+    if not _ACCT_RE.match(acct):
+        raise ValueError("账号含非法字符（只允许字母/数字/_ - .，1~64 位）")
+    return acct
+
 
 class Stale(Exception):
     """写回时 rev 对不上（另一个连接先写了这份存档）。"""
@@ -227,7 +238,9 @@ def load(acct):
     """读一个账号的存档。返回 (dict, rev)；没有这一行返回 (None, 0)。"""
     init()
     acct = str(acct or "")
-    if not acct:
+    if not acct or not _ACCT_RE.match(acct):
+        if acct:
+            log("[state_store] 拒绝读取非法账号 %r" % acct[:40])
         return None, 0
     con = _connect()
     try:
@@ -256,6 +269,7 @@ def save(acct, data, rev=0):
     acct = str(acct or "")
     if not acct:
         raise ValueError("save() 需要账号，空账号会把数据写进无名行")
+    acct = _check_acct(acct)
     payload = json.dumps(data, ensure_ascii=False, sort_keys=True)
     cols = _cols(data)
     now = _now()
@@ -320,7 +334,7 @@ def updated(acct):
 def exists(acct):
     init()
     acct = str(acct or "")
-    if not acct:
+    if not acct or not _ACCT_RE.match(acct):
         return False
     con = _connect()
     try:
@@ -332,9 +346,12 @@ def exists(acct):
 
 def delete(acct):
     init()
+    acct = str(acct or "")
+    if not _ACCT_RE.match(acct):
+        return
     con = _connect()
     try:
-        con.execute("DELETE FROM player WHERE acct=?", (str(acct or ""),))
+        con.execute("DELETE FROM player WHERE acct=?", (acct,))
     finally:
         con.close()
 
@@ -369,7 +386,7 @@ def accounts():
 def online_set(acct, cid):
     init()
     acct = str(acct or "")
-    if not acct:
+    if not _ACCT_RE.match(acct):
         return
     now = _now()
     con = _connect()
@@ -386,7 +403,7 @@ def online_set(acct, cid):
 def online_clear(acct):
     init()
     acct = str(acct or "")
-    if not acct:
+    if not _ACCT_RE.match(acct):
         return
     con = _connect()
     try:

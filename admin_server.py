@@ -454,6 +454,19 @@ class Handler(BaseHTTPRequestHandler):
                                 "allow": sorted(allow), "note": note})
 
 
+def _wrap_tls(srv):
+    """可选 HTTPS：KD_ADMIN_TLS=1 时用 patch/exact.pem|key（或 KD_ADMIN_CERT/KEY）加密。"""
+    if os.environ.get("KD_ADMIN_TLS") != "1":
+        return False
+    import ssl
+    cert = os.environ.get("KD_ADMIN_CERT") or os.path.join(HERE, "patch", "exact.pem")
+    key = os.environ.get("KD_ADMIN_KEY") or os.path.join(HERE, "patch", "exact.key")
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ctx.load_cert_chain(cert, key)
+    srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
+    return True
+
+
 def main():
     loopback = HOST in ("127.0.0.1", "localhost", "::1")
     require_env = os.environ.get("KD_ADMIN_REQUIRE") == "1"
@@ -461,9 +474,11 @@ def main():
     AUTH_REQUIRED[0] = admin_auth.configured() or (not loopback) or require_env
 
     srv = ThreadingHTTPServer((HOST, PORT), Handler)
+    https = _wrap_tls(srv)
     shown = "127.0.0.1" if HOST in ("0.0.0.0", "::") else HOST
     # flush：cmd 窗口重定向时 python 会缓冲，没这行要等很久才看到「已启动」
-    print("后台已启动: http://%s:%d  (Ctrl+C 退出)" % (shown, PORT), flush=True)
+    print("后台已启动: %s://%s:%d  (Ctrl+C 退出)"
+          % ("https" if https else "http", shown, PORT), flush=True)
     if HOST in ("0.0.0.0", "::"):
         print("已对公网/局域网开放，用 http://<本机IP>:%d 访问" % PORT, flush=True)
     if gen:

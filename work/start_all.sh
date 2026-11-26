@@ -82,7 +82,9 @@ start_srv 9000 local_server3.py 9000 patch/exact.pem patch/exact.key
 start_srv 80   local_http.py    80 "$HOSTIP"
 
 case " $MODE " in
-    *" admin "*) start_srv 8899 admin_server.py 8899 ;;
+    *" admin "*)
+        KD163_ADMIN_HOST="${KD163_ADMIN_HOST:-0.0.0.0}" start_srv 8899 admin_server.py 8899 ;;
+
 esac
 
 # ---- 以下只在开发机（有 adb）执行 ----

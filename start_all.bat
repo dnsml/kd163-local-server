@@ -34,14 +34,15 @@ if errorlevel 1 (
 
 call :port 8899
 if errorlevel 1 (
-    echo [start] 8899 网页后台
+    echo [start] 8899 网页后台（对外，需登录 admin）
+    set "KD163_ADMIN_HOST=0.0.0.0"
     start "kd163-admin" /min "%PY%" admin_server.py 8899
 ) else (
     echo [skip ] 8899 网页后台已在监听
 )
 
 echo.
-echo   网页后台: http://127.0.0.1:8899
+echo   网页后台: http://127.0.0.1:8899 （局域网/公网用 http://本机IP:8899，需登录）
 echo   游戏服  : 9000（TLS /auth + 游戏协议）
 echo   资源服  : 80（广播 IP %HOSTIP%）
 echo.
