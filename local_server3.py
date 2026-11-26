@@ -480,6 +480,9 @@ def send_push(conn, cid, cmd):
     if pl is not None and pl is not cur():
         with player_ctx(pl):
             return send_push(conn, cid, cmd)
+    if cmd in (947, 957, 964) and not cur().pets:
+        log("c%03d .. 跳过宠物推送 cmd=%d（当前角色尚未获得宠物）" % (cid, cmd))
+        return
     if cmd == 28:
         body = build_28()
         conn.sendall(pack(28, 0, body))
@@ -1695,7 +1698,7 @@ def add_purse(key, amount):
 # ---- 进度存档（等级/经验/铜钱/职业），避免每次重启回档 ----
 STATE_FILE = os.path.join(HERE, "player_state.json")
 # 多账号：主号（QQ 1784366）继续用 player_state.json，不动老存档；
-# 其它账号各自一个 player_state_<账号>.json，首次登录时用主号存档做模板复制一份。
+# 其它账号各自一个 player_state_<账号>.json；新账号从空角色开始，绝不复制主号。
 # 账号现在记在 Player.acct 上（每个连接一份），不再共用进程级 ACCOUNT_STATE。
 PRIMARY_ACCOUNT = "1784366"
 
@@ -2012,14 +2015,14 @@ def load_state(pl=None):
             if int(v):
                 pl.spirit_slot[int(k)] = int(v)
     # 宠物：新号必须一只都没有（真服新号身边不跟熊猫）。
-    # 老存档（这轮改动之前落的）没有 pets 字段 —— 只有主号补种，其余账号一律当空，
-    # 否则用户新建的号会连带继承主号那三只。
+    # 缺 pets 的旧档只能根据已完成的 400702 恢复任务宠物。
+    # 账号是主号不代表拿过宠物，不能再补入抓包账号的三只形象。
     pt = d.get("pets")
     if isinstance(pt, list):
         pl.pets = [int(x) for x in pt]
-    elif pl.acct in ("", PRIMARY_ACCOUNT):
-        pl.pets = list(pet_proto.PET_UIDS)
-        log("[pet] 老存档无 pets 字段（主号），补种真服已有的三只形象")
+    elif 400702 in pl.done_quests:
+        pl.pets = [10000]
+        log("[pet] 旧档缺少 pets，根据已完成的 400702 恢复功夫熊猫")
     else:
         pl.pets = []
     # 妖灵播种：达到 20 级才播（低等级新角色不该一出生就带三只没做任务拿到的妖灵，
@@ -3781,6 +3784,14 @@ def handle_game(conn, cid):
                         conn.sendall(pack(1, seq, b"\x01\xa0"))
                     continue
 
+                # 宠物详情、出战和妖灵操作共用归属检查，放在回放/热模板之前。
+                # 只拦 946/956 会漏掉 963 的抓包形象和 965 补推的熊猫详情；
+                # 客户端残留请求不能让新号获得抓包角色的宠物。
+                if cmd in (946, 956, 963, 965, 1411, 1413, 1414) and not cur().pets:
+                    log("c%03d .. 跳过宠物操作 cmd=%d（当前角色尚未获得宠物）"
+                        % (cid, cmd))
+                    continue
+
                 # 按真服原始顺序回放：定位到该 seq 的响应，把途中所有包按序全发。
                 # 只发「推送+匹配包」会漏掉客户端依赖的中间包，导致初始化不完整，
                 # 最后在 native 层静默段错误（没有 tombstone、没有 crash 日志）。
@@ -4325,6 +4336,17 @@ def handle_game(conn, cid):
                     conn.sendall(pack(214, seq, b""))
                     log("c%03d -> cmd=214 seq=%d [交任务 %d 空应答]"
                         % (cid, seq, qid_int))
+                    # 旧客户端残留的交任务请求不能提前解锁宠物，也不能领经验/铜钱。
+                    # 400702 必须是当前任务且已完成采集；重复提交仍走下方幂等分支。
+                    if (qid_int == 400702 and qid_int not in cur().done_quests
+                            and (cur().quest_active != qid_int or not cur().quest_ready)):
+                        log("[pet] 拒绝提前提交 400702：当前任务=%d 可交=%s"
+                            % (cur().quest_active, cur().quest_ready))
+                        if cur().quest_active:
+                            _current = (quest_210_ready(cur().quest_active) if cur().quest_ready
+                                        else quest_210_doing(cur().quest_active))
+                            conn.sendall(pack(210, 0, _current))
+                        continue
                     if qid_int in cur().done_quests:
                         # 同一个任务被反复提交（重登后客户端从本地进度重跑任务链
                         # 时必然出现）。以前这里只回 28，缺 29/30/178/210，
@@ -4841,6 +4863,13 @@ def handle_game(conn, cid):
                         break
                 if j is not None:
                     for c2, s2, p2 in SEQ[ptr:j + 1]:
+                        # 回放批次可夹带旧号宠物推送，同样不能绕过归属检查。
+                        if c2 in (947, 957, 964) and not cur().pets:
+                            log("c%03d .. 跳过回放 cmd=%d（当前角色尚未获得宠物）"
+                                % (cid, c2))
+                            continue
+                        if c2 == 962 and not cur().pets:
+                            p2 = pet_proto.pack_962(pets=[])
                         # 1266 是 1378 字节的大推送。早前误以为它在场景加载后触发
                         # 背景音乐播放（createMediaplayer b6.mp3）导致 native 段错误，
                         # 后续实测它经 TPL_PUSH 正常下发也没有崩——崩溃真因是 cmd=1。
