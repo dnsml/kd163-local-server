@@ -149,12 +149,14 @@ docs/
 对应回归脚本（`work/`，全是本地起服前的纯逻辑断言，不连客户端）：
 `test_acc_equip.py`（首饰/武器穿脱）、`test_bag_cap.py`（60 格）、`test_enhance_slots.py`（强化槽）、
 `test_newbie_char.py`（建角防覆盖/三件套/神装槽位/30 原包）、`test_login_snapshot.py`（17 货币、17/88 称号）、
-`test_account_flow.py`（账号四流程，分 phase1/phase2）、`check_semantics.py`（17/28/30 字段语义与长度断言）。
+`test_account_flow.py`（账号四流程，分 phase1/phase2）、`check_semantics.py`（17/28/30 字段语义与长度断言）、
+`test_state_store.py`（SQLite 存档：rev/隔离/重启/懒迁移/闸门/快照）。
 
 **协议与可行性（11-22）**
 | 文档 | 内容 |
 |---|---|
 | `reference/字段语义表_17_28_30_20261126.md` | **改包前先看这份**：17/28/30 逐字节 + 逐 token 语义、偏移/宽度、硬约束、三张操作卡、自动校验 |
+| `reference/存档存储_SQLite_20261126.md` | **存档在哪、怎么改**：`server_state.db` 表结构、`rev` 乐观锁、迁移/回退开关、`state_store.py` 接口、运维 GM |
 | `reference/协议分析报告.md` | 包结构、seq/cmd 规则、登录 17、已识别 cmd、服务端资源 |
 | `抓包日志说明.md` | **怎么读 `logs/relay.log`**：行格式、帧结构、编码规则、常用命令号速查、自己再抓一份 |
 | `history/自建服务端可行性评估_20261122.md` | 三条路线对比与成功率 |
@@ -237,7 +239,8 @@ docs/
    与 `121` 对账来清点本层杀怪数，塔层 `clear_needed="1"` 的跳点因此才亮。
    重摆怪要重推 `113+117`（GM `刷怪`），删怪用 `121`（GM `消怪`），过图用 `引路`。
 5. `151` 尾部实例 id 段（如 `ce055d4ead`）语义未定。
-6. 多人同屏、世界 BOSS、坐骑、家园未做；JSON 存档未迁 SQLite。
+6. 多人同屏、世界 BOSS、坐骑、家园未做。~~JSON 存档未迁 SQLite~~ **已完成 11-26**：
+   `state_store.py` + `server_state.db`，见 `reference/存档存储_SQLite_20261126.md`。
 7. 卸下武器后角色模型可能仍显示握刀 —— 属于 `17` 外观缓存/模型观感，面板与存档数据是对的，暂不算功能缺陷。
 8. 登录自动弹「精彩活动」是 `cmd=1266` 活动表原包所致（`templates.json` 的 `push_1266`，1378B）。
    要关掉就删掉这条推送；它不是 bug，也不会改角色数据。

@@ -23,6 +23,16 @@ HOST, PORT = "127.0.0.1", 9000
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MAIN = os.path.join(HERE, "player_state.json")
 GHOST = os.path.join(HERE, "player_state_ZZZ99999.json")
+sys.path.insert(0, HERE)
+# 这是**对着运行中的服**验收的脚本，必须看正式库，不能落到自检临时库
+os.environ.setdefault("KD_STATE_DB", os.path.join(HERE, "server_state.db"))
+try:
+    import state_store
+    USE_DB = state_store.enabled()
+except Exception:
+    state_store = None
+    USE_DB = False
+PRIMARY = "1784366"
 
 OK = []
 BAD = []
@@ -38,6 +48,20 @@ def md5(p):
         return "-"
     with open(p, "rb") as f:
         return hashlib.md5(f.read()).hexdigest()[:12]
+
+
+def save_snapshot(acct=PRIMARY):
+    """存档指纹 + 内容。SQLite 后端下按库里那一行的 data 算，不再看 JSON 文件。"""
+    if USE_DB:
+        d, rev = state_store.load(acct)
+        if d is None:
+            return "-", 0, {}
+        raw = json.dumps(d, ensure_ascii=False, sort_keys=True)
+        return (hashlib.md5(raw.encode("utf-8")).hexdigest()[:12], rev, d)
+    p = MAIN if acct == PRIMARY else os.path.join(HERE, "player_state_%s.json" % acct)
+    if not os.path.exists(p):
+        return "-", 0, {}
+    return md5(p), 0, json.load(open(p, encoding="utf-8"))
 
 
 def pack(cmd, seq, payload=b""):
@@ -94,10 +118,12 @@ def main():
     print("存档三重闸门回归")
     print("=" * 62)
 
-    before = md5(MAIN)
-    d0 = json.load(open(MAIN, encoding="utf-8"))
-    print("主号存档：md5=%s Lv%s 背包%d件" % (before, d0.get("level"), len(d0.get("bag", {}))))
-    check("前置：主号存档存在且是 Lv45", d0.get("level") == 45, "实际 Lv%s" % d0.get("level"))
+    before, rev0, d0 = save_snapshot()
+    print("主号存档：%s=%s Lv%s 背包%d件"
+          % ("rev" if USE_DB else "md5", rev0 if USE_DB else before,
+             d0.get("level"), len(d0.get("bag", {}))))
+    check("前置：主号存档存在且有角色", bool(d0) and int(d0.get("level") or 0) > 0,
+          "实际 Lv%s" % d0.get("level"))
 
     # ---------- 场景 1：不登录直接发业务包 ----------
     print("\n[1] 未登录连接发业务包（模拟半开连接误触发写盘）")
@@ -113,11 +139,14 @@ def main():
     drain(s, 1.0)
     s.close()
     time.sleep(0.8)
-    check("未登录不改主号存档", md5(MAIN) == before,
-          "before=%s after=%s" % (before, md5(MAIN)))
+    now, _, _ = save_snapshot()
+    check("未登录不改主号存档", now == before,
+          "before=%s after=%s" % (before, now))
 
     # ---------- 场景 2：登录没有存档的账号 ----------
     print("\n[2] 登录不存在角色的账号 ZZZ99999")
+    if USE_DB:
+        state_store.delete("ZZZ99999")
     if os.path.exists(GHOST):
         os.remove(GHOST)
     s = connect()
@@ -137,10 +166,12 @@ def main():
     drain(s, 0.8)
     s.close()
     time.sleep(0.8)
-    check("不复制主号存档给新账号", md5(MAIN) == before,
-          "before=%s after=%s" % (before, md5(MAIN)))
-    check("不为无角色账号凭空建存档", not os.path.exists(GHOST),
-          "存在=%s" % os.path.exists(GHOST))
+    now, _, _ = save_snapshot()
+    check("不复制主号存档给新账号", now == before,
+          "before=%s after=%s" % (before, now))
+    ghost_db = USE_DB and state_store.exists("ZZZ99999")
+    check("不为无角色账号凭空建存档", not ghost_db and not os.path.exists(GHOST),
+          "库=%s 文件=%s" % (ghost_db, os.path.exists(GHOST)))
 
     # ---------- 场景 3：登录主号 ----------
     print("\n[3] 登录主号 1784366")
@@ -155,10 +186,14 @@ def main():
     s.close()
     time.sleep(0.6)
 
-    # 主号存档仍应是 Lv45（登录不改写内容）
-    d1 = json.load(open(MAIN, encoding="utf-8"))
-    check("登录主号后存档等级仍是 45", d1.get("level") == 45, "实际 Lv%s" % d1.get("level"))
-    check("登录主号后背包件数仍是 31", len(d1.get("bag", {})) == 31,
+    # 主号存档内容必须一字不变（登录只读，不改写）
+    now, rev1, d1 = save_snapshot()
+    check("登录主号后存档内容不变", now == before,
+          "before=%s after=%s rev %d->%d" % (before, now, rev0, rev1))
+    check("登录主号后等级仍是 Lv%s" % d0.get("level"),
+          d1.get("level") == d0.get("level"), "实际 Lv%s" % d1.get("level"))
+    check("登录主号后背包件数仍是 %d" % len(d0.get("bag", {})),
+          len(d1.get("bag", {})) == len(d0.get("bag", {})),
           "实际 %d 件" % len(d1.get("bag", {})))
     check("主号没被拆成第二个存档", not os.path.exists(dup),
           "%s 存在=%s" % (os.path.basename(dup), os.path.exists(dup)))
