@@ -679,8 +679,15 @@ def journey_follow():
     """「开始旅程」之后要跟的推送。
 
     真服现场（logs/relay.log 15:38:19 `182 0001`）：只回 182 ACK + 29 + 28 + 178，
-    **没有 957、没有 947**，也就没有宠物。所以这里只刷新面板/背包，不发宠物。
+    **没有 957、没有 947**。但客户端点完这个按钮会自己建一个默认宠物位：
+      - 服务端一个宠物包都不发 → 地图上出现 `??` 占位熊猫（只平移、不会跑）；
+      - 发 957 + 947 → 立刻变成有名有动作的「功夫熊猫」。
+    真服之所以看不到 `??`，是因为那边每个号早就通过 400702「前世仙宠」拿过宠物了。
+    本地这条任务线还没接通，所以默认在「开始旅程」这一刻发第一只（KD_PET_STARTER=0 可关）。
     """
+    if os.environ.get("KD_PET_STARTER", "1") != "0" and not cur().pets \
+            and grant_pet(10000):
+        return [957, 29, 28, 178]
     return [29, 28, 178]
 
 
@@ -1039,6 +1046,17 @@ def apply_gm(line):
         push_all([947, 1410, 29])
         return True, ("槽%s 卸下 %s" % (arg[1].strip(),
                                        pet_proto.name_of(old) if old else "空"))
+
+    if line.startswith("领宠") or line.startswith("givepet"):
+        arg = line.split(None, 1)
+        pid = 10000
+        if len(arg) > 1 and arg[1].strip().isdigit():
+            pid = int(arg[1].strip())
+        if grant_pet(pid):
+            push_all([957, 29, 28, 30])
+            return True, ("获得宠物 %d（%s）"
+                          % (pid, pet_proto.PET.get(pid, {}).get("name", "?")))
+        return True, "已经有宠物 %d 了" % pid
 
     if line.startswith("妖灵") or line.startswith("spirit"):
         arg = line.split(None, 1)
@@ -3869,7 +3887,7 @@ def handle_game(conn, cid):
                 #   真服「已经有一只宠物、还没有皮肤」的档位，无宠号回它，客户端
                 #   会当场建出一个没有名字的宠物位（地图上 ?? 熊猫，站着平移）。
                 #   真服无宠号根本不回 962（客户端 961 之前不会问）。
-                if cmd in (946, 956, 961, 963, 965, 1411, 1413, 1414) and not cur().pets:
+                if cmd in (956, 961, 963, 965, 1411, 1413, 1414) and not cur().pets:
                     log("c%03d .. 跳过宠物操作 cmd=%d（当前角色尚未获得宠物）"
                         % (cid, cmd))
                     continue
@@ -5145,8 +5163,17 @@ def handle_game(conn, cid):
                     # “当前跟随宠物”在地图上渲染出来。新号没有宠物，
                     # 真服新号（954259122）整场都没出现过跟随宠，所以这里跳过。
                     if not cur().pets:
-                        log("c%03d .. 跳过 cmd=947（当前角色没有宠物，真服新号也不回）"
-                            % cid)
+                        # ★ 2026-11-26 21:5x 实验：无宠号到底要不要回 947、回什么内容。
+                        #   KD_PET947_EMPTY = 十六进制载荷（默认 "off" = 不回，真服无宠号就是这样）；
+                        #   设成 off / 0 / none = 完全回。
+                        _emp = (os.environ.get("KD_PET947_EMPTY") or "off").strip()
+                        if _emp.lower() in ("off", "0", "none", ""):
+                            log("c%03d .. 跳过 cmd=947（无宠，按 KD_PET947_EMPTY=off）" % cid)
+                            continue
+                        _eb = bytes.fromhex(_emp)
+                        conn.sendall(pack(947, seq, _eb))
+                        log("c%03d -> cmd=947 seq=%-4d len=%d [无宠档 实验 hex=%s]"
+                            % (cid, seq, len(_eb), _eb.hex()))
                         continue
                     _b = pet_proto.pack_947(spirit_strap())
                     conn.sendall(pack(947, seq, _b))
