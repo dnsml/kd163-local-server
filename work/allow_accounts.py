@@ -114,7 +114,13 @@ def cmd_remove(args):
 
 def cmd_off(_args):
     if os.path.exists(AP.FILE):
-        os.remove(AP.FILE)
+        try:
+            os.remove(AP.FILE)
+        except OSError as e:
+            # Windows 上偶发「文件已删但 remove 抛 0x2」，以实际存在与否为准
+            if os.path.exists(AP.FILE):
+                print("删除失败：%s" % e)
+                return 1
         AP.load(force=True)
         print("已删除 %s：白名单关闭，所有账号可登录" % AP.FILE)
     else:

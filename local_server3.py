@@ -820,6 +820,33 @@ def apply_gm(line):
                       % (cur().acct or "主号", cur().name,
                          "女" if cur().sex == 2 else "男",
                          "是" if cur().has_char else "否", cur().level, cur().cls))
+    # ---- 踢下线（后台「账号管理」用）----
+    if line.startswith("踢下线") or line.startswith("kick"):
+        key = store_key(cur())
+        for _c, _p in online_players():
+            if (_p.acct or PRIMARY_ACCOUNT) == key:
+                _conn = GAME_CONNS.get(_c)
+                if _conn is not None:
+                    try:
+                        _conn.shutdown(socket.SHUT_RDWR)
+                    except Exception:
+                        pass
+                    try:
+                        _conn.close()
+                    except Exception:
+                        pass
+                log("[gm] 踢下线 账号=%s c%03d" % (key, _c))
+                return True, "已踢下线 账号=%s（c%03d）" % (key, _c)
+        return True, "账号 %s 当前不在线" % key
+    # ---- 删档（两步确认，先备份）----
+    if line.startswith("删档") or line.startswith("delchar"):
+        _parts = line.split(None, 1)
+        _ok = len(_parts) > 1 and _parts[1].strip().lower() in ("确认", "confirm", "yes", "y")
+        if not _ok:
+            return False, ("将删除 账号=%s 角色=%r Lv%d 背包%d件；"
+                           "确认请发「删档 确认」（会先备份）"
+                           % (store_key(cur()), cur().name, cur().level, len(cur().bag)))
+        return delete_character(cur())
     # 无参指令先处理
     if line in ("清包", "清空背包", "clearbag"):
         cur().bag.clear()
@@ -1344,14 +1371,17 @@ def gm_watch():
                                 open(GM_CMD, "w").close()
                             except Exception:
                                 pass
-                        for ln in lines:
+                        for _raw in lines:
                             try:
-                                tgt, ln = gm_target(ln)
-                                with player_ctx(tgt):
-                                    ok, msg = apply_gm(ln)
+                                _tgt, _cmdline = gm_target(_raw)
+                                with player_ctx(_tgt):
+                                    ok, msg = apply_gm(_cmdline)
                             except Exception as e:
                                 ok, msg = False, "异常 %s: %s" % (type(e).__name__, e)
-                            log("[gm] %s %s -> %s" % ("OK" if ok else "NG", ln, msg))
+                            # 日志里保留**原始指令**（含 @账号 前缀）：网页后台
+                            # run_gm() 是按「发出去的那一行 + ' ->'」回收执的，
+                            # 这里要是只记去掉前缀的版本，后台永远等不到回执。
+                            log("[gm] %s %s -> %s" % ("OK" if ok else "NG", _raw, msg))
                     # 清空/删除后 mtime 会变，若还把 last 停在上一次的值，就会对
                     # 同一个空文件每秒重扫一遍（实测刷了几十条日志）。
                     try:
@@ -2031,6 +2061,48 @@ def create_character(name, sex=1, pl=None, force=False):
         % (pl.acct or "主号", pl.name, pl.sex))
     return True, "已建角：账号 %s 昵称 %r 性别 %s，Lv1 未转职" % (
         pl.acct or "主号", pl.name, "女" if pl.sex == 2 else "男")
+
+
+def delete_character(pl=None):
+    """删除某个账号的角色（后台「删角色」）。
+
+    三重保护，缺一不可：
+      1. 在线时必须先踢下线 —— 在线连接退出时会 save_state，刚删的档会被它写回来；
+      2. 先 force 备份（backups/ 里一份 JSON 快照）；
+      3. 删库行 **还要把老 JSON 挪走** —— 否则下次登录的「懒迁移」会把角色原样搬回来。
+    返回 (成功?, 说明)。
+    """
+    pl = pl or cur()
+    key = store_key(pl)
+    if not pl.has_char and not state_exists(pl):
+        return False, "账号 %s 没有角色可删" % key
+    for _c, _p in online_players():
+        if (_p.acct or PRIMARY_ACCOUNT) == key:
+            return False, ("账号 %s 正在线（c%03d），先「踢下线」再删，"
+                           "否则它退出时会把存档写回来" % (key, _c))
+    info = "账号=%s 角色=%r Lv%d 背包%d件" % (key, pl.name, pl.level, len(pl.bag))
+    backup_current(pl, force=True)
+    kept = []
+    if state_store.enabled():
+        try:
+            state_store.delete(key)
+            kept.append("库行")
+        except Exception as e:
+            return False, "删库失败：%s" % e
+    jp = state_path(pl)
+    if os.path.exists(jp):
+        try:
+            os.makedirs(BACKUP_DIR, exist_ok=True)
+            dst = os.path.join(BACKUP_DIR, "deleted_%s_%s.json"
+                               % (key.replace("/", "_"), time.strftime("%Y%m%d_%H%M%S")))
+            os.replace(jp, dst)
+            kept.append("JSON→backups/%s" % os.path.basename(dst))
+        except OSError as e:
+            log("[char] 删档：老 JSON 挪走失败 %s（下次登录可能被懒迁移搬回来）" % e)
+    player_mod.reset_newbie(pl)
+    log("[char] ★ 删档 %s（%s）" % (info, "、".join(kept) or "无"))
+    return True, "已删除 %s；删前快照已存 backups/（%s）" % (
+        info, "、".join(kept) or "无")
 
 
 def equip_story_set(pl=None):

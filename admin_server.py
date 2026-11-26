@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -27,6 +28,12 @@ sys.path.insert(0, HERE)
 
 import bag_proto          # 道具名查询
 import item_rules         # 道具效果/价格（后台展示用）
+import account_policy     # 账号白名单（accounts.json）
+
+# 账号/昵称格式：和 account_from_login / create_role 的限制保持一致。
+# 账号带空格或换行会被当 GM 指令拆开，所以这里必须卡死。
+ACCT_RE = re.compile(r"^[A-Za-z0-9_.-]{1,20}$")
+NAME_RE = re.compile(r"^[^\s]{1,10}$")
 
 STATE = os.path.join(HERE, "player_state.json")
 STATUS = os.path.join(HERE, "logs", "status.json")
@@ -172,10 +179,24 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/accounts":
             try:
                 import state_store
-                return self._send(200, {"backend": state_store.backend(),
-                                        "db": os.path.basename(state_store.DB_FILE),
-                                        "accounts": state_store.accounts(),
-                                        "online": state_store.online_list()})
+                allow, src = account_policy.load(force=True)
+                accs = state_store.accounts()
+                for a in accs:
+                    a["allowed"] = (allow is None or str(a["acct"]) in allow)
+                    a["online"] = False
+                for o in state_store.online_list():
+                    for a in accs:
+                        if a["acct"] == o["acct"]:
+                            a["online"] = True
+                return self._send(200, {
+                    "backend": state_store.backend(),
+                    "db": os.path.basename(state_store.DB_FILE),
+                    "accounts": accs,
+                    "allow": sorted(allow) if allow is not None else None,
+                    "policy": account_policy.describe(),
+                    "src": src,
+                    "file": os.path.basename(account_policy.FILE),
+                })
             except Exception as e:
                 return self._send(500, {"error": "读库失败: %s" % e})
         if u.path == "/api/items":
@@ -201,20 +222,99 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
-        if u.path != "/api/gm":
-            return self._send(404, {"error": "not found"})
         try:
             n = int(self.headers.get("Content-Length") or 0)
             body = json.loads(self.rfile.read(n) or b"{}")
         except Exception as e:
             return self._send(400, {"error": "bad json: %s" % e})
-        lines = body.get("lines")
-        if not lines and body.get("line"):
-            lines = [body["line"]]
-        lines = [str(x).strip() for x in (lines or []) if str(x).strip()]
-        if not lines:
-            return self._send(400, {"error": "缺少指令"})
-        return self._send(200, {"results": run_gm(lines)})
+
+        if u.path == "/api/gm":
+            lines = body.get("lines")
+            if not lines and body.get("line"):
+                lines = [body["line"]]
+            lines = [str(x).strip() for x in (lines or []) if str(x).strip()]
+            if not lines:
+                return self._send(400, {"error": "缺少指令"})
+            return self._send(200, {"results": run_gm(lines)})
+
+        # 账号管理：建角 / 删角色 / 踢下线（最终都走 GM，保证只有游戏服写存档）
+        if u.path == "/api/char":
+            action = str(body.get("action") or "").strip()
+            acct = str(body.get("acct") or "").strip()
+            if not ACCT_RE.match(acct):
+                return self._send(400, {"error": "账号格式不对（1~20 位字母/数字/_ - .）"})
+            if action == "create":
+                name = str(body.get("name") or "").strip()
+                if not NAME_RE.match(name):
+                    return self._send(400, {"error": "昵称 1~10 个字符且不能有空格"})
+                sex = "女" if str(body.get("sex") or "") in ("2", "女", "female", "f") else "男"
+                line = "@%s 建角 %s %s" % (acct, name, sex)
+            elif action == "delete":
+                line = "@%s 删档 确认" % acct
+            elif action == "kick":
+                line = "@%s 踢下线" % acct
+            else:
+                return self._send(400, {"error": "action 只支持 create/delete/kick"})
+            res = run_gm([line])[0]
+            return self._send(200, {"line": line, "ok": bool(res[0]), "msg": res[1]})
+
+        # 白名单：add / remove / sync / off
+        if u.path == "/api/allow":
+            return self._allow(body)
+
+        return self._send(404, {"error": "not found"})
+
+    def _allow(self, body):
+        action = str(body.get("action") or "").strip().lower()
+        if action == "off":
+            try:
+                if os.path.exists(account_policy.FILE):
+                    os.remove(account_policy.FILE)
+            except OSError as e:
+                # Windows 上偶尔会出现「文件其实删掉了，但 remove 仍抛 0x2」
+                # （杀毒/文件过滤驱动）。以「现在还在不在」为准，不要误报失败。
+                if os.path.exists(account_policy.FILE):
+                    return self._send(500, {"error": "关闭失败: %s" % e})
+            account_policy.load(force=True)
+            return self._send(200, {"ok": True, "policy": account_policy.describe(),
+                                    "allow": None,
+                                    "note": "白名单已关闭：所有账号都能登录"
+                                            + ("（环境变量 KD_ALLOW_ACCOUNTS 仍生效）"
+                                               if os.environ.get("KD_ALLOW_ACCOUNTS") else "")})
+        if action == "sync":
+            try:
+                import state_store
+                allow = {str(a["acct"]) for a in state_store.accounts()}
+            except Exception as e:
+                return self._send(500, {"error": "读库失败: %s" % e})
+            if not allow:
+                return self._send(400, {"error": "库里还没有角色，拒绝生成空名单"})
+            account_policy.save(allow)
+            return self._send(200, {"ok": True, "policy": account_policy.describe(),
+                                    "allow": sorted(allow),
+                                    "note": "已用库里现有 %d 个角色生成名单" % len(allow)})
+        allow, _src = account_policy.load(force=True)
+        was_off = allow is None
+        allow = set(allow or [])
+        accts = body.get("accounts")
+        if accts is None:
+            accts = [body.get("acct")]
+        accts = [str(x).strip() for x in (accts or []) if str(x or "").strip()]
+        if action == "add":
+            bad = [x for x in accts if not ACCT_RE.match(x)]
+            if bad:
+                return self._send(400, {"error": "账号格式不对：%s" % "、".join(bad)})
+            allow |= set(accts)
+        elif action == "remove":
+            allow -= set(accts)
+        else:
+            return self._send(400, {"error": "action 只支持 add/remove/sync/off"})
+        account_policy.save(allow)
+        note = ""
+        if was_off and action == "add":
+            note = "白名单已开启：名单外账号将无法登录（要全开请点「关闭白名单」）"
+        return self._send(200, {"ok": True, "policy": account_policy.describe(),
+                                "allow": sorted(allow), "note": note})
 
 
 def main():
