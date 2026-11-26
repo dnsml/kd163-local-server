@@ -78,6 +78,21 @@
   .toast.err{background:#2a1d1d;border-color:#5a2a2a;color:#f0b4b4}
   .lvbar{height:6px;background:#0e1015;border-radius:4px;overflow:hidden;margin-top:8px}
   .lvbar i{display:block;height:100%;background:linear-gradient(90deg,#c9922f,#f5cf8a)}
+  select{background:#0e1015;border:1px solid #2c3242;color:var(--text);border-radius:7px;
+         padding:7px 9px;font-family:inherit;font-size:13px;outline:none}
+  .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+             max-height:420px}
+  table.accts{border-collapse:collapse;width:100%;font-size:12.5px}
+  table.accts th,table.accts td{padding:8px 10px;border-bottom:1px solid #22262f;
+             text-align:left;white-space:nowrap}
+  table.accts th{color:var(--muted);font-weight:500;background:#151922;position:sticky;top:0;z-index:1}
+  table.accts tr:last-child td{border-bottom:none}
+  table.accts td.num{font-variant-numeric:tabular-nums}
+  .mono{font-family:ui-monospace,Consolas,monospace}
+  .tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;border:1px solid}
+  .tag.on{color:var(--green);border-color:#24463a;background:#1b2a22}
+  .tag.off{color:var(--red);border-color:#4a2626;background:#2a1b1b}
+  .tag.warn{color:var(--gold2);border-color:#5a4520;background:#2c2314}
 </style>
 </head>
 <body>
@@ -88,6 +103,30 @@
     <div class="spacer"></div>
     <div class="muted small" id="stamp">—</div>
   </header>
+
+  <section>
+    <h2>账号管理 <span class="muted small" id="acctnum"></span></h2>
+    <div class="search">
+      <input class="kw" id="newacct" placeholder="账号（字母/数字/_ - .，1~20 位）">
+      <input class="kw" id="newname" placeholder="昵称（1~10 个字符）">
+      <select id="newsex">
+        <option value="1">男</option>
+        <option value="2">女</option>
+      </select>
+      <button class="primary" id="mkchar">建角</button>
+      <button id="refreshacct">刷新</button>
+    </div>
+    <p class="hint" id="policyline">白名单状态加载中…</p>
+    <div class="row" style="margin-bottom:10px">
+      <button id="allsync">全部放行（用库里账号生成名单）</button>
+      <button class="danger" id="allowoff">关闭白名单（所有账号可登录）</button>
+    </div>
+    <div class="tablewrap">
+      <table class="accts" id="accts"></table>
+    </div>
+    <p class="hint">建角 = 给某个账号创角色（账号已有角色会被拒绝，不会覆盖）；删角色会先备份，
+      在线账号要先「踢下线」，否则它退出时会把存档写回来。</p>
+  </section>
 
   <section>
     <h2>角色数值</h2>
@@ -163,8 +202,14 @@ function fmt(n){ return (n??0).toLocaleString("zh-CN"); }
 
 async function api(path, opt){
   const r = await fetch(path, opt);
-  if(!r.ok) throw new Error(await r.text());
-  return r.json();
+  const txt = await r.text();
+  let j = null;
+  try{ j = txt ? JSON.parse(txt) : {}; }catch(e){ /* 非 JSON 错误页 */ }
+  if(!r.ok){
+    const msg = (j && (j.error || j.msg)) || txt || ("HTTP " + r.status);
+    throw new Error(msg);
+  }
+  return j || {};
 }
 async function gm(line){
   const j = await api("/api/gm", {method:"POST", headers:{"Content-Type":"application/json"},
@@ -212,6 +257,87 @@ function renderCards(s){
   });
 }
 function labelOf(k){ const f=FIELDS.find(x=>x.key===k); return f?f.label:k; }
+
+// ---------------- 账号管理 ----------------
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => (
+    {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+async function postJSON(path, body){
+  return api(path, {method:"POST", headers:{"Content-Type":"application/json"},
+                    body: JSON.stringify(body)});
+}
+
+async function charAction(body){
+  try{
+    const j = await postJSON("/api/char", body);
+    toast((j.ok ? "✔ " : "✘ ") + j.msg, !!j.ok);
+    refreshAccounts(); refresh();
+  }catch(e){ toast("✘ " + e.message, false); }
+}
+
+async function allowAction(body){
+  try{
+    const j = await postJSON("/api/allow", body);
+    toast("✔ " + (j.note || j.policy || "已更新"), true);
+    refreshAccounts();
+  }catch(e){ toast("✘ " + e.message, false); }
+}
+
+function bindAccountOps(){
+  document.querySelectorAll("[data-kick]").forEach(b=>b.onclick=()=>{
+    charAction({action:"kick", acct:b.dataset.kick});
+  });
+  document.querySelectorAll("[data-allow]").forEach(b=>b.onclick=()=>{
+    allowAction({action: b.dataset.on === "1" ? "remove" : "add", acct:b.dataset.allow});
+  });
+  document.querySelectorAll("[data-delchar]").forEach(b=>b.onclick=()=>{
+    const acct = b.dataset.delchar, name = b.dataset.name || "";
+    if(!confirm(`确定删除账号 ${acct} 的角色「${name}」吗？\n\n会先备份到 backups/，删除后角色不可恢复。`)) return;
+    charAction({action:"delete", acct});
+  });
+}
+
+async function refreshAccounts(){
+  try{
+    const j = await api("/api/accounts");
+    const list = j.accounts || [];
+    const on = list.filter(a=>a.online).length;
+    document.getElementById("acctnum").textContent =
+      `${list.length} 个角色${on ? ` · ${on} 在线` : ""}`;
+    document.getElementById("policyline").innerHTML =
+      `白名单：<b>${esc(j.policy || "—")}</b>` +
+      (j.file ? ` <span class="muted small">(${esc(j.file)})</span>` : "") +
+      (j.allow === null ? ` <span class="tag warn">关闭</span>`
+                        : ` <span class="tag on">${j.allow.length} 个放行</span>`);
+    const rows = list.map(a=>`<tr>
+      <td class="mono">${esc(a.acct)}${a.online ? ' <span class="tag on">在线</span>' : ""}</td>
+      <td>${esc(a.name || "—")}</td>
+      <td class="num">${a.level ?? 0}</td>
+      <td class="num">${fmt(a.gold)}</td>
+      <td class="num">${fmt(a.bind_copper)}</td>
+      <td class="num">${a.bag ?? 0}</td>
+      <td class="muted">${esc(a.updated_at || "")}</td>
+      <td>${a.allowed ? '<span class="tag on">放行</span>'
+                       : '<span class="tag off">未放行</span>'}</td>
+      <td>
+        ${a.online ? `<button data-kick="${esc(a.acct)}">踢下线</button>` : ""}
+        <button data-allow="${esc(a.acct)}" data-on="${a.allowed ? 1 : 0}">
+          ${a.allowed ? "取消放行" : "放行"}</button>
+        <button class="danger" data-delchar="${esc(a.acct)}"
+                data-name="${esc(a.name || "")}">删角色</button>
+      </td></tr>`).join("");
+    document.getElementById("accts").innerHTML =
+      `<thead><tr><th>账号</th><th>昵称</th><th>等级</th><th>元宝</th><th>绑铜</th>
+       <th>背包</th><th>更新</th><th>白名单</th><th>操作</th></tr></thead>
+       <tbody>${rows || `<tr><td colspan="9" class="muted">还没有角色</td></tr>`}</tbody>`;
+    bindAccountOps();
+  }catch(e){
+    document.getElementById("acctnum").textContent = "账号列表读取失败";
+    document.getElementById("policyline").textContent = e.message;
+  }
+}
 
 function renderBag(s){
   const bag = s.bag || {};
@@ -289,8 +415,34 @@ document.getElementById("gm").addEventListener("keydown", e=>{
 });
 document.querySelectorAll("[data-gm]").forEach(b=>b.onclick=()=>gm(b.dataset.gm));
 
+document.getElementById("mkchar").onclick = ()=>{
+  const acct = document.getElementById("newacct").value.trim();
+  const name = document.getElementById("newname").value.trim();
+  const sex = document.getElementById("newsex").value;
+  if(!acct || !name) return toast("账号和昵称都要填", false);
+  if(!/^[A-Za-z0-9_.-]{1,20}$/.test(acct)) return toast("账号只能是字母/数字/_ - .，1~20 位", false);
+  if(!confirm(`给账号 ${acct} 建角色「${name}」（${sex === "2" ? "女" : "男"}）？`)) return;
+  charAction({action:"create", acct, name, sex});
+};
+document.getElementById("refreshacct").onclick = ()=>refreshAccounts();
+document.getElementById("allsync").onclick = ()=>{
+  if(!confirm("用库里现有角色生成白名单？\n开启后名单外账号将无法登录。")) return;
+  allowAction({action:"sync"});
+};
+document.getElementById("allowoff").onclick = ()=>{
+  if(!confirm("关闭白名单后，任何账号都能登录（包括陌生账号），确定？")) return;
+  allowAction({action:"off"});
+};
+
 refresh();
-setInterval(()=>{ if(!document.activeElement.matches("input")) refresh(); }, 2500);
+refreshAccounts();
+setInterval(()=>{ if(!document.activeElement.matches("input,select")) refresh(); }, 2500);
+setInterval(()=>{
+  const box = document.getElementById("accts");
+  if(document.activeElement.matches("input,select")) return;
+  if(box && box.contains(document.activeElement)) return;
+  refreshAccounts();
+}, 8000);
 </script>
 </body>
 </html>
