@@ -151,13 +151,14 @@ docs/
 `test_newbie_char.py`（建角防覆盖/三件套/神装槽位/30 原包）、`test_login_snapshot.py`（17 货币、17/88 称号）、
 `test_account_flow.py`（账号四流程，分 phase1/phase2）、`check_semantics.py`（17/28/30 字段语义与长度断言）、
 `test_state_store.py`（SQLite 存档：rev/隔离/重启/懒迁移/闸门/快照）。
-`test_story_set_818.py`（400501 自动穿神装必推 818、GM 穿脱也推 818）。
+`test_story_set_818.py`（400501 自动穿神装必推 818、GM 穿脱也推 818）、
+`test_allowlist.py`（白名单：/auth 403、登录 17 拦截、不建行、热加载、fail closed）。
 
 **协议与可行性（11-22）**
 | 文档 | 内容 |
 |---|---|
 | `reference/字段语义表_17_28_30_20261126.md` | **改包前先看这份**：17/28/30 逐字节 + 逐 token 语义、偏移/宽度、硬约束、三张操作卡、自动校验 |
-| `reference/上线部署清单_20261126.md` | **要上线先看这份**：进程/端口、依赖、证书与改包、/auth 鉴权缺口、systemd、备份、容量与风险 |
+| `reference/上线部署清单_20261126.md` | **要上线先看这份**：进程/端口、依赖、证书与改包、账号白名单、Linux 路径、systemd（`deploy/`）、备份、容量与风险 |
 | `reference/存档存储_SQLite_20261126.md` | **存档在哪、怎么改**：`server_state.db` 表结构、`rev` 乐观锁、迁移/回退开关、`state_store.py` 接口、运维 GM |
 | `reference/协议分析报告.md` | 包结构、seq/cmd 规则、登录 17、已识别 cmd、服务端资源 |
 | `抓包日志说明.md` | **怎么读 `logs/relay.log`**：行格式、帧结构、编码规则、常用命令号速查、自己再抓一份 |
