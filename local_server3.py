@@ -3955,6 +3955,12 @@ def handle_game(conn, cid):
                     if _acct:
                         log("c%03d [acct] 登录账号 %s" % (cid, _acct))
                         switch_account(_acct)
+                        # 在线表只是给后台/运维看的（真正「在不在线」仍以 GAME_CONNS 为准）
+                        if state_store.enabled():
+                            try:
+                                state_store.online_set(_acct, cid)
+                            except Exception as _e:
+                                log("c%03d [state] 记在线表失败：%s" % (cid, _e))
                     else:
                         # ★ 2026-11-26：Player() 不再默认给一个 Lv10 演示号，
                         #   账号解析失败就是「空连接」-> has_char=False -> 回 01a0 让客户端建角。
@@ -5612,6 +5618,11 @@ def handle_game(conn, cid):
         with GAME_LOCK:
             GAME_CONNS.pop(cid, None)
             CONN_PLAYERS.pop(cid, None)
+        if pl.acct and state_store.enabled():
+            try:
+                state_store.online_clear(pl.acct)
+            except Exception:
+                pass
         write_status()
         try:
             conn.close()
