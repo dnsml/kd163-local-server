@@ -1850,7 +1850,10 @@ def account_from_login(payload):
         if not (0xA0 <= b <= 0xBF):
             continue
         n = b & 0x1F
-        if n < 4 or i + 1 + n > len(payload):
+        # ★ 2026-11-26 16:0x 修：以前要求 n>=4，结果 3 位账号（测试号 `123`）
+        #   解析成空串 → 走「空连接」分支 → 客户端建角落到主号文件
+        #   （player_state.json），把主号角色冲成 Lv1。1 位以上的账号都得认。
+        if n < 1 or i + 1 + n > len(payload):
             continue
         try:
             s = payload[i + 1:i + 1 + n].decode("ascii")
@@ -3763,7 +3766,15 @@ def handle_game(conn, cid):
                     _acct2 = account_from_login(payload) or cur().acct or ""
                     log("c%03d [create] ★ 建角请求 账号=%s 昵称=%r 性别候选=%s hex=%s"
                         % (cid, _acct2, _nm, _sx, payload.hex()))
-                    if _acct2 and _acct2 != cur().acct:
+                    # ★ 2026-11-26：账号解析不出来就绝不建角 —— 建角会 reset_newbie
+                    #   并写 state_path(pl)，而空账号的 state_path 就是主号
+                    #   player_state.json。宁可让客户端停在建角界面，也不能冲掉主号。
+                    if not _acct2:
+                        log("c%03d [create] ！！建角请求没有账号，拒绝建角"
+                            "（防写进主号存档）" % cid)
+                        conn.sendall(pack(1, seq, b"\x01\xa0"))
+                        continue
+                    if _acct2 != cur().acct:
                         switch_account(_acct2)
                     _ok, _msg = create_character(_nm, _sx if _sx in (1, 2) else 1)
                     if _ok:
