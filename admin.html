@@ -109,18 +109,18 @@
   <section>
     <h2>账号管理 <span class="muted small" id="acctnum"></span></h2>
     <div class="row" style="margin-bottom:12px">
-      <button class="primary" id="mkacct">+ 新建游戏账号（随机账号 + 随机密码）</button>
+      <button class="primary" id="mkacct">+ 新建游戏账号（账号随机，密码 123）</button>
       <input class="qty" id="acctnote" placeholder="备注（可选）" style="width:180px">
     </div>
     <div class="card" id="newacctbox" style="display:none">
-      <div class="label">新账号（密码只显示这一次，请立刻发给玩家）</div>
+      <div class="label">新账号（密码统一 123，把账号发给玩家即可）</div>
       <div class="num mono" id="newacctline" style="font-size:20px">—</div>
       <div class="row">
         <button id="copyacct">复制账号+密码</button>
         <button id="hidenew">收起</button>
       </div>
-      <p class="hint" style="margin-bottom:0">玩家在客户端登录界面输入这组账号密码，进游戏后会自己弹建角，
-        让他自己选男女和昵称。</p>
+      <p class="hint" style="margin-bottom:0">玩家在客户端登录界面输入「账号 + 123」，进游戏后会自己弹建角，
+        男女和昵称由玩家自己选。</p>
     </div>
 
     <details style="margin:12px 0">
@@ -145,7 +145,7 @@
     <div class="tablewrap">
       <table class="accts" id="accts"></table>
     </div>
-    <p class="hint">新建账号 = 生成随机账号 + 随机密码（写进 accounts.json，只存密码哈希）。
+    <p class="hint">新建账号 = 生成随机 8 位账号，密码统一 123（写进 accounts.json，只存哈希）。
       删账号只删登录资格，角色存档还在；要连角色一起清就再点「删角色」。</p>
   </section>
 
@@ -365,6 +365,7 @@ async function refreshAccounts(){
     const rows = list.map(a=>{
       const hasChar = !!(a.name || a.level);
       return `<tr>
+      <td class="num">${a.id || "—"}</td>
       <td class="mono">${esc(a.acct)}</td>
       <td>${hasChar ? esc(a.name || "—") : '<span class="muted">未建角</span>'}</td>
       <td class="num">${hasChar ? (a.level ?? 0) : "—"}</td>
@@ -386,9 +387,9 @@ async function refreshAccounts(){
       </td></tr>`;
     }).join("");
     document.getElementById("accts").innerHTML =
-      `<thead><tr><th>账号</th><th>昵称</th><th>等级</th><th>背包</th><th>密码</th>
-       <th>白名单</th><th>在线</th><th>创建时间</th><th>操作</th></tr></thead>
-       <tbody>${rows || `<tr><td colspan="9" class="muted">还没有账号</td></tr>`}</tbody>`;
+      `<thead><tr><th>ID</th><th>账号</th><th>昵称</th><th>等级</th><th>背包</th>
+       <th>密码</th><th>白名单</th><th>在线</th><th>创建时间</th><th>操作</th></tr></thead>
+       <tbody>${rows || `<tr><td colspan="10" class="muted">还没有账号</td></tr>`}</tbody>`;
     bindAccountOps();
   }catch(e){
     document.getElementById("acctnum").textContent = "账号列表读取失败";

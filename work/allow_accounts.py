@@ -124,6 +124,23 @@ def cmd_off(_args):
     return 0
 
 
+def cmd_passwd(args):
+    if not AP.set_password(args.acct, args.password):
+        print("账号 %s 不在账号表里（老白名单账号没有密码）" % args.acct)
+        return 1
+    print("已把 %s 的密码设为 %s" % (args.acct, args.password))
+    return 0
+
+
+def cmd_passwd_all(args):
+    n = AP.set_all_passwords(args.password)
+    if not n:
+        print("账号表是空的：先用后台「新建游戏账号」或 sync 建账号")
+        return 1
+    print("已把 %d 个账号的密码统一设为 %s" % (n, args.password))
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description="账号白名单维护")
     sub = ap.add_subparsers(dest="cmd")
@@ -133,9 +150,15 @@ def main():
     for name in ("add", "remove"):
         p = sub.add_parser(name)
         p.add_argument("accounts", nargs="+")
+    p = sub.add_parser("passwd")
+    p.add_argument("acct")
+    p.add_argument("password")
+    p = sub.add_parser("passwd-all")
+    p.add_argument("password", nargs="?", default="123")
     a = ap.parse_args()
     return {"list": cmd_list, "sync": cmd_sync, "add": cmd_add,
-            "remove": cmd_remove, "off": cmd_off}.get(a.cmd, cmd_list)(a)
+            "remove": cmd_remove, "off": cmd_off,
+            "passwd": cmd_passwd, "passwd-all": cmd_passwd_all}.get(a.cmd, cmd_list)(a)
 
 
 if __name__ == "__main__":

@@ -44,6 +44,8 @@ ACCT_ALPHABET = "23456789abcdefghjkmnpqrstuvwxyz"
 # 密码字母表：大小写 + 数字，同样去歧义
 PASS_ALPHABET = "23456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ"
 PBKDF2_ROUNDS = 120000
+# 生成账号时的默认密码。按运营要求统一成 123（弱密码，公网部署要清楚风险）。
+DEFAULT_PASSWORD = os.environ.get("KD_DEFAULT_PASSWORD") or "123"
 
 _cache = {"mtime": None, "allow": None, "accounts": None, "src": "off", "open": False}
 _warned = [False]
@@ -224,25 +226,49 @@ def new_account(acct=None, password=None):
             break
         if acct:
             break
-    p = password or "".join(secrets.choice(PASS_ALPHABET) for _ in range(10))
+    p = password or DEFAULT_PASSWORD
     accounts[a] = {"pass": hash_password(p),
                    "created_at": time.strftime("%Y-%m-%d %H:%M:%S")}
     _write(allow, accounts)
     return a, p
 
 
-def reset_password(acct):
-    """重置成新的随机密码，返回 (账号, 新密码)；账号不存在返回 (acct, None)。"""
+def reset_password(acct, password=None):
+    """重置密码（默认也是 123），返回 (账号, 新密码)；账号不存在返回 (acct, None)。"""
     load(force=True)
     accounts = dict(_cache["accounts"] or {})
     acct = str(acct or "").strip()
     if acct not in accounts:
         return acct, None
-    p = "".join(secrets.choice(PASS_ALPHABET) for _ in range(10))
+    p = password or DEFAULT_PASSWORD
     accounts[acct]["pass"] = hash_password(p)
     accounts[acct]["pass_reset_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
     _write(set(_cache["allow"] or []), accounts)
     return acct, p
+
+
+def set_password(acct, password):
+    """把某个账号的密码直接设成指定值（账号必须已在账号表里）。"""
+    load(force=True)
+    accounts = dict(_cache["accounts"] or {})
+    acct = str(acct or "").strip()
+    if acct not in accounts:
+        return False
+    accounts[acct]["pass"] = hash_password(password)
+    _write(set(_cache["allow"] or []), accounts)
+    return True
+
+
+def set_all_passwords(password):
+    """把账号表里所有账号的密码统一改成 password，返回改了几个。"""
+    load(force=True)
+    accounts = dict(_cache["accounts"] or {})
+    if not accounts:
+        return 0
+    for a in accounts:
+        accounts[a]["pass"] = hash_password(password)
+    _write(set(_cache["allow"] or []), accounts)
+    return len(accounts)
 
 
 def remove_account(acct):

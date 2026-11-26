@@ -135,7 +135,16 @@ def main():
         L.save_state()                      # authed=False / has_char=False
         check("未登录连接不建行", not S.exists("ghost1"))
 
-    print("\n[7] 写前快照")
+    print("\n[7] SQL 注入字符按普通字符串处理")
+    evil = "x'; DROP TABLE player;--"
+    S.save(evil, sample("注入", 3, 0), 0)
+    got, _ = S.load(evil)
+    check("恶意账号原样存取", got is not None and got["name"] == "注入")
+    check("player 表还在", S.count() >= 2, "count=%d" % S.count())
+    check("账号列表里是字面值",
+          any(r["acct"] == evil for r in S.accounts()))
+
+    print("\n[8] 写前快照")
     sn = S.snapshot("acc_a", S.load("acc_a")[0], force=True)
     check("生成了快照文件", bool(sn) and os.path.exists(sn), str(sn))
     again = S.snapshot("acc_a", S.load("acc_a")[0])
