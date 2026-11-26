@@ -2512,6 +2512,10 @@ def save_state(force=False):
                 pl.rev = state_store.save(store_key(pl), d, getattr(pl, "rev", 0))
                 pl.saved_sig = sig
                 return
+            except ValueError as e:
+                # 账号含非法字符：不落盘、也不回退写 JSON（避免生成奇怪文件名）
+                log("[state] ！！账号非法，拒绝落盘：%s" % e)
+                return
             except state_store.Stale as e:
                 # 同一个账号两个连接都写了：重读 rev 再写一次（内存里的这份更新）
                 log("[state] rev 冲突，重读后重写：%s" % e)
@@ -3948,17 +3952,18 @@ def handle_tls(raw_sock, cid):
         if path.startswith("/auth"):
             user = ""
             pw = ""
-            # 登录请求体只在排障时打（KD_AUTH_DEBUG=1）：里面有密码，
-            # 默认不入日志。查「客户端到底传了哪些字段」就靠这条。
-            if os.environ.get("KD_AUTH_DEBUG") not in ("", "0", None) and body:
-                log("c%03d /auth body len=%d %s"
-                    % (cid, len(body), body[:400].decode("utf-8", "replace")))
             try:
                 j = json.loads(body.decode("utf-8", "replace") or "{}")
                 user = j.get("username") or ""
                 pw = j.get("password") or ""
             except Exception:
-                pass
+                j = {}
+            # 排障开关只记「字段名 + 长度」，**绝不记录 password 的值**。
+            # 登录接口的凭据不落日志（server.log 可能被后台页面展示/打包带走）。
+            if os.environ.get("KD_AUTH_DEBUG") not in ("", "0", None) and body:
+                log("c%03d /auth 请求：字段=%s 长度=%d（密码已隐去）"
+                    % (cid, ",".join(sorted(j.keys())) if isinstance(j, dict) else "?",
+                       len(body)))
             if not account_policy.allowed(user):
                 # 白名单开启时，不在名单里的账号连令牌都不发。
                 log("c%03d /auth 拒绝 uid=%s（不在白名单）" % (cid, user or "?"))

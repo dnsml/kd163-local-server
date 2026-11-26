@@ -205,6 +205,22 @@ class GamePasswordTest(unittest.TestCase):
         self.assertTrue(cmds and cmds[0][0] == 1 and cmds[0][1] > 5,
                         "没过 /auth 的 17 应被拒：%s" % cmds)
 
+    def test_sql_injection_is_rejected(self):
+        """登录接口的注入串：/auth 拒绝、17 解析不出账号、库里不出现带引号的账号。"""
+        evil = "x' OR '1'='1"
+        self.assertIn("403", self.auth(evil, "123"))
+        cmds = self.login17(evil)
+        self.assertTrue(cmds and cmds[0][0] == 1 and cmds[0][1] <= 6,
+                        "注入账号不该进入登录流程：%s" % cmds)
+        import sqlite3
+        con = sqlite3.connect(os.path.join(self.tmp.name, "state.db"))
+        try:
+            rows = [r[0] for r in con.execute("SELECT acct FROM player")]
+        finally:
+            con.close()
+        self.assertNotIn(evil, rows)
+        self.assertTrue(all("'" not in r for r in rows), rows)
+
     def test_login_after_auth(self):
         self.assertIn("200", self.auth(self.acct, self.pwd))
         cmds = self.login17(self.acct)

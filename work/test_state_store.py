@@ -135,14 +135,16 @@ def main():
         L.save_state()                      # authed=False / has_char=False
         check("未登录连接不建行", not S.exists("ghost1"))
 
-    print("\n[7] SQL 注入字符按普通字符串处理")
+    print("\n[7] SQL 注入 / 非法账号")
     evil = "x'; DROP TABLE player;--"
-    S.save(evil, sample("注入", 3, 0), 0)
-    got, _ = S.load(evil)
-    check("恶意账号原样存取", got is not None and got["name"] == "注入")
+    try:
+        S.save(evil, sample("注入", 3, 0), 0)
+        check("恶意账号被拒绝", False, "竟然写进去了")
+    except ValueError:
+        check("恶意账号被拒绝", True)
+    check("非法账号读不到", S.load(evil)[0] is None)
     check("player 表还在", S.count() >= 2, "count=%d" % S.count())
-    check("账号列表里是字面值",
-          any(r["acct"] == evil for r in S.accounts()))
+    check("账号列表里没有注入账号", all(r["acct"] != evil for r in S.accounts()))
 
     print("\n[8] 写前快照")
     sn = S.snapshot("acc_a", S.load("acc_a")[0], force=True)
