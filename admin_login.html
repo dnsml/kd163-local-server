@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>口袋修仙 · 管理后台登录</title>
+<style>
+  :root{--bg:#111318;--panel:#191c23;--panel2:#1f232c;--line:#2b3040;--text:#e7e9ef;
+        --muted:#8a91a3;--gold:#e8b45c;--gold2:#f5cf8a;--red:#ef6b6b}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       background:radial-gradient(900px 500px at 50% 0%,#1c2130 0%,var(--bg) 60%);
+       color:var(--text);font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  .box{width:340px;background:linear-gradient(180deg,var(--panel2),var(--panel));
+       border:1px solid var(--line);border-radius:14px;padding:26px 24px 22px;
+       box-shadow:0 18px 50px rgba(0,0,0,.45)}
+  h1{font-size:17px;margin:0 0 4px;font-weight:600}
+  h1 span{color:var(--gold)}
+  p.sub{color:var(--muted);font-size:12px;margin:0 0 18px}
+  label{display:block;font-size:12px;color:var(--muted);margin:12px 0 6px}
+  input{width:100%;background:#0e1015;border:1px solid #2c3242;color:var(--text);
+        border-radius:8px;padding:9px 11px;font-size:14px;font-family:inherit;outline:none}
+  input:focus{border-color:#4a5570}
+  button{width:100%;margin-top:20px;padding:10px;border:none;border-radius:8px;cursor:pointer;
+         background:linear-gradient(180deg,#e8b45c,#c9922f);color:#241a05;font-weight:600;
+         font-size:14px;font-family:inherit}
+  button:disabled{opacity:.6;cursor:default}
+  .err{color:var(--red);font-size:12.5px;min-height:18px;margin-top:12px}
+</style>
+</head>
+<body>
+<form class="box" id="f">
+  <h1>口袋修仙 <span>· 管理后台</span></h1>
+  <p class="sub">需要管理员账号。默认用户名 <code>admin</code>，密码见服务器启动日志或 <code>admin.json</code>。</p>
+  <label>管理员账号</label>
+  <input id="user" autocomplete="username" autofocus>
+  <label>密码</label>
+  <input id="pass" type="password" autocomplete="current-password">
+  <button id="go" type="submit">登录</button>
+  <div class="err" id="err"></div>
+</form>
+<script>
+const f = document.getElementById("f");
+f.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = document.getElementById("err"), btn = document.getElementById("go");
+  err.textContent = ""; btn.disabled = true;
+  try {
+    const r = await fetch("/api/login", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({user: document.getElementById("user").value.trim(),
+                            pass: document.getElementById("pass").value}),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || ("HTTP " + r.status));
+    location.href = "/";
+  } catch (e) {
+    err.textContent = "✘ " + e.message;
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

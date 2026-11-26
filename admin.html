@@ -102,30 +102,51 @@
     <div id="online" class="badge off"><i class="dot"></i><span>未连接</span></div>
     <div class="spacer"></div>
     <div class="muted small" id="stamp">—</div>
+    <div class="muted small" id="who" style="margin-left:12px"></div>
+    <button id="logout" style="margin-left:8px">退出</button>
   </header>
 
   <section>
     <h2>账号管理 <span class="muted small" id="acctnum"></span></h2>
-    <div class="search">
-      <input class="kw" id="newacct" placeholder="账号（字母/数字/_ - .，1~20 位）">
-      <input class="kw" id="newname" placeholder="昵称（1~10 个字符）">
-      <select id="newsex">
-        <option value="1">男</option>
-        <option value="2">女</option>
-      </select>
-      <button class="primary" id="mkchar">建角</button>
-      <button id="refreshacct">刷新</button>
+    <div class="row" style="margin-bottom:12px">
+      <button class="primary" id="mkacct">+ 新建游戏账号（随机账号 + 随机密码）</button>
+      <input class="qty" id="acctnote" placeholder="备注（可选）" style="width:180px">
     </div>
+    <div class="card" id="newacctbox" style="display:none">
+      <div class="label">新账号（密码只显示这一次，请立刻发给玩家）</div>
+      <div class="num mono" id="newacctline" style="font-size:20px">—</div>
+      <div class="row">
+        <button id="copyacct">复制账号+密码</button>
+        <button id="hidenew">收起</button>
+      </div>
+      <p class="hint" style="margin-bottom:0">玩家在客户端登录界面输入这组账号密码，进游戏后会自己弹建角，
+        让他自己选男女和昵称。</p>
+    </div>
+
+    <details style="margin:12px 0">
+      <summary class="muted small" style="cursor:pointer">代建角色（可选：管理员直接给某账号建 Lv1 角色，玩家就不用自己建）</summary>
+      <div class="search" style="margin-top:10px">
+        <input class="kw" id="newacct" placeholder="账号">
+        <input class="kw" id="newname" placeholder="昵称（1~10 个字符）">
+        <select id="newsex">
+          <option value="1">男</option>
+          <option value="2">女</option>
+        </select>
+        <button id="mkchar">建角</button>
+      </div>
+    </details>
+
     <p class="hint" id="policyline">白名单状态加载中…</p>
     <div class="row" style="margin-bottom:10px">
+      <button id="refreshacct">刷新</button>
       <button id="allsync">全部放行（用库里账号生成名单）</button>
-      <button class="danger" id="allowoff">关闭白名单（所有账号可登录）</button>
+      <button class="danger" id="allowoff">放开白名单（新账号可直接登录）</button>
     </div>
     <div class="tablewrap">
       <table class="accts" id="accts"></table>
     </div>
-    <p class="hint">建角 = 给某个账号创角色（账号已有角色会被拒绝，不会覆盖）；删角色会先备份，
-      在线账号要先「踢下线」，否则它退出时会把存档写回来。</p>
+    <p class="hint">新建账号 = 生成随机账号 + 随机密码（写进 accounts.json，只存密码哈希）。
+      删账号只删登录资格，角色存档还在；要连角色一起清就再点「删角色」。</p>
   </section>
 
   <section>
@@ -205,6 +226,10 @@ async function api(path, opt){
   const txt = await r.text();
   let j = null;
   try{ j = txt ? JSON.parse(txt) : {}; }catch(e){ /* 非 JSON 错误页 */ }
+  if(r.status === 401 && path !== "/api/login"){
+    location.href = "/";                 // 登录过期 → 回登录页
+    throw new Error("未登录");
+  }
   if(!r.ok){
     const msg = (j && (j.error || j.msg)) || txt || ("HTTP " + r.status);
     throw new Error(msg);
@@ -212,8 +237,9 @@ async function api(path, opt){
   return j || {};
 }
 async function gm(line){
-  const j = await api("/api/gm", {method:"POST", headers:{"Content-Type":"application/json"},
-                                  body: JSON.stringify({lines:[line]})});
+  const j = await api("/api/gm", {method:"POST",
+    headers:{"Content-Type":"application/json", "X-Requested-With":"KDAdmin"},
+    body: JSON.stringify({lines:[line]})});
   const first = j.results && j.results[0];
   toast(first ? (first[0] ? "✔ " : "✘ ") + first[1] : "已发送", !!(first && first[0]));
   refresh();
@@ -265,8 +291,9 @@ function esc(s){
 }
 
 async function postJSON(path, body){
-  return api(path, {method:"POST", headers:{"Content-Type":"application/json"},
-                    body: JSON.stringify(body)});
+  return api(path, {method:"POST",
+    headers:{"Content-Type":"application/json", "X-Requested-With":"KDAdmin"},
+    body: JSON.stringify(body)});
 }
 
 async function charAction(body){
@@ -285,12 +312,36 @@ async function allowAction(body){
   }catch(e){ toast("✘ " + e.message, false); }
 }
 
+function showNewAccount(acct, pwd){
+  const box = document.getElementById("newacctbox");
+  box.style.display = "block";
+  box.dataset.acct = acct; box.dataset.pwd = pwd;
+  document.getElementById("newacctline").textContent = `账号 ${acct}　密码 ${pwd}`;
+}
+
+async function accountAction(body){
+  try{
+    const j = await postJSON("/api/account", body);
+    if(j.acct && j.password) showNewAccount(j.acct, j.password);
+    toast("✔ " + j.msg, true);
+    refreshAccounts();
+  }catch(e){ toast("✘ " + e.message, false); }
+}
+
 function bindAccountOps(){
   document.querySelectorAll("[data-kick]").forEach(b=>b.onclick=()=>{
     charAction({action:"kick", acct:b.dataset.kick});
   });
   document.querySelectorAll("[data-allow]").forEach(b=>b.onclick=()=>{
     allowAction({action: b.dataset.on === "1" ? "remove" : "add", acct:b.dataset.allow});
+  });
+  document.querySelectorAll("[data-reset]").forEach(b=>b.onclick=()=>{
+    if(!confirm(`重置账号 ${b.dataset.reset} 的密码？旧密码立即失效。`)) return;
+    accountAction({action:"reset", acct:b.dataset.reset});
+  });
+  document.querySelectorAll("[data-delacct]").forEach(b=>b.onclick=()=>{
+    if(!confirm(`删除账号 ${b.dataset.delacct}？\n玩家将无法再登录；角色存档不会自动删（要清角色再点「删角色」）。`)) return;
+    accountAction({action:"delete", acct:b.dataset.delacct});
   });
   document.querySelectorAll("[data-delchar]").forEach(b=>b.onclick=()=>{
     const acct = b.dataset.delchar, name = b.dataset.name || "";
@@ -305,33 +356,39 @@ async function refreshAccounts(){
     const list = j.accounts || [];
     const on = list.filter(a=>a.online).length;
     document.getElementById("acctnum").textContent =
-      `${list.length} 个角色${on ? ` · ${on} 在线` : ""}`;
+      `${list.length} 个账号${on ? ` · ${on} 在线` : ""}`;
     document.getElementById("policyline").innerHTML =
       `白名单：<b>${esc(j.policy || "—")}</b>` +
       (j.file ? ` <span class="muted small">(${esc(j.file)})</span>` : "") +
       (j.allow === null ? ` <span class="tag warn">关闭</span>`
                         : ` <span class="tag on">${j.allow.length} 个放行</span>`);
-    const rows = list.map(a=>`<tr>
-      <td class="mono">${esc(a.acct)}${a.online ? ' <span class="tag on">在线</span>' : ""}</td>
-      <td>${esc(a.name || "—")}</td>
-      <td class="num">${a.level ?? 0}</td>
-      <td class="num">${fmt(a.gold)}</td>
-      <td class="num">${fmt(a.bind_copper)}</td>
-      <td class="num">${a.bag ?? 0}</td>
-      <td class="muted">${esc(a.updated_at || "")}</td>
+    const rows = list.map(a=>{
+      const hasChar = !!(a.name || a.level);
+      return `<tr>
+      <td class="mono">${esc(a.acct)}</td>
+      <td>${hasChar ? esc(a.name || "—") : '<span class="muted">未建角</span>'}</td>
+      <td class="num">${hasChar ? (a.level ?? 0) : "—"}</td>
+      <td class="num">${hasChar ? (a.bag ?? 0) : "—"}</td>
+      <td>${a.has_pass ? '<span class="tag on">有密码</span>'
+                       : '<span class="tag warn">无密码</span>'}</td>
       <td>${a.allowed ? '<span class="tag on">放行</span>'
-                       : '<span class="tag off">未放行</span>'}</td>
+                      : '<span class="tag off">未放行</span>'}</td>
+      <td>${a.online ? '<span class="tag on">在线</span>' : '<span class="muted">—</span>'}</td>
+      <td class="muted">${esc(a.created_at || "")}</td>
       <td>
         ${a.online ? `<button data-kick="${esc(a.acct)}">踢下线</button>` : ""}
+        ${a.has_pass ? `<button data-reset="${esc(a.acct)}">重置密码</button>` : ""}
         <button data-allow="${esc(a.acct)}" data-on="${a.allowed ? 1 : 0}">
           ${a.allowed ? "取消放行" : "放行"}</button>
         <button class="danger" data-delchar="${esc(a.acct)}"
-                data-name="${esc(a.name || "")}">删角色</button>
-      </td></tr>`).join("");
+                data-name="${esc(a.name || "")}" ${hasChar ? "" : "disabled"}>删角色</button>
+        <button class="danger" data-delacct="${esc(a.acct)}">删账号</button>
+      </td></tr>`;
+    }).join("");
     document.getElementById("accts").innerHTML =
-      `<thead><tr><th>账号</th><th>昵称</th><th>等级</th><th>元宝</th><th>绑铜</th>
-       <th>背包</th><th>更新</th><th>白名单</th><th>操作</th></tr></thead>
-       <tbody>${rows || `<tr><td colspan="9" class="muted">还没有角色</td></tr>`}</tbody>`;
+      `<thead><tr><th>账号</th><th>昵称</th><th>等级</th><th>背包</th><th>密码</th>
+       <th>白名单</th><th>在线</th><th>创建时间</th><th>操作</th></tr></thead>
+       <tbody>${rows || `<tr><td colspan="9" class="muted">还没有账号</td></tr>`}</tbody>`;
     bindAccountOps();
   }catch(e){
     document.getElementById("acctnum").textContent = "账号列表读取失败";
@@ -424,13 +481,35 @@ document.getElementById("mkchar").onclick = ()=>{
   if(!confirm(`给账号 ${acct} 建角色「${name}」（${sex === "2" ? "女" : "男"}）？`)) return;
   charAction({action:"create", acct, name, sex});
 };
+document.getElementById("mkacct").onclick = ()=>{
+  const note = document.getElementById("acctnote").value.trim();
+  accountAction({action:"create", note});
+};
+document.getElementById("copyacct").onclick = async ()=>{
+  const box = document.getElementById("newacctbox");
+  const txt = `账号 ${box.dataset.acct} 密码 ${box.dataset.pwd}`;
+  try{ await navigator.clipboard.writeText(txt); toast("已复制到剪贴板", true); }
+  catch(e){ toast("复制失败，请手动选中复制", false); }
+};
+document.getElementById("hidenew").onclick = ()=>{
+  document.getElementById("newacctbox").style.display = "none";
+};
+document.getElementById("logout").onclick = async ()=>{
+  try{ await postJSON("/api/logout", {}); }catch(e){ /* 忽略 */ }
+  location.href = "/";
+};
+api("/api/me").then(j=>{
+  document.getElementById("who").textContent = j.user ? ("管理员 " + j.user) : "";
+  if(!j.required) document.getElementById("logout").style.display = "none";
+}).catch(()=>{});
+
 document.getElementById("refreshacct").onclick = ()=>refreshAccounts();
 document.getElementById("allsync").onclick = ()=>{
   if(!confirm("用库里现有角色生成白名单？\n开启后名单外账号将无法登录。")) return;
   allowAction({action:"sync"});
 };
 document.getElementById("allowoff").onclick = ()=>{
-  if(!confirm("关闭白名单后，任何账号都能登录（包括陌生账号），确定？")) return;
+  if(!confirm("放开白名单后，任何账号都能登录（已有账号的密码仍校验），确定？")) return;
   allowAction({action:"off"});
 };
 

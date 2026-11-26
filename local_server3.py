@@ -109,6 +109,35 @@ if os.path.exists(TEMPLATES):
 ACCOUNTS = {}          # username -> account_id
 next_id = [13]
 
+# /auth 成功后的「登录票据」：(账号, IP) -> 过期时间。
+# 有密码的账号，游戏登录（17）必须先在同一个 IP 上过 /auth；
+# 否则自组包可以跳过 /auth 直接发 17（白名单只认账号名）。
+# KD_REQUIRE_AUTH_TICKET=0 可关掉这条（排障用）。
+AUTH_TICKETS = {}
+AUTH_TICKET_TTL = 6 * 3600
+
+
+def peer_ip(conn):
+    try:
+        return conn.getpeername()[0]
+    except Exception:
+        return ""
+
+
+def auth_ticket_ok(acct, ip, touch=False):
+    key = (str(acct or ""), ip or "")
+    exp = AUTH_TICKETS.get(key) or 0
+    if exp < time.time():
+        AUTH_TICKETS.pop(key, None)
+        return False
+    if touch:
+        AUTH_TICKETS[key] = time.time() + AUTH_TICKET_TTL
+    return True
+
+
+def auth_ticket_grant(acct, ip):
+    AUTH_TICKETS[(str(acct or ""), ip or "")] = time.time() + AUTH_TICKET_TTL
+
 # 任务链：Quest.xml 的 next_quest 映射（交完任务后推下一环状态，真服 15:37:08 实证）
 QUEST_NEXT = {}
 # task 类型（首数字）：4=对话任务（211 应答尾 0101，接了即可交），其余=0001
@@ -3918,24 +3947,38 @@ def handle_tls(raw_sock, cid):
         status = "200 OK"
         if path.startswith("/auth"):
             user = ""
+            pw = ""
+            # 登录请求体只在排障时打（KD_AUTH_DEBUG=1）：里面有密码，
+            # 默认不入日志。查「客户端到底传了哪些字段」就靠这条。
+            if os.environ.get("KD_AUTH_DEBUG") not in ("", "0", None) and body:
+                log("c%03d /auth body len=%d %s"
+                    % (cid, len(body), body[:400].decode("utf-8", "replace")))
             try:
                 j = json.loads(body.decode("utf-8", "replace") or "{}")
                 user = j.get("username") or ""
+                pw = j.get("password") or ""
             except Exception:
                 pass
             if not account_policy.allowed(user):
                 # 白名单开启时，不在名单里的账号连令牌都不发。
-                # 注意：本服没有密码体系，白名单只能拦「陌生账号」，
-                # 拦不住「知道名单内账号的人」——公网开放前要清楚这一点。
                 log("c%03d /auth 拒绝 uid=%s（不在白名单）" % (cid, user or "?"))
                 resp = json.dumps({"ok": False, "msg": "account not allowed"},
                                   separators=(",", ":")).encode()
                 status = "403 Forbidden"
+            elif account_policy.verify(user, pw) is False:
+                # 后台生成的账号带密码；老白名单账号 verify() 返回 None，不校验。
+                log("c%03d /auth 密码错误 uid=%s" % (cid, user))
+                resp = json.dumps({"ok": False, "msg": "wrong password"},
+                                  separators=(",", ":")).encode()
+                status = "401 Unauthorized"
             else:
                 if user and user not in ACCOUNTS:
                     ACCOUNTS[user] = next_id[0]
                     next_id[0] += 1
                 tok = new_token()
+                # 记一张「这个 IP 刚过 /auth」的票据：有密码的账号登录 17 时要查，
+                # 防止自组包跳过 /auth 直接进游戏。
+                auth_ticket_grant(user, peer_ip(conn))
                 # 字段与真服完全一致：account_id 是数字，uid 字符串，token 43 字符
                 resp = json.dumps({
                     "account_id": int(ACCOUNTS.get(user, 13)),
@@ -4080,6 +4123,16 @@ def handle_game(conn, cid):
                         log("c%03d [acct] ！！账号 %s 不在白名单，拒绝登录" % (cid, _acct))
                         conn.sendall(pack(1, seq, struct.pack(">H", 1211)
                                           + "该账号未开通".encode("utf-8")))
+                        continue
+                    # 设了密码的账号：必须先在同一个 IP 上通过 /auth。
+                    # 否则自组包可以跳过 /auth 直接发 17（17 里没有密码字段）。
+                    if (_acct and account_policy.needs_password(_acct)
+                            and os.environ.get("KD_REQUIRE_AUTH_TICKET", "1") != "0"
+                            and not auth_ticket_ok(_acct, peer_ip(conn), touch=True)):
+                        log("c%03d [acct] ！！账号 %s 没有 /auth 票据（或已过期），拒绝登录"
+                            % (cid, _acct))
+                        conn.sendall(pack(1, seq, struct.pack(">H", 1211)
+                                          + "登录已过期，请重新登录".encode("utf-8")))
                         continue
                     if _acct:
                         log("c%03d [acct] 登录账号 %s" % (cid, _acct))

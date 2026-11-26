@@ -113,21 +113,14 @@ def cmd_remove(args):
 
 
 def cmd_off(_args):
-    if os.path.exists(AP.FILE):
-        try:
-            os.remove(AP.FILE)
-        except OSError as e:
-            # Windows 上偶发「文件已删但 remove 抛 0x2」，以实际存在与否为准
-            if os.path.exists(AP.FILE):
-                print("删除失败：%s" % e)
-                return 1
-        AP.load(force=True)
-        print("已删除 %s：白名单关闭，所有账号可登录" % AP.FILE)
+    """放开白名单（写 open=true），**不删文件** —— 文件里还有账号密码。"""
+    if not os.path.exists(AP.FILE):
+        print("没有 %s：本来就是「谁都能登录」的状态，也没有账号密码记录" % AP.FILE)
     else:
-        print("没有 %s，白名单本来就是关闭的" % AP.FILE)
+        print("已放开：%s" % AP.set_open(True))
     if os.environ.get("KD_ALLOW_ACCOUNTS"):
-        print("注意：环境变量 KD_ALLOW_ACCOUNTS 仍在生效（%s），要关得先去掉它"
-              % os.environ["KD_ALLOW_ACCOUNTS"])
+        print("注意：环境变量 KD_ALLOW_ACCOUNTS 仍然生效（%s）" % os.environ["KD_ALLOW_ACCOUNTS"])
+    print("已有账号的密码仍然校验；想彻底删掉账号表请手工删 accounts.json。")
     return 0
 
 
