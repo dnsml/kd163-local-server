@@ -35,8 +35,9 @@ def main():
         import local_server3 as m
         p = m.pet_proto
 
-        m.SPIRIT_BAG.clear()
-        m.SPIRIT_SLOT.clear()
+        # 2026-11-26：妖灵归属改成按连接的角色（Player.spirit_bag/spirit_slot）
+        m.cur().spirit_bag.clear()
+        m.cur().spirit_slot.clear()
 
         r, msg = m.apply_gm("妖灵 三只")
         ck("GM 妖灵 三只", r, msg)
