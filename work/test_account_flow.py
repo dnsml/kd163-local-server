@@ -156,7 +156,12 @@ def phase1():
         check("等级 Lv1", d.get("level") == 1, repr(d.get("level")))
         check("已建角 has_char", bool(d.get("has_char")))
         check("存档版本 ver=2", d.get("ver") == 2, repr(d.get("ver")))
-        check("背包为空（没继承别人的东西）", not d.get("bag"), repr(d.get("bag")))
+        # 2026-11-26：建角现在真发玄女新人三件套（20190×10 / 20432×1 / 21001×1），
+        # 这里不能再用「背包必须为空」——要断言「只有三件套，没有别人的东西」。
+        _bag = d.get("bag") or {}
+        _want = {0: [20190, 10], 1: [20432, 1], 2: [21001, 1]}
+        _got = {int(k): [v[0], v[1]] for k, v in _bag.items()}
+        check("背包只有新人三件套（没继承别人的东西）", _got == _want, repr(_bag))
         check("装备为空", not d.get("equip"), repr(d.get("equip")))
         check("货币未继承主号", (d.get("coin") or 0) == 0, repr(d.get("coin")))
 
