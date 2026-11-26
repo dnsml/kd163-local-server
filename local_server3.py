@@ -589,6 +589,12 @@ def send_push(conn, cid, cmd):
             log("c%03d .. push cmd=947    len=%d [宠物详情 妖灵%s]"
                 % (cid, len(body), pet_proto.strap_key(spirit_strap())))
         return
+    if cmd == 957:
+        # 宠物列表（获得宠物 / 956 的应答）。没有它客户端只有占位熊猫。
+        conn.sendall(pack(957, 0, PET_957))
+        log("c%03d .. push cmd=957    len=%d [宠物列表 功夫熊猫10000]"
+            % (cid, len(PET_957)))
+        return
     ph = TPL_PUSH.get(cmd)
     if not ph:
         log("c%03d .. 无推送模板 cmd=%d" % (cid, cmd))
@@ -639,6 +645,45 @@ def push_all(cmds):
 
 
 # ---- 妖灵 / 宠物 ----
+# 957 = **宠物列表**（既是 956 的应答，也是「获得宠物」的推送）。
+# 真服 15:41:14 现场：214 交 400702「前世仙宠」→ 957(82B) → 29 → 28 → 30 → 210。
+# 82B = 头部 50B（01 | A0|名长 | 功夫熊猫 | 等级 | 00 | 01 | 属性… | cd271008）
+#        + 8 个空妖灵槽 × 4B。
+# ★ 没有 957 的时候，客户端只会画「宠物位默认占位」：一只不会跑的静态熊猫
+#   加名牌 ?? —— 用户反馈的「原地站着像平移」就是它。客户端 .so 里那条
+#   assets/pets/p_gongfuxiongmao_ 是这条兜底路径，不读 Pet.xml / Monster.xml
+#   （2026-11-26 两次资源层实验已排除）。
+PET_957 = bytes.fromhex(
+    "01ace58a9fe5a4abe7868ae78cab010001ccdeccfc33cd0806"
+    "cd0322ccb633663300cd02b1010101010119191919cd271008"
+    "000000000000000000000000000000000000000000000000"
+    "0000000000000000")
+
+
+def grant_pet(pid=10000):
+    """给当前角色一只宠物（默认 10000 功夫熊猫），返回是否新获得。
+
+    只写存档 + 打日志，**推送由调用方决定顺序**（真服 957 在 29/28 之前）。
+    """
+    pid = int(pid)
+    if pid in cur().pets:
+        return False
+    cur().pets.append(pid)
+    save_state()
+    log("[pet] ★ 获得宠物 %d（%s），当前 pets=%s"
+        % (pid, pet_proto.PET.get(pid, {}).get("name", "?"), cur().pets))
+    return True
+
+
+def journey_follow():
+    """「开始旅程」之后要跟的推送。
+
+    真服现场（logs/relay.log 15:38:19 `182 0001`）：只回 182 ACK + 29 + 28 + 178，
+    **没有 957、没有 947**，也就没有宠物。所以这里只刷新面板/背包，不发宠物。
+    """
+    return [29, 28, 178]
+
+
 def spirit_strap():
     """{槽位: 妖灵id}（只取背包里真的有的，避免存档残留脏 id）。"""
     return {s: i for s, i in cur().spirit_slot.items() if i in cur().spirit_bag}
@@ -2028,6 +2073,11 @@ def load_state(pl=None):
         log("[pet] 旧档缺少 pets，根据已完成的 400702 恢复功夫熊猫")
     else:
         pl.pets = []
+    # ★ 2026-11-26 21:3x：撤销「登录自动补宠物」。
+    # 用户实测：真服新号无论点不点「开始旅程」都不会凭空多出一只宠物，
+    # 宠物只能靠 400702「前世仙宠」拿。所以登录/开始旅程一律不送宠物，
+    # 没有宠物就是没有（客户端只在收到 957 之后才会认为「我有宠物」）。
+    _pet_dirty = False
     # 妖灵播种：达到 20 级才播（低等级新角色不该一出生就带三只没做任务拿到的妖灵，
     # 用户反馈过「宠物像快照数据」）。以前只给主号播，其他号到 30 多级也一只没有，
     # 用户反馈「血·共工那些妖灵没有」，所以按等级放开，仍然**不自动上阵**。
@@ -2059,6 +2109,12 @@ def load_state(pl=None):
     if _migrated_dirty and pl.acct and pl.has_char:
         save_state(force=True)
         log("[state] 读档迁移结果已落盘（武器槽/强化槽/背包越界）")
+    # 补发的宠物同样要落盘，否则每次登录都走一遍「补发」分支、日志重复刷。
+    if _pet_dirty and pl.acct and pl.has_char:
+        try:
+            save_state()
+        except Exception as e:
+            log("[pet] 补发宠物落盘失败 %s" % e)
 
 
 BACKUP_DIR = os.path.join(HERE, "backups")
@@ -3284,7 +3340,7 @@ def builtin_resp(cmd, payload):
             # 这里对 0 格静默成功，只刷新面板，不报错。
             if pos == 0:
                 log("[bag] 182 00 %02x 视为「开始旅程」：该格无可用物品，静默成功 + 刷新" % num)
-                return 182, b"", [29, 28, 178]
+                return 182, b"", journey_follow()
             return 1, err_text("此背包位置没有可使用物品"), []
         iid, have = cell
         use = have if num == 0 else min(num, have)
@@ -3299,7 +3355,7 @@ def builtin_resp(cmd, payload):
             if _it0.get("kind1") != 1 and _it0.get("kind2") not in (14, 15):
                 log("[bag] 182 00 01 = 开始旅程（0 格是 %s，非装备）→ 静默成功 + 刷新"
                     % _it0["name"])
-                return 182, b"", [29, 28, 178]
+                return 182, b"", journey_follow()
         eff = USE_EFFECTS.get(iid)
         swap_pos, swap_iid = -1, 0      # 换装：旧装备要原地落回的那一格
         follow = [29, 28, 30, 178]      # 使用成功后要跟的推送；翅膀会换成带 1922/1931/1932
@@ -3807,10 +3863,13 @@ def handle_game(conn, cid):
                         conn.sendall(pack(1, seq, b"\x01\xa0"))
                     continue
 
-                # 宠物详情、出战和妖灵操作共用归属检查，放在回放/热模板之前。
+                # 宠物列表、宠物详情、出战和妖灵操作共用归属检查，放在回放/热模板之前。
                 # 只拦 946/956 会漏掉 963 的抓包形象和 965 补推的熊猫详情；
-                # 客户端残留请求不能让新号获得抓包角色的宠物。
-                if cmd in (946, 956, 963, 965, 1411, 1413, 1414) and not cur().pets:
+                # ★ 2026-11-26 21:3x：961 也要拦。962 那 4B `00 00 04 03` 是
+                #   真服「已经有一只宠物、还没有皮肤」的档位，无宠号回它，客户端
+                #   会当场建出一个没有名字的宠物位（地图上 ?? 熊猫，站着平移）。
+                #   真服无宠号根本不回 962（客户端 961 之前不会问）。
+                if cmd in (946, 956, 961, 963, 965, 1411, 1413, 1414) and not cur().pets:
                     log("c%03d .. 跳过宠物操作 cmd=%d（当前角色尚未获得宠物）"
                         % (cid, cmd))
                     continue
@@ -5070,14 +5129,14 @@ def handle_game(conn, cid):
                 if cmd == 961:
                     # ★ 2026-11-24 15:0x：962 = 「已拥有的宠物形象（皮肤）」列表。
                     # n2 就是形象数，客户端会按这个列表给玩家挂跟随外观。
-                    # 老代码给空号发 22B（n2=3，主号的三个形象）→ 新号地图上
-                    # 多出一只没有名字的熊猫（显示「？？」）。
-                    # 真服 15:41:16 交任务刚拿到功夫熊猫时是 962=4B + 947=83B，
-                    # 证明「有没有宠物」由 947 决定，962 只管形象数量。
-                    _b = pet_proto.pack_962(pets=cur().pets)
+                    # ★ 2026-11-26 21:3x 更正：`00 00 04 03` 不是「一只都没有」，
+                    #   它是真服「有 1 只宠物、无皮肤」的档位（15:41:16 拿到功夫熊猫
+                    #   之后就是这个包）。无宠角色已经在上面 961 的归属检查里被拦掉，
+                    #   走不到这里；能到这里的角色必然已有宠物，回这档才与真服一致。
+                    _b = pet_proto.pack_962(pets=[])
                     conn.sendall(pack(962, seq, _b))
-                    log("c%03d -> cmd=962 seq=%-4d len=%d [宠物形象 %d个]"
-                        % (cid, seq, len(_b), len(cur().pets)))
+                    log("c%03d -> cmd=962 seq=%-4d len=%d [宠物形象 无皮肤(真服刚获得档)] pets=%s"
+                        % (cid, seq, len(_b), cur().pets))
                     continue
 
                 if cmd == 946:
@@ -5264,22 +5323,21 @@ def handle_game(conn, cid):
                     689: (690, "01100100000000"),
                     849: (849, "04cd03e901cd03ea01cd03ed00cd03f700"),
                     502: (502, "00"),
-                    956: (957, "01ace58a9fe5a4abe7868ae78cab090002ccdeccfe33"
-                               "cd080acd0324ccb833663300cd02b301010101011919"
-                               "1919cd27100800000000000000000000000000000000"
-                               "00000000000000000000000000000000"),
+                    # 956 -> 957 走 PET_957（统一 82B「刚获得、无妖灵」档，
+                    # 不再抄别人号的等级 9 那份快照）。
+                    956: (957, None),
                 }
                 if cmd in LOGIN_EXTRA:
-                    # ★ 956 -> 957 是「宠物详情」，包里写死了「功夫熊猫」。
+                    # ★ 956 -> 957 是「宠物列表」，不是「宠物详情」。
                     # 真服 2026-11-24 12:39:34 新号建角后的登录现场：客户端发了 956，
                     # 服务端**什么都没回** —— 因为那个号一只宠物都没有。
-                    # 以前无条件发 82B 的 957，结果 Lv1 新号身边也跟着熊猫跑图。
+                    # 本地新号在「开始旅程」时拿正式宠物，之后登录就正常回 957。
                     if cmd == 956 and not cur().pets:
                         log("c%03d .. 跳过 cmd=957（当前角色没有宠物，真服新号也不回这个包）"
                             % cid)
                         continue
                     _rc, _rh = LOGIN_EXTRA[cmd]
-                    _rb = bytes.fromhex(_rh)
+                    _rb = PET_957 if _rh is None else bytes.fromhex(_rh)
                     conn.sendall(pack(_rc, seq, _rb))
                     sent_cmds.add(_rc)
                     log("c%03d -> cmd=%-6d seq=%-4d len=%d [登录初始化补包]"

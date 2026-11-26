@@ -43,13 +43,16 @@ check("Lv1 与真服新号逐字节一致",
 p.level = 4
 check("Lv4 仍是 19B", len(L.build_88()) == 19)
 
+# ★ 2026-11-26 21:4x：88 现在只认存档里的 title（不再按等级自动挂称号）。
 p.level = 5
+check("Lv5 未佩戴称号仍是 19B 空表", len(L.build_88()) == 19, "实际 %d" % len(L.build_88()))
+p.title = 1019
 b5 = L.build_88()
-check("Lv5 起带尾巴 21B（真服同档长度）", len(b5) == 21, "实际 %d" % len(b5))
-check("Lv5 尾巴是 cd0b7c", b5[-3:].hex() == "cd0b7c", b5[-3:].hex())
-
+check("佩戴称号后 21B", len(b5) == 21, "实际 %d" % len(b5))
+check("尾巴是 cd+称号id", b5[-3:].hex() == "cd03fb", b5[-3:].hex())
+p.title = 0
 p.level = 45
-check("Lv45 仍 21B", len(L.build_88()) == 21, "实际 %d" % len(L.build_88()))
+check("Lv45 未佩戴称号仍是 19B", len(L.build_88()) == 19, "实际 %d" % len(L.build_88()))
 
 print("\n[2] 962 宠物栏按拥有量生成")
 check("0 只 -> 4B 00 00 04 03",

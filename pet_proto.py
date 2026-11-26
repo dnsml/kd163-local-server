@@ -308,7 +308,13 @@ def pack_947(strap):
             body += b"\x01\x01"
         else:
             body += b"\x00" * 4
-    return bytes(head + body + tail)
+    out = bytearray(head + body + tail)
+    # 头部第 14 字节 = 宠物等级（真服样本 11/12 跟着宠物等级走）。
+    # 模板是从别人号抄的 0x0c(Lv12)，本地宠物没有养成系统，统一写 1，
+    # 与 957「刚获得」档（01）对齐，否则宠物栏 Lv1、详情 Lv12 自相矛盾。
+    if len(out) > 14:
+        out[14] = 1
+    return bytes(out)
 
 
 def strap_key(strap):
