@@ -105,6 +105,10 @@ while [ "$i" -lt "$TRIES" ]; do
     if git "${GIT_OPTS[@]}" push origin "$BRANCH"; then
         l=$(local_sha); r=$(remote_sha)
         if [ "$l" = "$r" ]; then
+            # 这台机器上 git 自己写的 refs/remotes/origin/* 会被清掉（status 一直 [gone]），
+            # 手工补一次：内容就是远端 sha + 换行。
+            mkdir -p ".git/refs/remotes/origin"
+            printf '%s\n' "$l" > ".git/refs/remotes/origin/$BRANCH"
             echo "[gh_push] 成功：remote $BRANCH = $l"
             exit 0
         fi
