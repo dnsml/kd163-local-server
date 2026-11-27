@@ -43,6 +43,10 @@ META_XML = next((p for p in META_XML_CANDIDATES if os.path.exists(p)),
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 80
 HOST_IP = sys.argv[2] if len(sys.argv) > 2 else "192.168.0.111"
 REAL_IP = "124.223.56.189"
+# 公网独立部署时置 1：把 assets.txt / meta.xml 里的真服 IP 换成 HOST_IP。
+# 本地开发（客户端靠 DNAT 连 124.223.56.189）必须保持 0，否则客户端会认为
+# 「资源地址的 host 和我连的服务器不一致」，卡在 0/6251 已更新 0KB。
+REWRITE_ASSETS = os.environ.get("KD_ASSETS_REWRITE") == "1"
 
 lock = threading.Lock()
 
@@ -122,6 +126,8 @@ class Handler(BaseHTTPRequestHandler):
                 import re as _re
                 body = _re.sub(rb"assets_md5=[0-9a-f]+", b"assets_md5=" + RESPKG_MD5.encode(), body)
                 body = _re.sub(rb"assets_md5_2=[0-9a-f]+", b"assets_md5_2=" + RESPKG_MD5.encode(), body)
+                if REWRITE_ASSETS:
+                    body = rewrite_host(body)
             else:
                 url = "http://%s:80/mhsj_res.zip" % REAL_IP
                 body = ("assets_md5=%s&assets_md5_2=%s&assets_url=%s&assets_url_2=%s"
@@ -131,7 +137,10 @@ class Handler(BaseHTTPRequestHandler):
 
         if path == "/meta.xml":
             if os.path.exists(META_XML):
-                return self._send(200, open(META_XML, "rb").read(), "text/xml; charset=utf-8")
+                body = open(META_XML, "rb").read()
+                if REWRITE_ASSETS:
+                    body = rewrite_host(body)
+                return self._send(200, body, "text/xml; charset=utf-8")
             return self._send(200, rewrite_host(read("meta.xml")), "text/xml; charset=utf-8")
 
         if path in ("/mhsj_res.zip", "/mhsj_res_2.zip"):
