@@ -17,6 +17,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 with patch.object(sys, "argv", [sys.argv[0]]):
     import local_server3 as sv
+import battle
 import player
 import pet_proto
 
@@ -212,6 +213,26 @@ class PetOwnershipTest(unittest.TestCase):
         packets = self.run_session(self.login(), (956, 9, b""), (946, 80, b"\x01"))
         self.assertTrue(any(c == 957 for c, _, _ in packets))
         self.assertTrue(any(c == 947 for c, _, _ in packets))
+
+    def test_battle_pet_keeps_name_after_skin_change(self):
+        """换形象卡只换模型，不改名字。
+
+        线上服 2026-11-27 16:05 实证：947 off48 `cd2710`(10000) → `cd2721`(10017)，
+        气血 +1002、战力 +20，**名字仍是「功夫熊猫」**。
+        之前 battle_pet() 把名字覆盖成形象卡名（美人鱼），一转战斗宠物就改名。
+        """
+        player.cur().pets = [10000]
+        player.cur().pet_skin = [10017]
+        p = sv.battle_pet()
+        self.assertIsNotNone(p)
+        self.assertEqual(p["skin"], 10017, "形象 id 要跟着形象卡走")
+        base = pet_proto.active_pet(player.cur().pets)
+        self.assertEqual(p["name"], base["name"], "战斗里必须还是宠物本名")
+        self.assertNotEqual(p["name"], "美人鱼")
+        seg = battle.build_pet_seg(p)
+        nm = base["name"].encode("utf-8")
+        self.assertIn(bytes([0xA0 | len(nm)]) + nm, seg,
+                      "151 宠物段里的名字要与 947 同源")
 
 
 if __name__ == "__main__":

@@ -873,16 +873,17 @@ def battle_pet():
       名字/等级是从 947 的**回放模板**里读的（永远是功夫熊猫），形象 id 又在
       battle.build_pet_seg 里写死 10000 —— 于是换了美人鱼形象卡后，
       跑图和面板是美人鱼，一进战斗就变回熊猫。用户实测「战斗里形象还是旧的」。
+
+    ★ 2026-11-27 23:3x：修形象时顺手把名字也换成了形象卡名字，错了。
+      线上服实证（947 off48 10000→10017 那次）：**换形象只换模型，名字不变**，
+      947 里的名字仍是「功夫熊猫」。战斗里再改成「美人鱼」就变成
+      「进战斗名字被改」。名字只认 947 那条（同一只宠物），这里不要覆盖。
     """
     base = pet_proto.active_pet(cur().pets)
     if not base:
         return None
     p = dict(base)
-    skin = pet_skin_id()
-    p["skin"] = skin
-    nm = pet_skin.pet_skin_name(skin)
-    if nm and not nm.startswith("?"):
-        p["name"] = nm
+    p["skin"] = pet_skin_id()
     return p
 
 
