@@ -172,6 +172,10 @@ logs/timing/*.jpeg
 # 抓包分享用的临时正文
 logs/share_today.md
 
+# 推送通道的临时输出（gh_push.sh / gh_tunnel.py 每次覆盖，无分析价值）
+logs/gh_tunnel.log
+logs/gh_push_trace.log
+
 # 本地/新证书材料目录（含私钥，整目录忽略）
 patch/local/
 patch/newcert/
