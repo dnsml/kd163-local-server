@@ -72,6 +72,18 @@ logs/h.txt
 logs/*.html
 logs/*.txt
 
+# ---- 4b. 分析证据例外（2026-11-27 用户要求：这些要入库，别人接手才能复现结论）----
+# 战斗时序 / logcat / 网络追踪 / 线上包序，都是「结论的依据」，不是噪音。
+!logs/logcat.txt
+!logs/net_trace.txt
+!logs/lc_battle.txt
+!logs/lc_pet.txt
+!logs/timing/logcat*.txt
+# 服务端单实例排查快照（9000/19000 监听、s2c dump 等）
+!logs/s9k_*.log
+!logs/s2c_dump.log
+!logs/server_9000_*.log
+
 # ---- 5. 本地工作区 ----
 # 存档快照（save_state 每 10 分钟一份）是玩家数据，不是代码，绝不进库。
 backups/
@@ -148,13 +160,14 @@ logs/test*.log
 patch/*.keystore
 patch/*.jks
 
-# adb 调试临时件：uiautomator 控件树 dump、手工抓的协议/标准输出快照
+# adb 调试临时件：uiautomator 控件树 dump 只是当次点击坐标，没有分析价值
 logs/ui*.xml
-logs/s9k_*.log
-logs/s9k_*.err
-logs/s2c_dump.log
-logs/server_9000_*.log
-logs/timing/
+
+# logs/timing/ 里只有截图是 34MB 占位大户；同目录的 logcat txt 是战斗时序证据，
+# 必须入库（2026-11-27 用户明确要求：抓包/运行日志要留给别人分析，不能一忽略了之）。
+logs/timing/*.png
+logs/timing/*.jpg
+logs/timing/*.jpeg
 
 # 抓包分享用的临时正文
 logs/share_today.md

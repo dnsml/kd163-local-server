@@ -1,0 +1,277 @@
+--------- beginning of main
+11-26 12:17:51.831 I/appproc ( 6321): app_process main with argv: /system/bin com.android.commands.input.Input tap 804 600 
+11-26 12:17:51.831 D/AndroidRuntime( 6321): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-26 12:17:51.832 E/cutils-trace( 6321): Error opening trace file: No such file or directory (2)
+11-26 12:17:51.839 V/libnb   ( 6321): enter native_bridge2_isCompatibleWith 3
+11-26 12:17:51.846 I/libnb   ( 6321): Found /system/lib64/libhoudini.so version 3
+11-26 12:17:51.857 I/app_process( 6321): The ClassLoaderContext is a special shared library.
+11-26 12:17:51.857 W/app_process( 6321): Could not create mount namespace.
+11-26 12:17:51.857 D/nativebridge( 6321): PreInitializeNativeBridge name=unknown instruction_set=x86_64
+11-26 12:17:51.857 W/nativebridge( 6321): Failed to bind-mount /data/local/cfg-haehn/ as /proc/cpuinfo: No such file or directory
+11-26 12:17:51.857 W/nativebridge( 6321): Failed to bind-mount /system/lib64/x86_64/cpuinfo as /proc/cpuinfo: Operation not permitted
+11-26 12:17:51.857 D/nativebridge( 6321): call UnloadNativeBridge! state=2
+11-26 12:17:51.863 D/AndroidRuntime( 6321): Calling main entry com.android.commands.input.Input
+11-26 12:17:51.865 I/Input   ( 6321): injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=804.0, y[0]=600.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=4407581, downTime=4407581, deviceId=3, source=0x1002 }
+11-26 12:17:51.871 I/Input   ( 6321): injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=804.0, y[0]=600.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=4407581, downTime=4407581, deviceId=3, source=0x1002 }
+11-26 12:17:51.878 V/libnb   ( 6169): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesBegin, trampoline_addr 0xf34b30a0
+11-26 12:17:51.878 V/libnb   ( 6169): enter native_bridge2_getTrampoline Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesEnd, trampoline_addr 0xf34b30b0
+11-26 12:17:51.878 D/AndroidRuntime( 6321): Shutting down VM
+11-26 12:17:51.903 W/System  ( 1591): A resource failed to call close. 
+11-26 12:17:51.903 I/chatty  ( 1591): uid=1000(system) FinalizerDaemon identical 21 lines
+11-26 12:17:51.903 W/System  ( 1591): A resource failed to call close. 
+11-26 12:17:51.924 D/cocos2d-x debug info( 6169): setLastLoginServerId id = 1
+11-26 12:17:51.925 D/cocos2d-x debug info( 6169): server id = 1
+11-26 12:17:51.925 D/cocos2d-x debug info( 6169): call cmd = 17, seq = 2
+11-26 12:17:51.925 D/cocos2d-x debug info( 6169): no handler for cmd -100
+11-26 12:17:51.946 D/cocos2d-x debug info( 6169): got packet, seq = 2, cmd = 17
+11-26 12:17:51.946 D/cocos2d-x debug info( 6169): no handler for cmd -101
+11-26 12:17:51.947 D/cocos2d-x debug info( 6169): set Account 900000102
+11-26 12:17:51.947 D/cocos2d-x debug info( 6169): set PlayerName 图门霁驿
+11-26 12:17:51.947 D/cocos2d-x debug info( 6169): start to build Player ...
+11-26 12:17:51.947 D/cocos2d-x debug info( 6169): Player build ok ...
+11-26 12:17:51.947 D/cocos2d-x debug info( 6169): start to build Scene ...
+11-26 12:17:51.947 D/cocos2d-x debug info( 6169): Scene build ok ...
+11-26 12:17:51.948 D/cocos2d-x debug info( 6169): player enter scene: 1031
+11-26 12:17:51.968 D/cocos2d-x debug info( 6169): start sit, state = 0
+11-26 12:17:51.968 D/cocos2d-x debug info( 6169): begin to load scene layer ...
+11-26 12:17:52.002 D/cocos2d-x debug info( 6169): done
+11-26 12:17:52.029 D/cocos2d-x debug info( 6169): call cmd = 1282, seq = 4
+11-26 12:17:52.029 D/cocos2d-x debug info( 6169): no handler for cmd -100
+11-26 12:17:52.029 D/cocos2d-x debug info( 6169): call cmd = 1282, seq = 5
+11-26 12:17:52.029 D/cocos2d-x debug info( 6169): no handler for cmd -100
+11-26 12:17:52.029 D/cocos2d-x debug info( 6169): call cmd = 981, seq = 6
+11-26 12:17:52.029 D/cocos2d-x debug info( 6169): no handler for cmd -100
+11-26 12:17:52.076 D/cocos2d-x debug info( 6169): call cmd = 881, seq = 14
+11-26 12:17:52.076 D/cocos2d-x debug info( 6169): loading begin, m_depth = 1
+11-26 12:17:52.076 D/cocos2d-x debug info( 6169): call cmd = 849, seq = 15
+11-26 12:17:52.076 D/cocos2d-x debug info( 6169): loading begin, m_depth = 2
+11-26 12:17:52.076 D/cocos2d-x debug info( 6169): call cmd = 1134, seq = 17
+11-26 12:17:52.076 D/cocos2d-x debug info( 6169): loading begin, m_depth = 3
+11-26 12:17:52.076 D/cocos2d-x debug info( 6169): call cmd = 1345, seq = 19
+11-26 12:17:52.076 D/cocos2d-x debug info( 6169): loading begin, m_depth = 4
+11-26 12:17:52.077 D/cocos2d-x debug info( 6169): call cmd = 1921, seq = 22
+11-26 12:17:52.077 D/cocos2d-x debug info( 6169): loading begin, m_depth = 5
+11-26 12:17:52.077 D/cocos2d-x debug info( 6169): call cmd = 2113, seq = 24
+11-26 12:17:52.077 D/cocos2d-x debug info( 6169): loading begin, m_depth = 6
+11-26 12:17:52.077 D/cocos2d-x debug info( 6169): call cmd = 90, seq = 27
+11-26 12:17:52.077 D/cocos2d-x debug info( 6169): loading begin, m_depth = 7
+11-26 12:17:52.079 D/cocos2d-x debug info( 6169): call cmd = 22, seq = 29
+11-26 12:17:52.079 D/cocos2d-x debug info( 6169): loading begin, m_depth = 8
+11-26 12:17:52.079 D/cocos2d-x debug info( 6169): call cmd = 502, seq = 30
+11-26 12:17:52.080 D/cocos2d-x debug info( 6169): loading begin, m_depth = 9
+11-26 12:17:52.093 I/System.out( 6169): ====type=-1
+11-26 12:17:52.103 D/cocos2d-x debug info( 6169): call cmd = 849, seq = 32
+11-26 12:17:52.103 D/cocos2d-x debug info( 6169): loading begin, m_depth = 10
+11-26 12:17:52.104 D/cocos2d-x debug info( 6169): call cmd = 689, seq = 33
+11-26 12:17:52.104 D/cocos2d-x debug info( 6169): loading begin, m_depth = 11
+11-26 12:17:52.104 D/cocos2d-x debug info( 6169): call cmd = 1154, seq = 34
+11-26 12:17:52.104 D/cocos2d-x debug info( 6169): loading begin, m_depth = 12
+11-26 12:17:52.104 D/cocos2d-x debug info( 6169): call cmd = 663, seq = 35
+11-26 12:17:52.105 D/cocos2d-x debug info( 6169): loading begin, m_depth = 13
+11-26 12:17:52.105 D/cocos2d-x debug info( 6169): activate view: 1031 ...
+11-26 12:17:52.123 D/cocos2d-x debug info( 6169): in GameScene::visitEveryGatherpoint
+11-26 12:17:52.123 D/cocos2d-x debug info( 6169): done
+11-26 12:17:52.123 D/Cocos2dxMusic( 6169): createMediaplayer assets/sound/BGSound/b6.mp3
+11-26 12:17:52.123 V/libnb   ( 6169): enter native_bridge2_getTrampoline Java_com_aiyou_mhsj_JniHelp_nativeGetFileOffsetAndSize, trampoline_addr 0xf34b30c0
+11-26 12:17:52.124 D/NuPlayerDriver( 1473): NuPlayerDriver(0xf2a99600) created, clientPid(6169)
+11-26 12:17:52.125 D/GenericSource( 1473): FileSource remote
+11-26 12:17:52.126 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (1, 0, 0, -1), loop setting(0, 0)
+11-26 12:17:52.127 D/NuPlayerDriver( 1473): stop(0xf2a99600)
+11-26 12:17:52.127 I/GenericSource( 1473): start
+11-26 12:17:52.128 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (1, 0, 0, -1), loop setting(0, 1)
+11-26 12:17:52.128 D/NuPlayerDriver( 1473): seekTo(0xf2a99600) (0 ms, 0) at state 10
+11-26 12:17:52.128 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (7, 0, 0, -1), loop setting(0, 1)
+11-26 12:17:52.128 I/OMXClient( 1473): IOmx service obtained
+11-26 12:17:52.128 I/OMXMaster( 1477): makeComponentInstance(OMX.google.mp3.decoder) in omx@1.0-service process
+11-26 12:17:52.128 D/NuPlayerDriver( 1473): start(0xf2a99600), state is 10, eos is 0
+11-26 12:17:52.128 E/bt_btif ( 1727): register_notification_rsp: Avrcp device is not connected, handle: 0x0
+11-26 12:17:52.128 I/chatty  ( 1727): uid=1002(bluetooth) BluetoothAvrcpH identical 4 lines
+11-26 12:17:52.128 E/bt_btif ( 1727): register_notification_rsp: Avrcp device is not connected, handle: 0x0
+11-26 12:17:52.129 E/OMXNodeInstance( 1477): setConfig(0xf562c960:google.mp3.decoder, ConfigPriority(0x6f800002)) ERROR: Undefined(0x80001001)
+11-26 12:17:52.129 I/ACodec  ( 1473): codec does not support config priority (err -2147483648)
+11-26 12:17:52.129 E/OMXNodeInstance( 1477): getConfig(0xf562c960:google.mp3.decoder, ConfigAndroidVendorExtension(0x6f100004)) ERROR: Undefined(0x80001001)
+11-26 12:17:52.129 I/MediaCodec( 1473): MediaCodec will operate in async mode
+11-26 12:17:52.129 W/AshmemAllocator( 1430): ashmem_create_region(8192) returning hidl_memory(0x76391702c100, 8192)
+11-26 12:17:52.129 I/chatty  ( 1430): uid=1000(system) allocator@1.0-s identical 2 lines
+11-26 12:17:52.130 W/AshmemAllocator( 1430): ashmem_create_region(8192) returning hidl_memory(0x76391702c100, 8192)
+11-26 12:17:52.130 W/AshmemAllocator( 1430): ashmem_create_region(9216) returning hidl_memory(0x76391702c100, 9216)
+11-26 12:17:52.130 I/chatty  ( 1430): uid=1000(system) allocator@1.0-s identical 2 lines
+11-26 12:17:52.130 W/AshmemAllocator( 1430): ashmem_create_region(9216) returning hidl_memory(0x76391702c100, 9216)
+11-26 12:17:52.131 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (4, 0, 0, -1), loop setting(0, 1)
+11-26 12:17:52.131 W/AudioFlinger( 1454): createTrack_l(): mismatch between requested flags (00000008) and output flags (00000002)
+11-26 12:17:52.131 D/AudioFlinger( 1454): Client defaulted notificationFrames to 3760 for frameCount 11280
+11-26 12:17:52.132 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (6, 0, 0, -1), loop setting(0, 1)
+11-26 12:17:52.132 D/audio_hw_hal( 1433): raw_start_output_stream, stream=0xf5e11000, sampleRate=48000, channel=2, bps=16, bufSize=4096
+11-26 12:17:52.133 D/cocos2d-x debug info( 6169): call cmd = 542, seq = 37
+11-26 12:17:52.133 D/cocos2d-x debug info( 6169): loading begin, m_depth = 14
+11-26 12:17:52.134 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 113
+11-26 12:17:52.134 D/cocos2d-x debug info( 6169): init scene, spawn points count(4)
+11-26 12:17:52.134 D/cocos2d-x debug info( 6169): spawnpoint 131101@(12, 0) added
+11-26 12:17:52.134 D/cocos2d-x debug info( 6169): SpawnpointMainView: 1
+11-26 12:17:52.139 D/cocos2d-x debug info( 6169): spawnpoint 131302@(25, 1) added
+11-26 12:17:52.139 D/cocos2d-x debug info( 6169): SpawnpointMainView: 2
+11-26 12:17:52.140 D/cocos2d-x debug info( 6169): spawnpoint 131303@(37, 0) added
+11-26 12:17:52.140 D/cocos2d-x debug info( 6169): SpawnpointMainView: 3
+11-26 12:17:52.145 D/cocos2d-x debug info( 6169): spawnpoint 133303@(50, 1) added
+11-26 12:17:52.145 D/cocos2d-x debug info( 6169): SpawnpointMainView: 4
+11-26 12:17:52.150 D/cocos2d-x debug info( 6169): gatherpoint 103101,0@(38, 9) added
+11-26 12:17:52.150 D/cocos2d-x debug info( 6169): gatherpoint 103101,0 added in view
+11-26 12:17:52.152 D/cocos2d-x debug info( 6169): gatherpoint 10201,0@(18, 10) added
+11-26 12:17:52.152 D/cocos2d-x debug info( 6169): gatherpoint 10201,0 added in view
+11-26 12:17:52.154 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 117
+11-26 12:17:52.154 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 818
+11-26 12:17:52.155 D/cocos2d-x debug info( 6169): got packet, seq = 4, cmd = 1282
+11-26 12:17:52.155 D/cocos2d-x debug info( 6169): loading end, m_depth = 13
+11-26 12:17:52.159 D/cocos2d-x debug info( 6169): got packet, seq = 5, cmd = 1282
+11-26 12:17:52.159 D/cocos2d-x debug info( 6169): loading end, m_depth = 12
+11-26 12:17:52.160 D/cocos2d-x debug info( 6169): got packet, seq = 6, cmd = 982
+11-26 12:17:52.160 D/cocos2d-x debug info( 6169): loading end, m_depth = 11
+11-26 12:17:52.161 D/cocos2d-x debug info( 6169): got packet, seq = 7, cmd = 947
+11-26 12:17:52.163 D/cocos2d-x debug info( 6169): got packet, seq = 8, cmd = 178
+11-26 12:17:52.163 D/cocos2d-x debug info( 6169): got packet, seq = 9, cmd = 658
+11-26 12:17:52.163 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 530
+11-26 12:17:52.163 D/cocos2d-x debug info( 6169): got packet, seq = 12, cmd = 538
+11-26 12:17:52.163 D/cocos2d-x debug info( 6169): got packet, seq = 13, cmd = 957
+11-26 12:17:52.164 D/cocos2d-x debug info( 6169): got packet, seq = 14, cmd = 882
+11-26 12:17:52.164 D/cocos2d-x debug info( 6169): loading end, m_depth = 10
+11-26 12:17:52.164 D/cocos2d-x debug info( 6169): got packet, seq = 15, cmd = 849
+11-26 12:17:52.164 D/cocos2d-x debug info( 6169): loading end, m_depth = 9
+11-26 12:17:52.165 D/cocos2d-x debug info( 6169): got packet, seq = 18, cmd = 1410
+11-26 12:17:52.165 D/cocos2d-x debug info( 6169): got packet, seq = 19, cmd = 1346
+11-26 12:17:52.165 D/cocos2d-x debug info( 6169): loading end, m_depth = 8
+11-26 12:17:52.165 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 194
+11-26 12:17:52.165 D/cocos2d-x debug info( 6169): got packet, seq = 21, cmd = 191
+11-26 12:17:52.166 D/cocos2d-x debug info( 6169): got packet, seq = 22, cmd = 1922
+11-26 12:17:52.166 D/cocos2d-x debug info( 6169): loading end, m_depth = 7
+11-26 12:17:52.166 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 88
+11-26 12:17:52.166 D/cocos2d-x debug info( 6169): got packet, seq = 24, cmd = 2114
+11-26 12:17:52.166 D/cocos2d-x debug info( 6169): loading end, m_depth = 6
+11-26 12:17:52.166 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 2116
+11-26 12:17:52.166 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 306
+11-26 12:17:52.167 D/cocos2d-x debug info( 6169): list active skill learn 20101
+11-26 12:17:52.167 D/cocos2d-x debug info( 6169): list active skill learn 20201
+11-26 12:17:52.167 D/cocos2d-x debug info( 6169): list active skill learn 20301
+11-26 12:17:52.167 D/cocos2d-x debug info( 6169): got packet, seq = 27, cmd = 91
+11-26 12:17:52.167 D/cocos2d-x debug info( 6169): loading end, m_depth = 5
+11-26 12:17:52.167 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 1506
+11-26 12:17:52.167 D/cocos2d-x debug info( 6169): got packet, seq = 30, cmd = 502
+11-26 12:17:52.167 D/cocos2d-x debug info( 6169): loading end, m_depth = 4
+11-26 12:17:52.167 D/cocos2d-x debug info( 6169): got packet, seq = 31, cmd = 210
+11-26 12:17:52.170 D/cocos2d-x debug info( 6169): got packet, seq = 32, cmd = 849
+11-26 12:17:52.170 D/cocos2d-x debug info( 6169): loading end, m_depth = 3
+11-26 12:17:52.170 D/cocos2d-x debug info( 6169): got packet, seq = 33, cmd = 690
+11-26 12:17:52.170 D/cocos2d-x debug info( 6169): loading end, m_depth = 2
+11-26 12:17:52.171 D/cocos2d-x debug info( 6169): got packet, seq = 34, cmd = 1154
+11-26 12:17:52.171 D/cocos2d-x debug info( 6169): loading end, m_depth = 1
+11-26 12:17:52.195 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 1266
+11-26 12:17:52.222 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 818
+11-26 12:17:52.223 D/cocos2d-x debug info( 6169): got packet, seq = 39, cmd = 43
+11-26 12:17:52.232 D/cocos2d-x debug info( 6169): got packet, seq = 0, cmd = 30
+11-26 12:17:52.392 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:17:52.653 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:17:53.331 E/cutils-trace( 6344): Error opening trace file: No such file or directory (2)
+11-26 12:17:53.331 D/vndksupport( 6344): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:17:53.332 D/vndksupport( 6344): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:17:53.334 I/        ( 6344): fastpipe: Connect success
+11-26 12:17:53.334 I/        ( 6344): fastpipe: Connect success
+11-26 12:17:53.335 D/HostConnection( 6344): HostRPC::connect sucess: app=screencap, pid=6344, tid=6344, this=0x763893ee4540
+11-26 12:17:53.335 D/HostConnection( 6344): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-26 12:17:53.942 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:17:54.459 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:17:55.126 E/cutils-trace( 6348): Error opening trace file: No such file or directory (2)
+11-26 12:17:55.126 D/vndksupport( 6348): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:17:55.126 D/vndksupport( 6348): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:17:55.129 I/        ( 6348): fastpipe: Connect success
+11-26 12:17:55.130 I/        ( 6348): fastpipe: Connect success
+11-26 12:17:55.130 D/HostConnection( 6348): HostRPC::connect sucess: app=screencap, pid=6348, tid=6348, this=0x763893ee4540
+11-26 12:17:55.130 D/HostConnection( 6348): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-26 12:17:56.915 E/cutils-trace( 6352): Error opening trace file: No such file or directory (2)
+11-26 12:17:56.915 D/vndksupport( 6352): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:17:56.915 D/vndksupport( 6352): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:17:56.917 I/        ( 6352): fastpipe: Connect success
+11-26 12:17:56.918 I/        ( 6352): fastpipe: Connect success
+11-26 12:17:56.918 D/HostConnection( 6352): HostRPC::connect sucess: app=screencap, pid=6352, tid=6352, this=0x763893ee4540
+11-26 12:17:56.919 D/HostConnection( 6352): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-26 12:17:57.124 D/cocos2d-x debug info( 6169): loading end, m_depth = 0
+11-26 12:17:57.124 D/cocos2d-x debug info( 6169): loading end, m_depth = 0
+11-26 12:17:57.124 D/cocos2d-x debug info( 6169): query server capability failed: -2
+11-26 12:17:57.124 D/cocos2d-x debug info( 6169): loading end, m_depth = 0
+11-26 12:17:57.124 D/cocos2d-x debug info( 6169): loading end, m_depth = 0
+11-26 12:17:57.146 D/cocos2d-x debug info( 6169): memory warning received, remove unused textures ...
+11-26 12:17:58.710 E/cutils-trace( 6356): Error opening trace file: No such file or directory (2)
+11-26 12:17:58.711 D/vndksupport( 6356): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:17:58.711 D/vndksupport( 6356): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:17:58.713 I/        ( 6356): fastpipe: Connect success
+11-26 12:17:58.714 I/        ( 6356): fastpipe: Connect success
+11-26 12:17:58.714 D/HostConnection( 6356): HostRPC::connect sucess: app=screencap, pid=6356, tid=6356, this=0x763893ee4540
+11-26 12:17:58.714 D/HostConnection( 6356): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-26 12:18:00.000 E/memtrack( 1591): Couldn't load memtrack module
+11-26 12:18:00.000 W/android.os.Debug( 1591): failed to get memory consumption info: -1
+11-26 12:18:00.498 E/cutils-trace( 6360): Error opening trace file: No such file or directory (2)
+11-26 12:18:00.498 D/vndksupport( 6360): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:18:00.498 D/vndksupport( 6360): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:18:00.500 I/        ( 6360): fastpipe: Connect success
+11-26 12:18:00.501 I/        ( 6360): fastpipe: Connect success
+11-26 12:18:00.501 D/HostConnection( 6360): HostRPC::connect sucess: app=screencap, pid=6360, tid=6360, this=0x763893ee4540
+11-26 12:18:00.502 D/HostConnection( 6360): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-26 12:18:00.663 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:18:01.179 I/chatty  ( 1473): uid=1013(media) NuPlayerDriver identical 2 lines
+11-26 12:18:01.437 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:18:02.280 E/cutils-trace( 6364): Error opening trace file: No such file or directory (2)
+11-26 12:18:02.280 D/vndksupport( 6364): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:18:02.280 D/vndksupport( 6364): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:18:02.282 I/        ( 6364): fastpipe: Connect success
+11-26 12:18:02.283 I/        ( 6364): fastpipe: Connect success
+11-26 12:18:02.283 D/HostConnection( 6364): HostRPC::connect sucess: app=screencap, pid=6364, tid=6364, this=0x763893ee4540
+11-26 12:18:02.283 D/HostConnection( 6364): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-26 12:18:02.728 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:18:04.022 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:18:04.081 E/cutils-trace( 6369): Error opening trace file: No such file or directory (2)
+11-26 12:18:04.081 D/vndksupport( 6369): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:18:04.081 D/vndksupport( 6369): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:18:04.083 I/        ( 6369): fastpipe: Connect success
+11-26 12:18:04.084 I/        ( 6369): fastpipe: Connect success
+11-26 12:18:04.084 D/HostConnection( 6369): HostRPC::connect sucess: app=screencap, pid=6369, tid=6369, this=0x763893ee4540
+11-26 12:18:04.085 D/HostConnection( 6369): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-26 12:18:05.312 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:18:05.876 E/cutils-trace( 6373): Error opening trace file: No such file or directory (2)
+11-26 12:18:05.876 D/vndksupport( 6373): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:18:05.876 D/vndksupport( 6373): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:18:05.878 I/        ( 6373): fastpipe: Connect success
+11-26 12:18:05.879 I/        ( 6373): fastpipe: Connect success
+11-26 12:18:05.880 D/HostConnection( 6373): HostRPC::connect sucess: app=screencap, pid=6373, tid=6373, this=0x763893ee4540
+11-26 12:18:05.880 D/HostConnection( 6373): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-26 12:18:06.086 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:18:07.381 I/chatty  ( 1473): uid=1013(media) NuPlayerDriver identical 3 lines
+11-26 12:18:07.641 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:18:07.677 E/cutils-trace( 6377): Error opening trace file: No such file or directory (2)
+11-26 12:18:07.677 D/vndksupport( 6377): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:18:07.677 D/vndksupport( 6377): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:18:07.680 I/        ( 6377): fastpipe: Connect success
+11-26 12:18:07.681 I/        ( 6377): fastpipe: Connect success
+11-26 12:18:07.681 D/HostConnection( 6377): HostRPC::connect sucess: app=screencap, pid=6377, tid=6377, this=0x763893ee4540
+11-26 12:18:07.681 D/HostConnection( 6377): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-26 12:18:07.898 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:18:08.933 I/chatty  ( 1473): uid=1013(media) NuPlayerDriver identical 3 lines
+11-26 12:18:09.449 D/NuPlayerDriver( 1473): notifyListener_l(0xf2a99600), (211, 0, 0, 20), loop setting(0, 1)
+11-26 12:18:09.462 E/cutils-trace( 6381): Error opening trace file: No such file or directory (2)
+11-26 12:18:09.462 D/vndksupport( 6381): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:18:09.463 D/vndksupport( 6381): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:18:09.464 I/        ( 6381): fastpipe: Connect success
+11-26 12:18:09.466 I/        ( 6381): fastpipe: Connect success
+11-26 12:18:09.466 D/HostConnection( 6381): HostRPC::connect sucess: app=screencap, pid=6381, tid=6381, this=0x763893ee4540
+11-26 12:18:09.466 D/HostConnection( 6381): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-26 12:18:11.239 E/cutils-trace( 6385): Error opening trace file: No such file or directory (2)
+11-26 12:18:11.239 D/vndksupport( 6385): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:18:11.240 D/vndksupport( 6385): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:18:11.242 I/        ( 6385): fastpipe: Connect success
+11-26 12:18:11.243 I/        ( 6385): fastpipe: Connect success
+11-26 12:18:11.243 D/HostConnection( 6385): HostRPC::connect sucess: app=screencap, pid=6385, tid=6385, this=0x763893ee4540
+11-26 12:18:11.243 D/HostConnection( 6385): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
+11-26 12:18:13.044 E/cutils-trace( 6389): Error opening trace file: No such file or directory (2)
+11-26 12:18:13.044 D/vndksupport( 6389): Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+11-26 12:18:13.045 D/vndksupport( 6389): Loading /vendor/lib64/hw/gralloc.default.so from current namespace instead of sphal namespace.
+11-26 12:18:13.049 I/        ( 6389): fastpipe: Connect success
+11-26 12:18:13.050 I/        ( 6389): fastpipe: Connect success
+11-26 12:18:13.050 D/HostConnection( 6389): HostRPC::connect sucess: app=screencap, pid=6389, tid=6389, this=0x763893ee4540
+11-26 12:18:13.050 D/HostConnection( 6389): queryAndSetGLESMaxVersion select gles-version: 3.1 hostGLVersion:46 process:screencap
