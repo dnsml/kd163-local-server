@@ -47,6 +47,9 @@ REAL_IP = "124.223.56.189"
 # 本地开发（客户端靠 DNAT 连 124.223.56.189）必须保持 0，否则客户端会认为
 # 「资源地址的 host 和我连的服务器不一致」，卡在 0/6251 已更新 0KB。
 REWRITE_ASSETS = os.environ.get("KD_ASSETS_REWRITE") == "1"
+# 80 端口复用：客户端把 server-list 的 port 写成 80 后，游戏连接（TLS，首字节
+# 0x16）从 80 进来，这里按首字节分流到本地游戏服。留空=关闭。
+MUX_GAME = os.environ.get("KD_MUX_GAME") or ""
 
 lock = threading.Lock()
 
@@ -67,6 +70,17 @@ def read(name, default=b""):
 def rewrite_host(b):
     """把镜像里的真服 IP 换成本机 IP（DNAT 下其实无所谓，但便于直连调试）"""
     return b.replace(REAL_IP.encode(), HOST_IP.encode())
+
+
+# 服务器列表里下发的游戏端口。公网复用 80 端口时设 KD_GAME_PORT=80。
+GAME_PORT = os.environ.get("KD_GAME_PORT") or ""
+
+
+def rewrite_server_list(b):
+    b = rewrite_host(b)
+    if GAME_PORT:
+        b = b.replace(b'port="9000"', ('port="%s"' % GAME_PORT).encode())
+    return b
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -110,7 +124,7 @@ class Handler(BaseHTTPRequestHandler):
         log("GET %s  UA=%s" % (path, (self.headers.get("User-Agent") or "")[:40]))
 
         if path in ("/server-list.xml", "/server_list.xml"):
-            body = rewrite_host(read("server-list.xml"))
+            body = rewrite_server_list(read("server-list.xml"))
             return self._send(200, body, "text/xml; charset=utf-8")
 
         if path == "/version.txt":
@@ -209,6 +223,50 @@ class Handler(BaseHTTPRequestHandler):
         return self._send(404, b"not found")
 
 
+def _pump(src, dst):
+    try:
+        while True:
+            data = src.recv(65536)
+            if not data:
+                break
+            dst.sendall(data)
+    except Exception:
+        pass
+    finally:
+        try:
+            dst.shutdown(socket.SHUT_WR)
+        except Exception:
+            pass
+
+
+class MuxServer(ThreadingHTTPServer):
+    """同一端口既服务 HTTP 资源，又把 TLS 连接（0x16 开头）转给游戏服。"""
+
+    def process_request(self, request, client_address):
+        if MUX_GAME:
+            try:
+                request.settimeout(1.0)
+                head = request.recv(1, socket.MSG_PEEK)
+            except Exception:
+                head = b""
+            request.settimeout(None)
+            if head == b"\x16":
+                try:
+                    host, port = MUX_GAME.rsplit(":", 1)
+                    up = socket.create_connection((host, int(port)), 5)
+                except Exception as e:
+                    log("mux 转发失败 %s: %s" % (MUX_GAME, e))
+                    try:
+                        request.close()
+                    except Exception:
+                        pass
+                    return
+                threading.Thread(target=_pump, args=(up, request), daemon=True).start()
+                threading.Thread(target=_pump, args=(request, up), daemon=True).start()
+                return
+        return super().process_request(request, client_address)
+
+
 def main():
     if not os.path.exists(RESPKG):
         log("警告：没有 %s" % RESPKG)
@@ -219,9 +277,11 @@ def main():
         log("警告：找不到 meta.xml（srvres/ 与 mirror/ 都没有）")
     else:
         log("meta.xml：%s" % META_XML)
-    srv = ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
+    srv = MuxServer(("0.0.0.0", PORT), Handler)
     srv.daemon_threads = True
     log("本地 HTTP 监听 :%d   host_ip=%s" % (PORT, HOST_IP))
+    if MUX_GAME:
+        log("80 端口复用已开：TLS 连接转发到 %s" % MUX_GAME)
     srv.serve_forever()
 
 
