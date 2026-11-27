@@ -1,5 +1,15 @@
 # -*- coding: utf-8 -*-
-"""用 GitHub REST API 推送提交（github.com:443 被墙、api.github.com 能通时的备用通道）。
+"""⚠️ 已停用（2026-11-27）——不要再用它推，改用 `git push` 或 `work/gh_push.sh`。
+
+    原因：本脚本走 REST API 逐条 replay，每个 commit 都是**新对象**（作者变成 token 账号），
+    哈希全变。远程与本地因此成为两条平行历史，之后只能强推：
+    本地 2e59811 与远程 727666f 标题相同、树对象完全一致、哈希不同，就是这么来的。
+    正确通道：git 走 http://127.0.0.1:7890 + http.sslBackend=openssl（已写进仓库配置），
+    代理掉线时用 `bash work/gh_push.sh` 轮询重试。旧链备份在分支 backup-remote-20261127。
+
+----- 以下为原始说明，仅作历史参考 -----
+
+用 GitHub REST API 推送提交（github.com:443 被墙、api.github.com 能通时的备用通道）。
 
 原理：不碰 git 传输协议，逐个本地提交replay 成远端提交：
     每个提交 → 该提交相对父提交的改动文件 → blob → tree(base_tree) → commit → 最后更新 ref
