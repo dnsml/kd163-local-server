@@ -34,10 +34,17 @@ echo "[net] reverse: $("$ADB" $DEV reverse --list | tr '\n' ' ')"
 #   改成转到 127.0.0.1 的 adb reverse 端口：reverse 是 adb 自己拉的通路，
 #   与宿主防火墙、LAN 可达性全部无关，实测立刻能取到 assets.txt。
 RIP="124.223.56.189"
+# ★ 默认只兜 124.223.56.189（原版包 / 本地版包内置的就是它）。
+#   129.204.52.72（公网版共存包内置）故意不兜：让公网包真的走公网登录公网服，
+#   否则会被劫持进本地服，而它内嵌的是公网证书 → 握手后立刻断开，看起来像"登录不进去"。
+#   需要拿公网包测本地服时：KD_RIPS="124.223.56.189 129.204.52.72" bash work/net_fix.sh
+RIPS="${KD_RIPS:-124.223.56.189}"
 HOSTIP="${KD_HOST:-192.168.0.111}"
 "$ADB" $DEV shell "su 0 iptables -t nat -F OUTPUT" 2>/dev/null
-"$ADB" $DEV shell "su 0 iptables -t nat -A OUTPUT -d $RIP -p tcp --dport 80 -j DNAT --to-destination 127.0.0.1:8080" 2>/dev/null
-"$ADB" $DEV shell "su 0 iptables -t nat -A OUTPUT -d $RIP -p tcp --dport 9000 -j DNAT --to-destination 127.0.0.1:9000" 2>/dev/null
+for R in $RIPS; do
+    "$ADB" $DEV shell "su 0 iptables -t nat -A OUTPUT -d $R -p tcp --dport 80 -j DNAT --to-destination 127.0.0.1:8080" 2>/dev/null
+    "$ADB" $DEV shell "su 0 iptables -t nat -A OUTPUT -d $R -p tcp --dport 9000 -j DNAT --to-destination 127.0.0.1:9000" 2>/dev/null
+done
 
 # ★ 2026-11-26 12:36：光改 124.223.56.189 还不够 —— server-list.xml 里游戏服地址
 #   被 rewrite_host 改成了宿主 IP，客户端拿着 192.168.0.111:9000 直连，
@@ -67,8 +74,10 @@ fi
 #   以前 DNAT 一丢，客户端就静默登进线上服，表现成「安全连接验证失败」或
 #   「账号在别人服上」—— 加这条后立刻变成连接失败，一眼能看出是本机服没起来。
 "$ADB" $DEV shell "su 0 iptables -N KD_GUARD 2>/dev/null; su 0 iptables -F KD_GUARD" 2>/dev/null
-"$ADB" $DEV shell "su 0 iptables -A KD_GUARD -d $RIP -p tcp --dport 9000 -j REJECT --reject-with tcp-reset" 2>/dev/null
-"$ADB" $DEV shell "su 0 iptables -A KD_GUARD -d $RIP -p tcp --dport 19000 -j REJECT --reject-with tcp-reset" 2>/dev/null
+for R in $RIPS; do
+    "$ADB" $DEV shell "su 0 iptables -A KD_GUARD -d $R -p tcp --dport 9000 -j REJECT --reject-with tcp-reset" 2>/dev/null
+    "$ADB" $DEV shell "su 0 iptables -A KD_GUARD -d $R -p tcp --dport 19000 -j REJECT --reject-with tcp-reset" 2>/dev/null
+done
 "$ADB" $DEV shell "su 0 iptables -A KD_GUARD -j RETURN" 2>/dev/null
 "$ADB" $DEV shell "su 0 iptables -C OUTPUT -j KD_GUARD 2>/dev/null || su 0 iptables -I OUTPUT 1 -j KD_GUARD" 2>/dev/null
 if "$ADB" $DEV shell "su 0 iptables -S OUTPUT" 2>/dev/null | tr -d '\r' | grep -q "KD_GUARD"; then
