@@ -33,6 +33,22 @@ class Player(object):
         # 坐骑穿的形象卡（item id），0 = 没换过形象。
         "mount_skin",
         "spirit_bag", "spirit_slot",
+        # ---- 宠物「仙府探秘」技能系统（2026-11-28 线上服抓包定案）----
+        # 秘籍库：[[技能id, 经验], ...]，顺序＝962 第一组的顺序（客户端按这个画网格）
+        "pet_skill_bag",
+        # 已装技能栏：最多 4 个技能 id，顺序＝962 第二组＝947 尾部 4 个 id
+        "pet_skill_slots",
+        # 每日免费探秘剩余次数（默认 3），配 pet_skill_day 按自然日重置
+        "pet_skill_free", "pet_skill_day",
+        # 洗髓四条比例（体/力/防/巧，合计 100），写 947 的 k20~23
+        "pet_qual",
+        # 954 返回的预览比例；None = 没有待采用的洗髓结果
+        "pet_qual_preview",
+        # ---- 藏宝图（268/271）----
+        # {背包格位: [场景, x, y]}：同一格重复查 268 必须回同一个点
+        "treasure",
+        # 秘籍库（1506）：[[秘籍id, 序号], ...]，挖宝掉到 k1=16 的秘籍时追加
+        "miji",
         "quest_active", "quest_ready", "done_quests",
         "title",                 # 当前佩戴的称号 id（0=没有）；只有用掉称号卡才会有
         "scene", "pos_x", "pos_y",
@@ -97,6 +113,16 @@ class Player(object):
         self.mount_skin = [0]
         self.spirit_bag = {}
         self.spirit_slot = {}
+        # 仙府探秘：秘籍库里默认给 3 条（与 947 模板尾部的 3 个技能同源，
+        # 这样老号不点探秘也能看到技能栏有东西，不会误以为"数据丢了"）。
+        self.pet_skill_bag = [[804201, 0], [810101, 0], [812101, 0]]
+        self.pet_skill_slots = [[804201, 0], [810101, 0], [812101, 0]]
+        self.pet_skill_free = 3
+        self.pet_skill_day = ""
+        self.pet_qual = [25, 25, 25, 25]
+        self.pet_qual_preview = None
+        self.treasure = {}
+        self.miji = []
         self.quest_active = 0
         self.quest_ready = False
         # 0 = 没有任何称号。称号不是「等级到了就有」，必须用称号卡激活。
@@ -198,6 +224,14 @@ def reset_newbie(p=None):
     p.pets = []               # ★ 新号一只宠物都没有（真服实测：新号身边不跟熊猫）
     p.spirit_bag = {}
     p.spirit_slot = {}
+    p.pet_skill_bag = [[804201, 0], [810101, 0], [812101, 0]]
+    p.pet_skill_slots = [[804201, 0], [810101, 0], [812101, 0]]
+    p.pet_skill_free = 3
+    p.pet_skill_day = ""
+    p.pet_qual = [25, 25, 25, 25]
+    p.pet_qual_preview = None
+    p.treasure = {}
+    p.miji = []
     p.quest_active = 0
     p.quest_ready = False
     p.title = 0

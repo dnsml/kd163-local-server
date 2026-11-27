@@ -46,18 +46,25 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CFG = os.path.join(HERE, "res_cfg")
 EQUIP_XML = os.path.join(CFG, "PetEquip.xml")
 PET_XML = os.path.join(CFG, "Pet.xml")
+SKILL_XML = os.path.join(CFG, "Skill.xml")
 TPL_JSON = os.path.join(CFG, "pet_tpl.json")
 
 SPIRIT = {}          # 妖灵 id -> {"name","basic","level","color"}
 PET = {}             # 宠物模板 id -> {"name","level","effect"}
+SKILL = {}           # 仙宠技能 id（Skill.xml class=9）-> 名字
 TPL = {"962": b"", "947": {}}
 MAX_SLOT = 3         # 真服样本里槽位只出现 01/02/03
-# 本账号的宠物形象实例（真服 962 40B 稳定态的两组 uid）
-#   第一组 = 列表里显示的那三只（814101/815201/803201）
-#   第二组 = 947 末尾那三只（804201/810101/812101）
-# uid 编码：800000 + 形象id*1000 + 序号
+# ★ 2026-11-28 更正（`docs/reference/宠物技能_仙府探秘_962_963_964.md`）：
+#   下面这两组 8xxxxx **不是宠物形象 uid，也不是 800000+形象*1000+序号**，
+#   它们是 `Skill.xml class=9` 的**仙宠技能 id**（末两位＝等级）。
+#   PET_UIDS / PET_SKIN 只留作历史常量，新代码一律走 pack_962(bag, slots, free)。
 PET_UIDS = [814101, 815201, 803201]
 PET_SKIN = [804201, 810101, 812101]
+# 新号默认秘籍库 / 技能栏（＝947 模板尾部那 3 个 id，保证老号面板不空）
+DEFAULT_SKILLS = [[804201, 0], [810101, 0], [812101, 0]]
+MAX_SKILL_SLOT = 4                       # 962 里那个恒定的 04 就是技能栏容量
+SKILL_FAMILIES = (801, 802, 803, 804, 805, 806, 807,
+                  808, 809, 810, 811, 812, 813, 814, 815)
 # 千位 -> 部位（**八系全部实证**，2026-11-27 17:39 线上装卸抓包）
 NATURE = {1: 1, 4: 2, 2: 3, 3: 4, 5: 5, 6: 7, 7: 8, 8: 9}
 # 部位编号 = 真服 1410 每条里的第 3 个字节（= 1411 的槽位字节）。
@@ -199,7 +206,57 @@ def load():
             d = json.load(f)
         TPL["962"] = bytes.fromhex(d.get("962") or "")
         TPL["947"] = {k: bytes.fromhex(v) for k, v in (d.get("947") or {}).items()}
+    for d in _items(SKILL_XML):
+        if d.get("class") != "9":
+            continue
+        try:
+            sid = int(d["id"])
+        except (KeyError, ValueError):
+            continue
+        SKILL[sid] = d.get("name", "")
     return SPIRIT, PET, TPL
+
+
+def skill_name(iid):
+    """仙宠技能名（Skill.xml class=9）；查不到就回 id。"""
+    return SKILL.get(int(iid)) or "仙宠技能%d" % int(iid)
+
+
+def skill_family(iid):
+    """技能族 = id 前三位（801~815）；同族共用一条经验记录。
+
+    如 804201 -> 804；804101/804201/804301 同族不同阶。
+    """
+    return int(iid) // 1000
+
+
+def skill_tier(iid):
+    """阶 = 百位（1/2/3），与名字里的「一阶/二阶/三阶」一致。"""
+    return (int(iid) // 100) % 10
+
+
+def skill_level(iid):
+    """等级 = id 末两位。升级就是末两位 +1。"""
+    return int(iid) % 100
+
+
+def skill_id(family, tier, level):
+    return int(family) * 1000 + int(tier) * 100 + int(level)
+
+
+def skill_pool(tier_weights=None):
+    """可抽的技能 id 池（每族的 Lv1 那一档）。
+
+    真服 964 里出现过的都是 `xx1xx1`（一/二/三阶的 1 级）：803201 / 812101 / 815201 …
+    抽到重复就往同一条记录上加经验，凑满阈值再 id+1（见 local_server3 的 963 处理）。
+    """
+    out = []
+    for fam in SKILL_FAMILIES:
+        for tier in (1, 2, 3):
+            sid = skill_id(fam, tier, 1)
+            if sid in SKILL:
+                out.append(sid)
+    return out
 
 
 def name_of(iid):
@@ -277,81 +334,65 @@ def sum_strap(strap):
     return agg
 
 
-def pack_962(pets=None, out=None):
-    """宠物栏列表。
+def pack_962(bag=None, slots=None, free=None):
+    """仙府探秘面板数据。
 
-    结构：`[u8 n1][n1×(uid,00)] [u8 n2][n2×(uid,00)] [u8 04 容量][u8 余]`
+    结构（2026-11-28 线上服 01:06~01:16 逐字节定案）：
 
-    真服各档原包（relay.log 逐字节抄的，不是推的）：
-      4B   00 00 04 03
-      10B  01 [4569 00] 00 04 02
-      22B  03 [4569][5c75][6445] 00 04 00
-      28B  01 [6c15 00] 03 [4569][5c75][6445] 04 02
-      34B  02 [6c15][7061] 03 [...] 04 01
-      40B  03 [6c15][7061][4181] 03 [4569][5c75][6445] 04 00
+        [u8 n1] [n1 × (varint 技能id, u8 经验)]      ← 秘籍库（右上网格）
+        [u8 n2] [n2 × (varint 技能id, u8 经验)]      ← 已装技能栏（宠物身上生效）
+        [u8 04]                                     ← 技能栏容量（恒 4）
+        [u8 剩余免费探秘次数]                        ← 每天 3 次，03→00
 
-    ★ 默认（TPL["962"]）用真服 20:52:31 那份 **22B**：
-      `00 03 [4569][5c75][6445] 04 03`。
-    ★ 排除 40B：`03 [6c15][7061][4181] 03 [...] 04 00`（真服 21:02:28/38/39 连点三次 963 的产物）。
-    ★★ 2026-11-28 更正（`docs/reference/宠物技能_仙府探秘_962_963_964.md`）：
-      上面这些 id **不是宠物形象 uid**，是 `Skill.xml class=9` 的**仙宠技能 id**
-      （4569=804201 二阶坚韧光环、5c75=810101 一阶涅磐重生、6445=812101 一阶连击、
-      6c15=814101 一阶破魔、7061=815201 二阶施毒、4181=803201 二阶命中祝福）。
-      结构＝`[n1 秘籍库×(id,经验)][n2 已装技能栏×(id,经验)][04 容量][剩余免费探秘次数]`，
-      变量 id 后那个字节是**该技能的经验**，不是固定 0。
-      尾部 `03` 是**每天 3 次免费探秘**的剩余次数（抽一次 −1，03→00），不是「3 - n1」。
+    ★ 8xxxxx 不是宠物形象 uid，是 `Skill.xml class=9` 的仙宠技能 id
+      （804201 二阶坚韧光环 / 810101 一阶涅磐重生 / 812101 一阶连击 …），
+      id 末两位＝等级，「升一级」在协议里就是 id 末两位 +1，不另开字段。
+    ★ 空号下限＝4B `00 00 04 03`。
+    ★ 技能变更必须**同时**重推 962 和 947（947 尾部那 4 个 id 与第二组同序）。
     """
-    if pets is None and out is None:
+    if bag is None and slots is None and free is None:
         return TPL["962"] if TPL.get("962") else b"\x00\x00\x04\x03"
-    pets = PET_UIDS if pets is None else list(pets)
-    out = [] if out is None else list(out)
-    # ★ 2026-11-24 15:0x 修正：空列表必须发 **4B `00 00 04 03`**。
-    # 22B 的 `00 03 [804457][810101][812101] 04 03` 是「已拥有 3 个宠物形象」，
-    # 发给新号等于凭空塞 3 个形象：客户端会把第一个挂到玩家身上当跟随，
-    # 而形象本身没有名字（名字在 947 里），于是地图上出现一只「？？」的熊猫。
-    # 真服 15:41:16 现场（交任务刚拿到功夫熊猫）就是 962=4B + 947=83B：
-    #   [15:41:16] S->C cmd=962 len=4 hex=00000403
-    #   [15:41:16] S->C cmd=947 len=83 hex=01ac"功夫熊猫"...
-    # 说明「有没有宠物」由 947 决定，962 只表示「拥有几个宠物形象/皮肤」。
-    if not pets and not out:
-        return b"\x00\x00\x04\x03"
-    body = bytearray([len(out) & 0xFF])
-    for u in out:
-        body += b"\xce" + int(u).to_bytes(4, "big") + b"\x00"
-    body.append(len(pets) & 0xFF)
-    for u in pets:
-        body += b"\xce" + int(u).to_bytes(4, "big") + b"\x00"
-    body += bytes([0x04, max(0, 3 - len(out)) & 0xFF])
+    bag = list(DEFAULT_SKILLS if bag is None else bag)
+    slots = list(DEFAULT_SKILLS if slots is None else slots)
+    free = 3 if free is None else int(free)
+    body = bytearray()
+    body.append(len(bag) & 0xFF)
+    for iid, exp in bag:
+        body += _num(iid) + bytes([int(exp) & 0xFF])
+    body.append(len(slots) & 0xFF)
+    for iid, exp in slots:
+        body += _num(iid) + bytes([int(exp) & 0xFF])
+    body += bytes([0x04, max(0, int(free)) & 0xFF])
     return bytes(body)
 
 
-def pack_964(pets=None, sel=None, extra=None):
-    """宠物出战确认（963 -> 964）。
+def pack_964(new_ids=None, ups=None, bag=None, slots=None, free=None):
+    """963 抽奖结果（无 04 容量字节）。
 
-    结构（真服 16/22/28/34/40/46B 六档全部吻合）：
-      [u8 01][varint 当前选中 uid][u8 00]
-      [u8 n1][n1 × (varint uid + u8 00)]     ← 出战列表
-      [u8 n2][n2 × (varint uid + u8 00)]     ← 仓库/其他（962 的第二段）
-      [u8 3-n1 剩余出战位]
-
-    与 962 同构，仅多一个 `01 + 选中 uid + 00` 头、尾部没有 `04` 容量字节。
-    证据：
-      16B  01 4569 00 | 01 4569                | 00       | 02
-      28B  01 6445 00 | 03 4569 5c75 6445      | 00       | 00
-      46B  01 4181 00 | 03 6c15 7061 4181      | 03 4569 5c75 6445 | 00
+        [u8 n_new] [n_new × varint 抽中技能id]          ← 抽中清单（十连 10 个，允许重复）
+        [u8 n_up]  [n_up × (varint 升级后id, u8 新经验)] ← 本次因重复而升级的技能
+        [u8 n1][n1 × (id, 经验)]                        ← 以下同 962
+        [u8 n2][n2 × (id, 经验)]
+        [u8 剩余免费探秘次数]
     """
-    pets = PET_UIDS if pets is None else list(pets)
-    extra = [] if extra is None else list(extra)
-    sel = (pets[-1] if pets else 0) if sel is None else int(sel)
-    body = bytearray([0x01])
-    body += b"\xce" + int(sel).to_bytes(4, "big") + b"\x00"
-    body.append(len(pets) & 0xFF)
-    for u in pets:
-        body += b"\xce" + int(u).to_bytes(4, "big") + b"\x00"
-    body.append(len(extra) & 0xFF)
-    for u in extra:
-        body += b"\xce" + int(u).to_bytes(4, "big") + b"\x00"
-    body.append(max(0, 3 - len(pets)) & 0xFF)
+    new_ids = [] if new_ids is None else list(new_ids)
+    ups = [] if ups is None else list(ups)
+    bag = list(DEFAULT_SKILLS if bag is None else bag)
+    slots = list(DEFAULT_SKILLS if slots is None else slots)
+    free = 3 if free is None else int(free)
+    body = bytearray([len(new_ids) & 0xFF])
+    for iid in new_ids:
+        body += _num(iid)
+    body.append(len(ups) & 0xFF)
+    for iid, exp in ups:
+        body += _num(iid) + bytes([int(exp) & 0xFF])
+    body.append(len(bag) & 0xFF)
+    for iid, exp in bag:
+        body += _num(iid) + bytes([int(exp) & 0xFF])
+    body.append(len(slots) & 0xFF)
+    for iid, exp in slots:
+        body += _num(iid) + bytes([int(exp) & 0xFF])
+    body += bytes([max(0, int(free)) & 0xFF])
     return bytes(body)
 
 
@@ -437,7 +478,7 @@ def _head_nums(seg, start):
     return out, bool(out)
 
 
-def pack_947(strap, skin=10000):
+def pack_947(strap, skin=10000, skills=None, qual=None):
     """选中宠物详情。
 
     妖灵区结构（从真服 5 档样本逐字节拆出来）：
@@ -498,6 +539,15 @@ def pack_947(strap, skin=10000):
     # （以前写死 out[14]，那个偏移只在名字正好 12 字节时成立，改名宠物就会错位。）
     if nums:
         nums[0] = 1
+    # ★ 2026-11-28 洗髓：947 尾部「皮肤 id 之前的最后 4 个数」就是四条分配比例，
+    #   协议顺序 **体 / 力 / 防 / 巧**（954 的 4 字节逐字节相同，合计恒 100）。
+    #   换新比例后能力值只做小幅重算（真服实测 攻+2/血-8/法-1/防+2），
+    #   不是把已有 424 点重新分配 —— 见 宠物技能_仙府探秘 文档 7.2.1。
+    if qual and len(nums) >= 4:
+        try:
+            nums[-4:] = [max(0, min(100, int(x))) for x in list(qual)[:4]]
+        except (TypeError, ValueError):
+            pass
     head = base[:2 + n] + b"".join(_num(x) for x in nums) + _num(skin) + b"\x08"
     tail = base[j:]
     body = bytearray()
@@ -508,6 +558,11 @@ def pack_947(strap, skin=10000):
             body += b"\x01\x01"
         else:
             body += b"\x00" * 4
+    # ★ 2026-11-28：尾部技能栏原本是模板里写死的 `03 + 3 个 id`，
+    #   现在按角色真实技能栏拼（`[n][n × varint id]`，n 可为 0）。
+    if skills is not None:
+        _sk = [int(x) for x in list(skills)[:MAX_SKILL_SLOT]]
+        tail = bytes([len(_sk)]) + b"".join(_num(x) for x in _sk)
     out = bytearray(head + body + tail)
     return bytes(out)
 

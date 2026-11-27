@@ -493,7 +493,13 @@ def build_113(sid):
     body.append(len(spawns) & 0xFF)
     n = len(spawns)
     for i, oid in enumerate(spawns):
-        body += b"\xCE" + struct.pack(">I", oid) + bytes([63 * (i + 1) // (n + 1), i & 1, 0])
+        # ★ 2026-11-28 修正公式（真服 110/109 两场景 8 个刷怪点逐格对齐）：
+        #   起点 = floor(63/(n+1))，步长 = ceil(63/(n+1))。
+        #   旧式 63*(i+1)//(n+1) 在 n=4 时给 12/25/37/50，第 3、4 个各差 1 格
+        #   （真服 12/25/38/51），客户端虽不崩，但玩法 BOSS 面板的「剩余」位置会错。
+        _start = 63 // (n + 1)
+        _step = -(-63 // (n + 1))
+        body += b"\xCE" + struct.pack(">I", oid) + bytes([_start + _step * i, i & 1, 0])
     body.append(len(gathers) & 0xFF)
     m = len(gathers)
     for i, oid in enumerate(gathers):
@@ -531,6 +537,156 @@ def arrival_pos(target, prev):
 
 def scene_name(sid):
     return SCENES.get(sid, {}).get("name", "?")
+
+
+# ============================ 玩法·战斗BOSS（138 / 134）============================
+# 文档：docs/reference/玩法战斗BOSS_列表与传送_138_134.md
+# 真服 2026-11-28 00:43:23 原包（224B，30 个入口）。第三字段是**活数**（疑似当前血量），
+# 客户端只拿来画进度、不影响传送，本地固定回这一份快照。
+BOSS_138 = bytes.fromhex(
+    "1ece000dbba166ccb0ce000dbba266ccc0ce000dbba368ccd9ce000dbba468ccef"
+    "ce000dbba568cd0107ce000dbba668cd0120ce000dbba769ccf9ce000dbba869ccff"
+    "ce000dbba969cd012ace000dbbaa69ccc2ce000dbbab6a00ce000dbbac6a66ce000d"
+    "bbad6a00ce000dbbae6a00ce000dbbaf6b00ce000dbbb06b00ce000dbbb16b00ce00"
+    "0dbbb26b00ce000dbbb36c00ce000dbbb46c00ce000dbbb56c00ce000dbbb66c00ce"
+    "000dbbb76d00ce000dbbb86d00ce000dbbb96d00ce000dbbba6d00ce000dbbbb6e00"
+    "ce000dbbbc6e00ce000dbbbd6e00ce000dbbbe6e00")
+
+# 入口 -> (场景, 落点x, 落点y)。**落点是服务端逐条配的挑战位，没有任何公式**：
+# 灭蒙和天鹿的 boss 都在 (25,1)，落点却一个 (24,1) 一个 (26,1)。
+BOSS_LANDING = {
+    900001: (102, 22, 0),    # 九尾狐（实证）
+    900002: (102, 41, 1),    # 玄蜂（实证）
+    900006: (104, 52, 1),    # 玄武（实证）
+    900009: (105, 37, 0),    # 白泽（实证）
+    900024: (109, 26, 1),    # 天鹿（实证）
+    900028: (110, 24, 1),    # 灭蒙（实证）
+}
+# 138 里的「入口 -> 场景」，给没有实证落点的 boss 兜底用（按 Scene.xml 的刷怪点推算）
+BOSS_SCENE = {
+    900001: 102, 900002: 102, 900003: 104, 900004: 104, 900005: 104,
+    900006: 104, 900007: 105, 900008: 105, 900009: 105, 900010: 105,
+    900011: 106, 900012: 106, 900013: 106, 900014: 106,
+    900015: 107, 900016: 107, 900017: 107, 900018: 107,
+    900019: 108, 900020: 108, 900021: 108, 900022: 108,
+    900023: 109, 900024: 109, 900025: 109, 900026: 109,
+    900027: 110, 900028: 110, 900029: 110, 900030: 110,
+}
+
+
+def boss_landing(entry):
+    """入口 -> (场景, x, y)。没有实证的按「该 boss 刷怪点右一格」推断（日志会标）。"""
+    hit = BOSS_LANDING.get(entry)
+    if hit:
+        return hit, "实证"
+    sc = BOSS_SCENE.get(entry, DEFAULT_SCENE)
+    ids = [int(t) for t in ((SCENES.get(sc) or {}).get("spawn_points") or "").split(",")
+           if t.strip().isdigit()]
+    try:
+        i = ids.index(entry)
+    except ValueError:
+        return (sc, 5, 7), "推断(无刷怪点)"
+    n = len(ids)
+    _start = 63 // (n + 1)
+    _step = -(-63 // (n + 1))
+    return (sc, min(62, _start + _step * i + 1), i & 1), "推断"
+
+
+def travel_to(conn, cid, tgt, x, y, why=""):
+    """定点传送：129 + 113 + 117(00)。134/135 共用的落点收尾。
+
+    真服落点由服务端决定，客户端不校验合法性；117 语义未定，发 `00` 是安全下限
+    （玄武/灭蒙/天鹿 三个场景都这么发，客户端正常走动、正常开打）。
+    """
+    cur().scene = int(tgt)
+    cur().pos_x, cur().pos_y = int(x) & 0xFF, int(y) & 0xFF
+    body113 = build_113(tgt)
+    conn.sendall(pack(129, 0, enc_scene(tgt) + bytes([cur().pos_x, cur().pos_y])))
+    conn.sendall(pack(113, 0, body113))
+    conn.sendall(pack(117, 0, b"\x00"))
+    log("c%03d -> cmd=129 [%s 落点(%d,%d) %s(%d)] + 113(%dB) + 117(00)"
+        % (cid, why or "传送", cur().pos_x, cur().pos_y,
+           scene_name(tgt), tgt, len(body113)))
+
+
+# ============================ 藏宝图（268 / 271 / 1506）============================
+# 文档：docs/reference/藏宝图_挖宝_268_271_1506.md
+TREASURE_KIND1 = 13          # Item.xml item_kind1=13 = 藏宝图
+TREASURE_ITEM = 19999        # 挖到的元宝（不占背包，只走 28）
+TREASURE_SCENES = (104, 105, 106, 107)   # 真服 11 次样本全落在这四个场景（0x68~0x6b）
+# 掉落池 (物品id, 权重)。前 11 次实测：元宝 4 次、石头 5 次、秘籍 3 本
+TREASURE_DROPS = ((19999, 30), (20257, 12), (20256, 12), (20457, 8),
+                  (30999, 8), (40301, 10), (40801, 10), (40601, 10))
+
+
+def is_treasure(iid):
+    try:
+        return int(bag_proto.item(iid).get("kind1") or 0) == TREASURE_KIND1
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def treasure_point(pos):
+    """该格藏宝图的宝藏点；同一格重复查询必须回同一个点（真服实证）。"""
+    pt = cur().treasure.get(str(pos))
+    if not pt:
+        import random
+        pt = [random.choice(TREASURE_SCENES),
+              random.randint(3, 58), random.randint(0, 12)]
+        cur().treasure[str(pos)] = pt
+    return pt
+
+
+def treasure_drop():
+    tot = sum(w for _i, w in TREASURE_DROPS)
+    import random
+    r = random.uniform(0, tot)
+    for iid, w in TREASURE_DROPS:
+        r -= w
+        if r <= 0:
+            return iid
+    return TREASURE_DROPS[0][0]
+
+
+def bag_add_at(iid, n, prefer=None):
+    """入包，优先放进刚空出来的格（挖宝：挖空哪格，新物品就填哪格）。"""
+    for p, v in cur().bag.items():
+        if v[0] == iid and v[1] + n <= 99:
+            v[1] += n
+            return p
+    if prefer is not None and prefer not in cur().bag and int(prefer) < BAG_CAPACITY:
+        cur().bag[int(prefer)] = [iid, n]
+        return int(prefer)
+    return bag_add(iid, n)
+
+
+def build_1506():
+    """秘籍/宝物列表：`[01][401013][01][n][n × (秘籍id, 序号, 01, 00)]`，每 6B 一条。
+
+    真服每次挖到秘籍都会追加条目，序号 0..7 全局递增；空表是 8B
+    `01 ce00061e75 01 00`。本地按 cur().miji 拼，序号就是列表下标。
+    """
+    body = bytearray(b"\x01\xce\x00\x06\x1e\x75\x01")
+    body.append(len(cur().miji) & 0xFF)
+    for i, mid in enumerate(cur().miji):
+        mid = int(mid)
+        body += (b"\xcd" + mid.to_bytes(2, "big")) if mid <= 0xFFFF \
+            else (b"\xce" + mid.to_bytes(4, "big"))
+        body += bytes([i & 0xFF, 0x01, 0x00])
+    return bytes(body)
+
+
+# 210 = 活动/任务计数器，真服挖宝后原样跟着推（本地不解析，按模板回放）。
+TPL_210 = bytes.fromhex("0003ce000629be01ce00030e2701cd80fb01")
+TPL_1508 = b"\x00\x00\x00"
+
+
+def push_treasure(conn, cid):
+    conn.sendall(pack(210, 0, TPL_210))
+    conn.sendall(pack(1506, 0, build_1506()))
+    conn.sendall(pack(1508, 0, TPL_1508))
+    log("c%03d .. push cmd=210/1506(%dB,秘籍%d本)/1508"
+        % (cid, len(build_1506()), len(cur().miji)))
 
 
 def pack(cmd, seq, payload=b""):
@@ -727,11 +883,14 @@ def send_push(conn, cid, cmd):
         push_spirit(conn, cid)
         return
     if cmd == 947:
-        body = pet_proto.pack_947(spirit_strap(), pet_skin_id())
+        # ★ 2026-11-28：走 pack_947_cur()，一次带上妖灵 / 形象 / 技能栏 / 洗髓比例。
+        #   以前只传前两个参数 → 技能栏和四条比例永远是模板里的死值。
+        body = pack_947_cur()
         if body:
             conn.sendall(pack(947, 0, body))
-            log("c%03d .. push cmd=947    len=%d [宠物详情 妖灵%s 形象%d]"
-                % (cid, len(body), pet_proto.strap_key(spirit_strap()), pet_skin_id()))
+            log("c%03d .. push cmd=947    len=%d [宠物详情 妖灵%s 形象%d 技能%s 比例%s]"
+                % (cid, len(body), pet_proto.strap_key(spirit_strap()), pet_skin_id(),
+                   [x[0] for x in pet_skill_slots()], pet_qual()))
         return
     if cmd == 957:
         # 宠物列表（获得宠物 / 956 的应答）。没有它客户端只有占位熊猫。
@@ -864,6 +1023,180 @@ def pet_skin_id():
         return int(v[0]) if v else 10000
     except (TypeError, ValueError, IndexError):
         return 10000
+
+
+# ---- 仙府探秘 / 洗髓（962 / 963 / 964 / 965 / 966 / 953 / 954 / 955）----
+# 文档：docs/reference/宠物技能_仙府探秘_962_963_964.md
+PET_SKILL_DAILY_FREE = 3     # 每天 3 次免费探秘
+PET_SKILL_DRAW_COST = 30     # 免费次数用完后的单抽价（十连 270 = 30×9）
+PET_WASH_ITEM = 20381        # 宠物洗髓丹
+PET_WASH_COST = 5000         # 每次洗髓另外消耗的铜钱
+
+
+def pet_skill_today():
+    return time.strftime("%Y-%m-%d", time.localtime())
+
+
+def pet_skill_tick():
+    """跨天重置免费探秘次数（真服换会话/隔天都回到 03）。"""
+    if cur().pet_skill_day != pet_skill_today():
+        cur().pet_skill_day = pet_skill_today()
+        cur().pet_skill_free = PET_SKILL_DAILY_FREE
+        log("[petskill] 新的一天，免费探秘次数重置为 %d" % PET_SKILL_DAILY_FREE)
+
+
+def pet_skill_bag():
+    """秘籍库 [[id, exp], ...]；老存档没这字段时补默认三条。"""
+    if not cur().pet_skill_bag:
+        cur().pet_skill_bag = [list(x) for x in pet_proto.DEFAULT_SKILLS]
+    return cur().pet_skill_bag
+
+
+def pet_skill_slots():
+    """已装技能栏 [[id, exp], ...]（与 947 尾部同序，最多 4 条）。"""
+    if not cur().pet_skill_slots:
+        cur().pet_skill_slots = [list(x) for x in pet_proto.DEFAULT_SKILLS]
+    return cur().pet_skill_slots[:pet_proto.MAX_SKILL_SLOT]
+
+
+def pet_qual():
+    """四条分配比例（体/力/防/巧），合计 100。老存档没有就 25×4。"""
+    q = getattr(cur(), "pet_qual", None)
+    if not q or len(q) != 4:
+        cur().pet_qual = [25, 25, 25, 25]
+    return cur().pet_qual
+
+
+def pack_947_cur():
+    """当前角色的 947（妖灵 + 形象 + 技能栏 + 洗髓比例）。"""
+    return pet_proto.pack_947(spirit_strap(), pet_skin_id(),
+                              [x[0] for x in pet_skill_slots()], pet_qual())
+
+
+def pack_962_cur():
+    pet_skill_tick()
+    return pet_proto.pack_962(pet_skill_bag(), pet_skill_slots(), cur().pet_skill_free)
+
+
+def push_pet_skill(conn, cid, why=""):
+    """技能/比例变更后的整套刷新：947 → 178 → 29 → 28 → 30 → 962（真服同序）。"""
+    _b = pack_947_cur()
+    conn.sendall(pack(947, 0, _b))
+    log("c%03d .. push cmd=947    len=%d [%s 技能栏%s]"
+        % (cid, len(_b), why, [x[0] for x in pet_skill_slots()]))
+    for c in (178, 29, 28, 30):
+        send_push(conn, cid, c)
+    conn.sendall(pack(962, 0, pack_962_cur()))
+    log("c%03d .. push cmd=962    [%s 库%d条 栏%d条 免费%d]"
+        % (cid, why, len(pet_skill_bag()), len(pet_skill_slots()),
+           cur().pet_skill_free))
+
+
+def pet_skill_hit(iid):
+    """抽到一张技能书：同族已有 → 加经验（满阈值升级）；没有 → 新建。
+
+    返回 (是否升级后的记录, 升级后记录 or None)。真服实测：
+      814201 exp2 + 抽到 814101 → 814202 exp4（升级时 id 末两位 +1）
+      803201 exp2 → 803301 exp6（十连里同族中了两次）
+    阈值按 4×当前等级，升级后经验**不扣**（真服升级后 exp 仍在涨）。
+    """
+    fam = pet_proto.skill_family(iid)
+    for rec in pet_skill_bag():
+        if pet_proto.skill_family(rec[0]) != fam:
+            continue
+        rec[1] = int(rec[1]) + 1
+        lv = pet_proto.skill_level(rec[0])
+        if rec[1] >= 4 * max(1, lv) and lv < 10:
+            old = rec[0]
+            rec[0] = old + 1                      # id 末两位 +1 = 升一级
+            for s in cur().pet_skill_slots:
+                if s[0] == old:
+                    s[0] = rec[0]
+            log("[petskill] %s 升级 → %s (exp=%d)"
+                % (pet_proto.skill_name(old), pet_proto.skill_name(rec[0]), rec[1]))
+            return True, list(rec)
+        return False, None
+    pet_skill_bag().append([int(iid), 0])
+    log("[petskill] 新技能 %s" % pet_proto.skill_name(iid))
+    return False, None
+
+
+def pet_skill_draw(conn, cid, times):
+    """963：times=1 单抽 / 10 十连。返回 (ok, 提示语)。"""
+    pet_skill_tick()
+    free = max(0, int(cur().pet_skill_free))
+    use_free = min(free, times)
+    cost = PET_SKILL_DRAW_COST * (times - use_free)
+    if times == 10:
+        cost = PET_SKILL_DRAW_COST * max(0, times - use_free) - (
+            PET_SKILL_DRAW_COST if times - use_free == 10 else 0)   # 十连 270
+    if cost > 0 and cur().yuanbao[0] < cost:
+        return False, "元宝不足"
+    if cost > 0:
+        add_purse("yuanbao", -cost)
+    cur().pet_skill_free = max(0, free - use_free)
+
+    pool = pet_proto.skill_pool()
+    if not pool:
+        return False, "技能表未加载"
+    import random
+    new_ids, ups = [], []
+    for _ in range(times):
+        # 免费次数的池子偏一阶，元宝抽偏高阶（对应「元宝探秘高级技能概率更高」）
+        tier = random.choices((1, 2, 3), weights=(6, 3, 1) if use_free else (4, 3, 3))[0]
+        cand = [s for s in pool if pet_proto.skill_tier(s) == tier] or pool
+        sid = random.choice(cand)
+        new_ids.append(sid)
+        new, rec = pet_skill_hit(sid)
+        if new and rec:
+            ups.append(rec)
+    conn.sendall(pack(964, 0, pet_proto.pack_964(
+        new_ids, ups, pet_skill_bag(), pet_skill_slots(), cur().pet_skill_free)))
+    log("c%03d -> cmd=964 [探秘x%d 花费%d元宝 免费剩%d 抽到%s 升级%s]"
+        % (cid, times, cost, cur().pet_skill_free,
+           [pet_proto.skill_name(i) for i in new_ids],
+           [pet_proto.skill_name(r[0]) for r in ups]))
+    save_state()
+    return True, ""
+
+
+def pet_wash(conn, cid):
+    """953：洗髓 —— 扣 1 颗洗髓丹 + 5000，掷四条比例（合 100）存进预览，回 954。
+
+    ★ 只改「以后升级时的分配比例」，**不重分已有 424 点**（真服 7.2.1 实证）。
+    """
+    import random
+    pos = None
+    for p, v in cur().bag.items():
+        if v[0] == PET_WASH_ITEM and v[1] > 0:
+            pos = p
+            break
+    if pos is None:
+        return False, "没有宠物洗髓丹"
+    purse = None
+    for k in ("tongqian", "coin_bound"):
+        if PURSES()[k][0] >= PET_WASH_COST:
+            purse = k
+            break
+    if purse is None:
+        return False, "铜钱不足"
+    v = cur().bag[pos]
+    v[1] -= 1
+    if v[1] <= 0:
+        del cur().bag[pos]
+    add_purse(purse, -PET_WASH_COST)
+    # 四条比例：随机切 100，保证每条 5~60（真服样本 13/34/31/22、29/27/21/23）
+    while True:
+        cuts = sorted(random.sample(range(1, 100), 3))
+        q = [cuts[0], cuts[1] - cuts[0], cuts[2] - cuts[1], 100 - cuts[2]]
+        if all(5 <= x <= 60 for x in q):
+            break
+    cur().pet_qual_preview = q
+    conn.sendall(pack(954, 0, bytes([max(0, min(255, x)) for x in q])))
+    log("c%03d -> cmd=954 [洗髓 格%02x 扣%s%d+洗髓丹1 新比例 体%d/力%d/防%d/巧%d]"
+        % (cid, pos, PURSE_NAME.get(purse, purse), PET_WASH_COST, q[0], q[1], q[2], q[3]))
+    save_state()
+    return True, ""
 
 
 def battle_pet():
@@ -2600,6 +2933,22 @@ def load_state(pl=None):
         log("[pet] 旧档缺少 pets，根据已完成的 400702 恢复功夫熊猫")
     else:
         pl.pets = []
+    # ---- 仙府探秘 / 洗髓 / 藏宝图（2026-11-28 新增，老存档缺字段就走默认）----
+    _psb = d.get("pet_skill_bag")
+    pl.pet_skill_bag = ([[int(a), int(b)] for a, b in _psb] if isinstance(_psb, list)
+                        else [list(x) for x in pet_proto.DEFAULT_SKILLS])
+    _pss = d.get("pet_skill_slots")
+    pl.pet_skill_slots = ([[int(a), int(b)] for a, b in _pss] if isinstance(_pss, list)
+                          else [list(x) for x in pet_proto.DEFAULT_SKILLS])
+    pl.pet_skill_free = int(d.get("pet_skill_free", 3) or 0)
+    pl.pet_skill_day = str(d.get("pet_skill_day") or "")
+    _q = d.get("pet_qual")
+    pl.pet_qual = ([int(x) for x in _q] if isinstance(_q, list) and len(_q) == 4
+                   else [25, 25, 25, 25])
+    _tr = d.get("treasure")
+    pl.treasure = ({str(k): list(v) for k, v in _tr.items()} if isinstance(_tr, dict) else {})
+    _mj = d.get("miji")
+    pl.miji = [int(x) for x in _mj] if isinstance(_mj, list) else []
     # ★ 2026-11-26 21:3x：撤销「登录自动补宠物」。
     # 用户实测：真服新号无论点不点「开始旅程」都不会凭空多出一只宠物，
     # 宠物只能靠 400702「前世仙宠」拿。所以登录/开始旅程一律不送宠物，
@@ -2726,6 +3075,15 @@ def state_dict():
             "mount_skin": int(cur().mount_skin[0]) if cur().mount_skin else 0,
             "spirit_bag": {str(k): v for k, v in cur().spirit_bag.items()},
             "spirit_slot": {str(k): v for k, v in cur().spirit_slot.items()},
+            # ---- 仙府探秘 / 洗髓（2026-11-28）----
+            "pet_skill_bag": [[int(a), int(b)] for a, b in pet_skill_bag()],
+            "pet_skill_slots": [[int(a), int(b)] for a, b in pet_skill_slots()],
+            "pet_skill_free": int(cur().pet_skill_free),
+            "pet_skill_day": cur().pet_skill_day or "",
+            "pet_qual": [int(x) for x in pet_qual()],
+            # ---- 藏宝图（268/271）----
+            "treasure": {str(k): list(v) for k, v in (cur().treasure or {}).items()},
+            "miji": [int(x) for x in (cur().miji or [])],
             # ★ 存档版本：ver>=2 表示「首饰四格是四件独立物品」的新格式，
             #   读档时不再跑那条老的「同 id 成对去重」（它会把玩家真穿着的
             #   两枚同款戒指吃掉一枚）。见 load_state。
@@ -4592,7 +4950,8 @@ def handle_game(conn, cid):
                 #   真服「已经有一只宠物、还没有皮肤」的档位，无宠号回它，客户端
                 #   会当场建出一个没有名字的宠物位（地图上 ?? 熊猫，站着平移）。
                 #   真服无宠号根本不回 962（客户端 961 之前不会问）。
-                if cmd in (956, 961, 963, 965, 1411, 1413, 1414) and not cur().pets:
+                if cmd in (956, 961, 963, 965, 966, 953, 955, 1411, 1413, 1414) \
+                        and not cur().pets:
                     log("c%03d .. 跳过宠物操作 cmd=%d（当前角色尚未获得宠物）"
                         % (cid, cmd))
                     continue
@@ -4946,6 +5305,99 @@ def handle_game(conn, cid):
                            (enc_scene(tgt) + bytes(_pos)).hex(),
                            len(body113)))
                     continue
+
+                if cmd == 138:
+                    # 玩法·战斗BOSS 面板列表：回真服 224B 原始快照（30 个入口）。
+                    # 以前没有这条 → 面板里一个 boss 都没有、点不动。
+                    conn.sendall(pack(138, seq, BOSS_138))
+                    log("c%03d -> cmd=138 seq=%-4d len=%d [战斗BOSS列表 30条]"
+                        % (cid, seq, len(BOSS_138)))
+                    continue
+
+                if cmd == 134:
+                    # 点某个 boss 条目 = 定点传送到它的「挑战位」。
+                    # payload 固定 7B：`[01][场景][入口 id varint]`（如 01 66 ce000dbba1）。
+                    _ent = 0
+                    try:
+                        _ent, _ = vread(payload, 2)   # 跳过 [01][场景]
+                    except Exception:  # noqa: BLE001
+                        _ent = 0
+                    _hit, _src = boss_landing(_ent)
+                    travel_to(conn, cid, _hit[0], _hit[1], _hit[2],
+                              "134 战斗BOSS %d(%s)" % (_ent, _src))
+                    conn.sendall(pack(2, seq, b""))
+                    log("c%03d -> cmd=2 seq=%-4d [134 ACK 入口%d 场景%d 落点(%d,%d)]"
+                        % (cid, seq, _ent, _hit[0], _hit[1], _hit[2]))
+                    continue
+
+                if cmd == 135:
+                    # 藏宝图挖宝前的定点传送：`[场景][x][y]`（真服 11 次全是宝藏点 x-3）。
+                    if len(payload) >= 3:
+                        _sc = dec_scene(payload[:1])
+                        _x, _y = payload[1], payload[2]
+                    else:
+                        _sc, _x, _y = cur().scene, cur().pos_x, cur().pos_y
+                    travel_to(conn, cid, _sc, _x, _y,
+                              "135 定点传送(%d,%d)" % (_x, _y))
+                    conn.sendall(pack(2, seq, b""))
+                    log("c%03d -> cmd=2 seq=%-4d [135 ACK 场景%d 落点(%d,%d)]"
+                        % (cid, seq, _sc, _x, _y))
+                    continue
+
+                if cmd == 268:
+                    # 藏宝图查宝藏点：`[格位]` -> `[场景][x][y]`；同一格永远回同一个点。
+                    _pos = payload[0] if payload else 0
+                    _cell = cur().bag.get(_pos)
+                    if not _cell or not is_treasure(_cell[0]):
+                        log("c%03d !! 268 格%02x 不是藏宝图（%s）"
+                            % (cid, _pos, bag_one_desc(_cell)))
+                        conn.sendall(pack(1, seq, err_text("亲，要宝图才能挖宝喔")))
+                        continue
+                    _pt = treasure_point(_pos)
+                    conn.sendall(pack(268, seq, enc_scene(_pt[0]) + bytes(_pt[1:3])))
+                    log("c%03d -> cmd=268 seq=%-4d [格%02x 宝藏点 %s(%d) %d,%d]"
+                        % (cid, seq, _pos, scene_name(_pt[0]), _pt[0], _pt[1], _pt[2]))
+                    continue
+
+                if cmd == 271:
+                    # 挖宝：`[格位]` -> 扣 1 张 -> 回 `[01][物品id][00]` -> 掉落入账 + 全推。
+                    _pos = payload[0] if payload else 0
+                    _cell = cur().bag.get(_pos)
+                    if not _cell or not is_treasure(_cell[0]) or _cell[1] <= 0:
+                        log("c%03d !! 271 格%02x 没有藏宝图（%s）"
+                            % (cid, _pos, bag_one_desc(_cell)))
+                        conn.sendall(pack(1, seq, err_text("亲，要宝图才能挖宝喔")))
+                        continue
+                    _cell[1] -= 1
+                    _freed = None
+                    if _cell[1] <= 0:
+                        del cur().bag[_pos]
+                        _freed = _pos
+                        cur().treasure.pop(str(_pos), None)
+                    _drop = treasure_drop()
+                    conn.sendall(pack(271, seq, b"\x01" + venc(_drop) + b"\x00"))
+                    _info = bag_proto.item(_drop)
+                    if _drop == TREASURE_ITEM:
+                        add_purse("yuanbao", 1)      # 真服 19999 = 元宝，不占背包
+                        log("c%03d -> cmd=271 seq=%-4d [格%02x 挖到 元宝×1 → 28]"
+                            % (cid, seq, _pos))
+                        send_push(conn, cid, 28)
+                    elif int(_info.get("kind1") or 0) == 16:
+                        cur().miji.append(int(_drop))
+                        log("c%03d -> cmd=271 seq=%-4d [格%02x 挖到 秘籍 %s(%d) → 1506 第%d条]"
+                            % (cid, seq, _pos, _info["name"], _drop, len(cur().miji)))
+                        push_treasure(conn, cid)
+                        send_push(conn, cid, 178)
+                    else:
+                        _p = bag_add_at(_drop, 1, _freed)
+                        log("c%03d -> cmd=271 seq=%-4d [格%02x 挖到 %s(%d)×1 → 背包格%s]"
+                            % (cid, seq, _pos, _info["name"], _drop, _p))
+                        push_treasure(conn, cid)
+                        for _c in (178, 29, 28, 30):
+                            send_push(conn, cid, _c)
+                    save_state()
+                    continue
+
                 if cmd == 817:
                     # 817 = 装备栏拉取（不是转职！早期误判已修正）。
                     # 真服两份样本：
@@ -5683,7 +6135,12 @@ def handle_game(conn, cid):
                                 % (cid, c2))
                             continue
                         if c2 == 962 and not cur().pets:
-                            p2 = pet_proto.pack_962(pets=[])
+                            # ★ 2026-11-28：962 已改成「仙府探秘面板」
+                            #   [n1 库][n2 技能栏][04 容量][剩余免费]，
+                            #   老签名 pack_962(pets=[]) 会直接 TypeError，
+                            #   让整条回放中断（无宠号登录就卡在这里）。
+                            #   无宠号没有技能库，按空档 4B 回。
+                            p2 = pet_proto.pack_962([], [], cur().pet_skill_free)
                         # 1266 是 1378 字节的大推送。早前误以为它在场景加载后触发
                         # 背景音乐播放（createMediaplayer b6.mp3）导致 native 段错误，
                         # 后续实测它经 TPL_PUSH 正常下发也没有崩——崩溃真因是 cmd=1。
@@ -5859,16 +6316,15 @@ def handle_game(conn, cid):
                            spirit_strap() or "无", _b1410.hex()))
                     continue
                 if cmd == 961:
-                    # ★ 2026-11-24 15:0x：962 = 「已拥有的宠物形象（皮肤）」列表。
-                    # n2 就是形象数，客户端会按这个列表给玩家挂跟随外观。
-                    # ★ 2026-11-26 21:3x 更正：`00 00 04 03` 不是「一只都没有」，
-                    #   它是真服「有 1 只宠物、无皮肤」的档位（15:41:16 拿到功夫熊猫
-                    #   之后就是这个包）。无宠角色已经在上面 961 的归属检查里被拦掉，
-                    #   走不到这里；能到这里的角色必然已有宠物，回这档才与真服一致。
-                    _b = pet_proto.pack_962(pets=[])
+                    # ★ 2026-11-28：962 是「仙府探秘」面板，
+                    #   [n1 秘籍库×(id,经验)][n2 技能栏×(id,经验)][04 容量][剩余免费]，
+                    #   以前回的是 `00 00 04 03` 固定 4 字节（旧语义「宠物形象列表」），
+                    #   所以点开探秘面板秘籍/技能栏都是空的。
+                    _b = pack_962_cur()
                     conn.sendall(pack(962, seq, _b))
-                    log("c%03d -> cmd=962 seq=%-4d len=%d [宠物形象 无皮肤(真服刚获得档)] pets=%s"
-                        % (cid, seq, len(_b), cur().pets))
+                    log("c%03d -> cmd=962 seq=%-4d len=%d [探秘面板 库%d条 栏%s 免费%d]"
+                        % (cid, seq, len(_b), len(pet_skill_bag()),
+                           [x[0] for x in pet_skill_slots()], cur().pet_skill_free))
                     continue
 
                 if cmd == 946:
@@ -5889,12 +6345,11 @@ def handle_game(conn, cid):
                         log("c%03d -> cmd=947 seq=%-4d len=%d [无宠档 实验 hex=%s]"
                             % (cid, seq, len(_eb), _eb.hex()))
                         continue
-                    _b = pet_proto.pack_947(spirit_strap(), pet_skin_id())
+                    _b = pack_947_cur()
                     conn.sendall(pack(947, seq, _b))
-                    log("c%03d -> cmd=947 seq=%-4d len=%d [宠物详情 妖灵%s%s]"
-                        % (cid, seq, len(_b), spirit_strap() or "无",
-                           "" if pet_proto.has_tpl(spirit_strap())
-                           else "（该组合无真服原包，退回无妖灵版）"))
+                    log("c%03d -> cmd=947 seq=%-4d len=%d [宠物详情 妖灵%s 形象%d 技能%s 比例%s]"
+                        % (cid, seq, len(_b), spirit_strap() or "无", pet_skin_id(),
+                           [x[0] for x in pet_skill_slots()], pet_qual()))
                     continue
 
                 if cmd == 973:
@@ -5906,52 +6361,94 @@ def handle_game(conn, cid):
                     # 950 payload=0100 -> 951 回 1 字节（宠物窗口初始化的一环）。
                     # 取值就是 947 里那个计数：98B 那份是 02、99/105B 那份是 03，
                     # 与真服 15:41:18(02) / 21:02:46(03) 两个现场完全对上。
-                    _b947 = pet_proto.pack_947(spirit_strap())
+                    _b947 = pack_947_cur()
                     _n = _b947[16] if (cur().pets and len(_b947) > 16) else 0
                     conn.sendall(pack(951, seq, bytes([_n])))
                     log("c%03d -> cmd=951 seq=%-4d len=1 [计数 %d]" % (cid, seq, _n))
                     continue
 
                 if cmd == 963:
-                    # 真服打开宠物界面后连发 3 次 963(01)，每次都回 964，
-                    # 且是「逐只累加」：g1 前 1 只 -> 前 2 只 -> 三只全。
-                    # 40B 稳定态下 964 三档是 34/40/46B：
-                    #   pets = g1[:k]，extra = g2 恒为三只，尾字节 = 3-k。
-                    _all = list(pet_proto.PET_UIDS)
-                    if _all:
-                        pet_sel[0] = (pet_sel[0] + 1) % len(_all)
-                        _pets = _all[:pet_sel[0] + 1]
-                        _sel = _pets[-1]
-                    else:
-                        pet_sel[0], _pets, _sel = 0, [], 0
-                    _b = pet_proto.pack_964(_pets, _sel, pet_proto.PET_SKIN)
-                    conn.sendall(pack(964, seq, _b))
-                    log("c%03d -> cmd=964 seq=%-4d len=%d [选中第%d只，列表%d只+形象%d只]"
-                        % (cid, seq, len(_b), pet_sel[0] + 1, len(_pets),
-                           len(pet_proto.PET_SKIN)))
+                    # ★ 2026-11-28 定案：963 = 仙府探秘抽技能。
+                    #   载荷 `01` = 单抽（免费→30 元宝）、`02` = 十连（270 元宝）。
+                    #   应答 964 = [n_new 抽中id][n_up 升级(id,经验)][库][栏][剩余免费]，
+                    #   然后按真服顺序补推 947/178/29/28/30/962。
+                    _times = 10 if (payload[:1] == b"\x02") else 1
+                    _ok, _msg = pet_skill_draw(conn, cid, _times)
+                    if not _ok:
+                        log("c%03d !! 963 探秘失败：%s" % (cid, _msg))
+                        conn.sendall(pack(1, seq, err_text(_msg)))
+                        continue
+                    push_pet_skill(conn, cid, "963探秘x%d" % _times)
                     continue
 
-                if cmd == 965:
-                    # 965 的 payload 是「一只宠物的 varint uid」= 设为出战/选中。
-                    # 真服回空包，然后补推 947（详情）和 178（可交互对象）。
-                    _u = 0
-                    if payload[:1] == b"\xce" and len(payload) >= 5:
-                        _u = int.from_bytes(payload[1:5], "big")
-                    elif payload[:1] == b"\xcd" and len(payload) >= 3:
-                        _u = int.from_bytes(payload[1:3], "big")
-                    elif payload[:1] == b"\xcc" and len(payload) >= 2:
-                        _u = payload[1]
-                    _known = list(pet_proto.PET_UIDS) + list(pet_proto.PET_SKIN)
-                    if _u in _known:
-                        pet_sel[0] = min(_known.index(_u), len(pet_proto.PET_UIDS) - 1)
-                    conn.sendall(pack(965, seq, b""))
-                    log("c%03d -> cmd=965 seq=%-4d len=0 [选中宠物 uid=%s]"
-                        % (cid, seq, _u or "?"))
-                    _b947 = pet_proto.pack_947(spirit_strap())
-                    conn.sendall(pack(947, 0, _b947))
-                    log("c%03d .. push cmd=947    len=%d [965 后刷新详情]"
-                        % (cid, len(_b947)))
-                    send_push(conn, cid, 178)
+                if cmd in (965, 966):
+                    # ★ 2026-11-28 定案：965 = 装技能（库→技能栏，追加末尾），
+                    #   966 = 卸技能（栏→库，回原位）。载荷都只有 1 个 varint 技能 id。
+                    #   栏只有 4 格，满了必须先卸（客户端自己会拦，服务端不替换）。
+                    _sid = 0
+                    try:
+                        _sid, _ = vread(payload, 0)
+                    except Exception:  # noqa: BLE001
+                        _sid = 0
+                    _slots = cur().pet_skill_slots
+                    _bag = pet_skill_bag()
+                    if not _sid:
+                        log("c%03d !! %d 载荷异常 %s" % (cid, cmd, payload.hex()))
+                        conn.sendall(pack(cmd, seq, b""))
+                        continue
+                    if cmd == 965:
+                        if any(s[0] == _sid for s in _slots):
+                            log("c%03d .. 965 %s 已在技能栏，忽略"
+                                % (cid, pet_proto.skill_name(_sid)))
+                        elif len(_slots) >= pet_proto.MAX_SKILL_SLOT:
+                            log("c%03d !! 965 %s 技能栏已满(%d)，必须先卸"
+                                % (cid, pet_proto.skill_name(_sid), len(_slots)))
+                        else:
+                            _exp = 0
+                            for r in _bag:
+                                if r[0] == _sid:
+                                    _exp = int(r[1])
+                                    break
+                            _slots.append([_sid, _exp])
+                            log("c%03d -> 965 装技能 %s（栏=%s）"
+                                % (cid, pet_proto.skill_name(_sid),
+                                   [x[0] for x in _slots]))
+                    else:
+                        _before = len(_slots)
+                        cur().pet_skill_slots = [s for s in _slots if s[0] != _sid]
+                        log("c%03d -> 966 卸技能 %s（栏 %d→%d）"
+                            % (cid, pet_proto.skill_name(_sid), _before,
+                               len(cur().pet_skill_slots)))
+                    conn.sendall(pack(cmd, seq, b""))
+                    save_state()
+                    push_pet_skill(conn, cid, "%d%s" % (cmd, "装" if cmd == 965 else "卸"))
+                    continue
+
+                if cmd == 953:
+                    # 洗髓第一步：扣 1 颗洗髓丹 + 5000 → 回 954（4B 比例预览，不写 947）。
+                    _ok, _msg = pet_wash(conn, cid)
+                    if not _ok:
+                        log("c%03d !! 953 洗髓失败：%s" % (cid, _msg))
+                        conn.sendall(pack(1, seq, err_text(_msg)))
+                        continue
+                    continue
+
+                if cmd == 955:
+                    # 洗髓第二步：采用预览 → 写 947 的 k20~23 → 整套刷新。
+                    # ★ 不重分已有 424 点，能力值只做小幅重算（真服 7.2.1 实证）。
+                    _q = cur().pet_qual_preview
+                    if not _q:
+                        log("c%03d .. 955 没有待采用的洗髓结果，回空 ACK" % cid)
+                        conn.sendall(pack(955, seq, b""))
+                        continue
+                    cur().pet_qual = list(_q)
+                    cur().pet_qual_preview = None
+                    conn.sendall(pack(955, seq, b""))
+                    log("c%03d -> cmd=955 [采用新比例 体%d/力%d/防%d/巧%d]"
+                        % (cid, cur().pet_qual[0], cur().pet_qual[1],
+                           cur().pet_qual[2], cur().pet_qual[3]))
+                    save_state()
+                    push_pet_skill(conn, cid, "955洗髓生效")
                     continue
 
                 if cmd == 1411:

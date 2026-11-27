@@ -54,12 +54,16 @@ p.title = 0
 p.level = 45
 check("Lv45 未佩戴称号仍是 19B", len(L.build_88()) == 19, "实际 %d" % len(L.build_88()))
 
-print("\n[2] 962 宠物栏按拥有量生成")
-check("0 只 -> 4B 00 00 04 03",
-      pet_proto.pack_962(pets=[]) == b"\x00\x00\x04\x03",
-      pet_proto.pack_962(pets=[]).hex())
-b3 = pet_proto.pack_962(pets=pet_proto.PET_UIDS)
-check("3 只 -> 22B（主号不变）", len(b3) == 22, "实际 %d (%s)" % (len(b3), b3.hex()))
+print("\n[2] 962 仙府探秘面板（2026-11-28 新语义）")
+# 962 = [n1 秘籍库×(id,exp)][n2 技能栏×(id,exp)][04 容量][剩余免费]，
+# 8xxxxx 是 Skill.xml class=9 的仙宠技能 id，不是宠物形象 uid。
+check("空档 -> 4B 00 00 04 03",
+      pet_proto.pack_962([], [], 3) == b"\x00\x00\x04\x03",
+      pet_proto.pack_962([], [], 3).hex())
+b3 = pet_proto.pack_962([], pet_proto.DEFAULT_SKILLS, 3)
+check("库0/栏3 -> 22B（真服原包）", len(b3) == 22, "实际 %d (%s)" % (len(b3), b3.hex()))
+check("库0/栏3 逐字节 == 真服",
+      b3.hex() == "0003ce000c456900ce000c5c7500ce000c6445000403", b3.hex())
 
 print("\n[3] Player 默认与新号都不带宠物")
 p2 = P.Player()
