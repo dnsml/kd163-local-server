@@ -1,5 +1,5 @@
 #!/bin/bash
-# 用法: try_accept.sh <payload_hex>
+# 用法: work/probe_try_accept.sh <payload_hex>
 # 把 211 的人工响应写成指定 payload，重新登录进服，点接受任务，报告结果
 ADB="/d/66666/tools/scrcpy-win64-v5.0.1/adb.exe"
 D="-s 127.0.0.1:5555"

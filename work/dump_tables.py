@@ -3,7 +3,8 @@
 
 用法：
   python work/dump_tables.py            控制台摘要
-  python work/dump_tables.py --md       写 docs/reference/怪物与技能表_20261127.md
+  python work/dump_tables.py --md       只打印写盘目录（半成品，未真正生成）
+  真正的数值总表用 work/gen_tables_html.py → docs/reference/怪物与技能表.html
 """
 import os
 import re

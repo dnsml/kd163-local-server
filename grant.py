@@ -49,7 +49,7 @@ CURRENCY_SLOT = {
 }
 SLOT_OF = {v: k for k, v in CURRENCY_SLOT.items()}
 
-# 全部 41 个字段的语义（2026-11-26 定稿，见 docs/reference/字段语义表_17_28_30_20261126.md）
+# 全部 41 个字段的语义（2026-11-26 定稿，见 docs/reference/字段语义表_17_28_30.md）
 # ★ 以前这张表整体错位一格（写成 19=绑铜），照着它改包会改到 VIP 上。
 FIELD_HINT = {
     0: "头标记", 1: "账号(字符串)", 2: "角色名(字符串)",

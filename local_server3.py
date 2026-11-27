@@ -4555,7 +4555,7 @@ def handle_game(conn, cid):
                 # 145 = 客户端发起战斗；服务端回 145 空 ACK + 151 开战包
                 # 146 = 客户端回合操作（不是服务端包！）；服务端回 148 结算
                 # 149 = 客户端结束确认；服务端回 150
-                # 详见 战斗协议_真服抓包_20261122.md
+                # 详见 战斗协议_真服抓包.md
                 if cmd == 145:
                     mob_id, ok = battle.target_from_request(payload)
                     if ok and BT is not None:

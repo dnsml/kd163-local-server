@@ -13,8 +13,10 @@
 | 一次性排查过程、抓包清单、对某服评估 | 放 `docs/history/`，并登记进 `docs/INDEX.md` | ❌ 放根目录 |
 | 给接手人的入口 | 只维护 `README.md` + `docs/交接说明.md` 两份 | ❌ 再建第三份"总览/索引/入口" |
 
-**根目录只允许出现**：`README.md`、`AGENTS.md`、启动脚本（`start_all.bat` / `restart_srv.sh` 等），
-以及主程序与协议模块（`local_server3.py`、`battle.py`、`*_proto.py`、`state_store.py` 等）。
+**根目录只允许出现**：`README.md`、`AGENTS.md`、启动脚本（`start_all.bat` / `start_admin.bat` / `restart_srv.sh`），
+运行时数据与模板（`hosts`、`templates.json`、`tpl_extra.json`、`replay_*.json`、`mirror_manifest.txt`、
+`admin*.html`、`rea_wrap.mjs`），以及主程序与协议模块（`local_server3.py`、`battle.py`、`*_proto.py`、`state_store.py` 等）。
+**一次性 .sh 探针一律进 `work/`**（2026-11-27 已把 17 个从根目录迁走，见 `docs/notes/2026-11-27.md`）。
 **根目录新增任何 `.md` 都需要在 PR/提交说明里写理由。**
 
 `docs/` 的现行结构（动手前先按这个放，不要再平铺）：
@@ -37,6 +39,9 @@ docs/
 
 - 日期一律 `YYYY-MM-DD`（`2026-11-24`），**不要** `20261124`。
 - 文档名用"主题"，不用"动作"：`战斗数值.md` ✅ / `战斗数值_修复_20261124.md` ❌。
+- **`reference/` 文件名不带到日期**，日期写在正文首行（`> 定稿：2026-11-26`）；
+  `history/` 保留建成时的文件名，属历史，**不再改名**（2026-11-27 统一清理过一次 reference，
+  当时把 15 份 `*_2026112x.md` 的日期从文件名挪进了正文）。
 - 探针与测试脚本按前缀分类，全部放 `work/`：
 
 | 前缀 | 含义 | 会被删吗 |

@@ -2,7 +2,7 @@
 """生成《怪物 + 技能总表》单页 HTML（可搜索/筛选/排序）。
 
 数据来源：res_cfg/Monster.xml、res_cfg/Skill.xml、res_cfg/Class.xml
-输出：docs/怪物与技能表_20261127.html
+输出：docs/reference/怪物与技能表.html
 """
 import json
 import os
@@ -13,7 +13,7 @@ from collections import Counter, OrderedDict
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 CFG = os.path.join(ROOT, "res_cfg")
-OUT = os.path.join(ROOT, "docs", "怪物与技能表_20261127.html")
+OUT = os.path.join(ROOT, "docs", "reference/怪物与技能表.html")
 
 ITEM = re.compile(r'<item ([^>]*?)/>')
 

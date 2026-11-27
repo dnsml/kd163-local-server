@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from patch_apk import build_manifest, build_sf, patch_dex, patch_trust, OLD_HOST_B  # noqa: E402
 
 # 基于 orig.apk 做：换内嵌 PEM 为 exact.pem（本地服出示的证书）+ 放宽 TLS + 改包名。
-# 路由靠 per-UID DNAT（switch.sh coexist）：只有本包 uid 的 9000/80 流量进本地服，
+# 路由靠 per-UID DNAT（work/probe_switch.sh coexist）：只有本包 uid 的 9000/80 流量进本地服，
 # orig.apk（真服）完全不受影响 —— 两包可同时安装、同时在线。
 # 注意：patch_trust 单独用不行（kd163_trust.apk 实测登录 TLS 被拒），
 #       必须换内嵌 PEM（1151 字节槽位，exact.pem 按此长度精确生成，v2 已验证可行）。

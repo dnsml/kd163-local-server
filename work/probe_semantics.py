@@ -5,7 +5,7 @@
     python work/probe_semantics.py            # 模板
     python work/probe_semantics.py real       # 真服最新样本（relay.log）
 
-输出用于 docs/reference/字段语义表_17_28_30_20261126.md，
+输出用于 docs/reference/字段语义表_17_28_30.md，
 不连客户端、不改任何文件。
 """
 import re

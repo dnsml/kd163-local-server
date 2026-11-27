@@ -9,7 +9,7 @@
 > **第一次来先看 [`docs/INDEX.md`](docs/INDEX.md)**：
 > 六天做了什么、每个结论在哪个文档、哪些还没做完，一页看完。
 > 只想看懂抓包日志 → [`docs/抓包日志说明.md`](docs/抓包日志说明.md)。
-> 怪物/技能数值总表 → [`docs/怪物与技能表_20261127.html`](docs/怪物与技能表_20261127.html)（浏览器打开）。
+> 怪物/技能数值总表 → [`docs/reference/怪物与技能表.html`](docs/reference/怪物与技能表.html)（浏览器打开）。
 
 ---
 
@@ -56,7 +56,7 @@ python admin_server.py            # 默认 8899，读写 logs/gm.cmd（也可 st
 
 | 缺什么 | 表现 | 说明 |
 |---|---|---|
-| **客户端 APK** `patch/kd163_coexist.apk`（119MB） | 登录界面一直转圈 / 「网络连接失败」 | 改过包的版本：`classes.dex` 内嵌信任根 + 用 `exact.pem` 签名，可与原版共存。**原版 APK 连不上**——它只信任官方 CA，握手直接失败。现有三套包名（`cn.kd163.online` 公网 / `com.kd163.dev` 开发版 / `com.kdxx.online` 本地服版）见 [`docs/reference/客户端版本对照_20261127.md`](docs/reference/客户端版本对照_20261127.md) |
+| **客户端 APK** `patch/kd163_coexist.apk`（119MB） | 登录界面一直转圈 / 「网络连接失败」 | 改过包的版本：`classes.dex` 内嵌信任根 + 用 `exact.pem` 签名，可与原版共存。**原版 APK 连不上**——它只信任官方 CA，握手直接失败。现有三套包名（`cn.kd163.online` 公网 / `com.kd163.dev` 开发版 / `com.kdxx.online` 本地服版）见 [`docs/reference/客户端版本对照.md`](docs/reference/客户端版本对照.md) |
 | **资源包** `res_update/mhsj_res.zip`（109MB，md5 `5efc42ed36978e860f135a96bd93c85a`） | 能登录，但进主城/切图时 native abort 或一直卡加载 | 必须与抓包同版本。APK 内置资源包比服务端版本旧，拿它顶替会在进主城时崩 |
 | **`exact.pem` + `exact.key`** | TLS 握手被拒 | **已随仓库提供**（`.gitattributes` 锁了行尾，clone 后字节不变），md5 `126de9578e43df3c3278583cf09c5504`，必须与 APK 内嵌/签名的那张是同一张 |
 
@@ -126,7 +126,8 @@ admin_server.py      网页后台（写 logs/gm.cmd）
 capture_proxy.py     抓包中转（真服/他服镜像到本地日志，默认 :19000）
 res_cfg/             战斗/任务/装备/商城等配置表（XML）
 mirror/assets/       Equip.xml / Item.xml / Mall.xml 等
-work/                一次性探针脚本（直连 socket 验协议，不依赖客户端）
+work/                探针与回归脚本：`test_*`（回归，长期留）/ `probe_*`（直连 socket 验协议）/
+                     `scan_*` `dump_*` `parse_*`（一次性，可归档）；另有 `net_fix.sh` / `net_capture.sh` / `relogin.sh`
 docs/                全部协议分析与修复记录（docs/INDEX.md 是索引；新增请追加，不要新建「XX修复_日期」这类文件）
 legacy/              早期原型 local_server.py / local_server2.py（已被 local_server3.py 取代，仅供对照）
 AGENTS.md            本仓库的约定：文档怎么放、什么不许提交（动手前先读）

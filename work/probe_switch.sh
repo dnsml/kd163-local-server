@@ -1,9 +1,9 @@
 #!/bin/bash
 # KD163 一键切换：真服抓包 / 本地服 / 共存包
-# 用法：./switch.sh real     连他的服（经 relay 记录），装 orig.apk
-#       ./switch.sh local    连本地服（v2，整机 DNAT）
-#       ./switch.sh coexist  共存模式：orig 连他的服，kd163_coexist 连本地服，互不影响
-#       ./switch.sh status   只看规则
+# 用法：./work/probe_switch.sh real     连他的服（经 relay 记录），装 orig.apk
+#       ./work/probe_switch.sh local    连本地服（v2，整机 DNAT）
+#       ./work/probe_switch.sh coexist  共存模式：orig 连他的服，kd163_coexist 连本地服，互不影响
+#       ./work/probe_switch.sh status   只看规则
 set -u
 ADB="/d/66666/tools/scrcpy-win64-v5.0.1/adb.exe"
 # 设备号自动探测：以前写死 127.0.0.1:5555，模拟器重启后会变成 emulator-5554，
