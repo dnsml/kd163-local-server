@@ -77,6 +77,10 @@ class PetOwnershipTest(unittest.TestCase):
             "AUTO_NEWBIE": False,
         }.items():
             self.stack.enter_context(patch.object(sv, key, value))
+        # ★ 2026-11-27：登录/建角两层都加了账号白名单（account_policy.allowed）。
+        #   本用例只验宠物归属，测试账号不该被白名单判断挡住，这里直接放行。
+        self.stack.enter_context(patch.object(sv.account_policy, "allowed",
+                                              lambda acct: True))
         player.new()
 
     def path(self, acct):

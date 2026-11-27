@@ -108,6 +108,47 @@ def slot_name(s):
             5: "闪", 6: "暴", 7: "坚", 8: "绝"}.get(int(s), "?")
 
 
+# ---------------------------------------------------------------- 妖灵属性
+# 947 头部数值区（名字之后、skin `cd2710` 之前）的下标，0 = 宠物等级。
+# 全部由 relay.log 真服装卸实测反推（work/probe_947_attrs.py）：
+#   装 血·共工(53,550)   -> idx6 +550, idx13 +11
+#   装 攻·白光虎(5,90)   -> idx4 +90,  idx13 +36
+#   装 防·图腾王(7,120)  -> idx8 +120, idx13 +12
+#   装 命·魍魉(11,25)    -> idx10 +25, idx13 +12
+#   装 闪·精卫鸟(9,25)   -> idx11 +25, idx13 +13
+#   装 暴·火烈鸟(13,25)  -> idx5 +25,  idx13 +13
+#   装 坚·醒狮(19,25)    -> idx9 +25,  idx13 +12
+#   装 绝·九尾(25,35)    -> idx12 +35, idx13 +52
+# 卸下时逐项原样回退（21:56:48 卸 1101：idx6 2612->2062、idx13 752->741）。
+ATTR_947_IDX = {5: 4, 13: 5, 53: 6, 7: 8, 19: 9, 11: 10, 9: 11, 25: 12}
+POWER_IDX_947 = 13
+# 每点属性折多少战力：由上面 8 条增量反解，整数舍入后全部吻合
+# （550*0.02=11 / 90*0.4=36 / 120*0.1=12 / 25*0.48=12 / 25*0.52=13 / 35*1.5=52.5→52）。
+ATTR_POWER_W = {53: 0.02, 5: 0.40, 7: 0.10, 11: 0.48,
+                9: 0.52, 13: 0.52, 19: 0.48, 25: 1.5}
+
+
+def spirit_bonus(strap):
+    """已上阵妖灵的属性合计 -> {属性id: 值}（basic 直接相加）。"""
+    out = {}
+    for iid in (strap or {}).values():
+        try:
+            d = SPIRIT.get(int(iid)) or {}
+        except (TypeError, ValueError):
+            continue
+        for k, v in (d.get("basic") or {}).items():
+            out[int(k)] = out.get(int(k), 0.0) + float(v)
+    return {k: int(round(v)) for k, v in out.items()}
+
+
+def spirit_power(strap):
+    """上阵妖灵贡献的战力（29[25] / 28[31] / 17 战力字段都要加上它）。"""
+    tot = 0.0
+    for k, v in spirit_bonus(strap).items():
+        tot += v * ATTR_POWER_W.get(k, 0.0)
+    return int(tot)
+
+
 def _attrs(s):
     """'53,550;11,25' -> {53:550.0, 11:25.0}"""
     out = {}
@@ -367,6 +408,33 @@ def _hp_span(base):
 SKIN_HP_BONUS = 1000
 
 
+def _vread(b, i):
+    """读一个协议变长整数，返回 (值, 下一个下标)。"""
+    c = b[i]
+    if c < 0x80:
+        return c, i + 1
+    if c == 0xCC:
+        return b[i + 1], i + 2
+    if c == 0xCD:
+        return int.from_bytes(b[i + 1:i + 3], "big"), i + 3
+    if c == 0xCE:
+        return int.from_bytes(b[i + 1:i + 5], "big"), i + 5
+    raise ValueError("未知变长整数前缀 0x%02x" % c)
+
+
+def _head_nums(seg, start):
+    """把 947 头部数值区解成 list，失败返回 ([], False)。"""
+    out = []
+    i = start
+    while i < len(seg):
+        try:
+            v, i = _vread(seg, i)
+        except Exception:  # noqa: BLE001
+            return [], False
+        out.append(v)
+    return out, bool(out)
+
+
 def pack_947(strap, skin=10000):
     """选中宠物详情。
 
@@ -404,9 +472,31 @@ def pack_947(strap, skin=10000):
     j = base.rfind(b"\x03\xce\x00\x0c\x45\x69")
     if i < 0 or j < 0:      # 结构没对上就退回原包，别拼坏
         return base
-    # head 原本是 base[:i+4]（含 cd2710 08）；现在 skin 换成长度不同的编码，
-    # 所以重新拼：前缀 + 变长 skin + 原来的 `08`。
-    head = base[:i] + _num(skin) + b"\x08"
+    # ★ 2026-11-27：头部数值段必须**重新编码**再加妖灵属性。
+    #   以前 head = base[:i] 原样照抄模板，所以装上/卸下妖灵后 947 里
+    #   气血、攻击、命中、战力一动不动（用户反馈「穿和脱不加减宠物属性」）。
+    #   真服是按 basic 逐项加进这组数字的（映射见 ATTR_947_IDX），
+    #   数值跨 varint 宽度（如 186→306）时长度会变，所以只能解码→改→重编码。
+    n = base[1] - 0xA0
+    nums, ok = _head_nums(base[:i], 2 + n)
+    if not ok:
+        return base
+    for k, v in spirit_bonus(strap).items():
+        idx = ATTR_947_IDX.get(int(k))
+        if idx is not None and idx < len(nums):
+            nums[idx] += v
+    pw = spirit_power(strap)
+    if pw and POWER_IDX_947 < len(nums):
+        nums[POWER_IDX_947] += pw
+    # 形象卡「获得该形象的宠物气血 +1000」：真服 2617→3619(+1002)，按描述 +1000。
+    if int(skin) != 10000 and ATTR_947_IDX[53] < len(nums):
+        nums[ATTR_947_IDX[53]] += SKIN_HP_BONUS
+    # nums[0] = 宠物等级。模板是别人号的 0x0c(Lv12)，本地没有养成系统，统一写 1，
+    # 与 957「刚获得」档（01）对齐，否则宠物栏 Lv1、详情 Lv12 自相矛盾。
+    # （以前写死 out[14]，那个偏移只在名字正好 12 字节时成立，改名宠物就会错位。）
+    if nums:
+        nums[0] = 1
+    head = base[:2 + n] + b"".join(_num(x) for x in nums) + _num(skin) + b"\x08"
     tail = base[j:]
     body = bytearray()
     for s in slots:
@@ -417,17 +507,6 @@ def pack_947(strap, skin=10000):
         else:
             body += b"\x00" * 4
     out = bytearray(head + body + tail)
-    # 换形象带来的气血加成。真服 2617→3619（+1002），描述写 +1000，这里按描述补。
-    # 只有模板结构对得上才改（_hp_span 解析失败就跳过，宁可少 1000 也别写坏包）。
-    if int(skin) != 10000:
-        _sp = _hp_span(base)
-        if _sp and _sp[1] <= len(out):
-            out[_sp[0]:_sp[1]] = _num(_sp[2] + SKIN_HP_BONUS)
-    # 头部第 14 字节 = 宠物等级（真服样本 11/12 跟着宠物等级走）。
-    # 模板是从别人号抄的 0x0c(Lv12)，本地宠物没有养成系统，统一写 1，
-    # 与 957「刚获得」档（01）对齐，否则宠物栏 Lv1、详情 Lv12 自相矛盾。
-    if len(out) > 14:
-        out[14] = 1
     return bytes(out)
 
 

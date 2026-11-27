@@ -46,20 +46,25 @@ def main():
         ck("947 = 105B 真服原包", len(p.pack_947(m.spirit_strap())) == 105,
            "len=%d" % len(p.pack_947(m.spirit_strap())))
 
-        m.spirit_unequip(3)
-        ck("卸槽3 1410 = 10B(只剩2101)",
-           m.spirit_1410().hex() == "cc800102cd0835030101",
+        # ★ 2026-11-27：格子号＝面板位置（1血 2攻 3防 4命 5闪 6坚 7绝 8暴），
+        #   GM 三只现在放 1(血1101)/2(攻2101)/4(命4101)。所以先卸「攻」=槽2。
+        #   1410 每条 `[序号-1][id][部位][01][01]`，真服 3 只在包时 = 24B（见下）。
+        m.spirit_unequip(2)
+        ck("卸槽2 1410 = 10B(只剩攻·白光虎)",
+           m.spirit_1410().hex() == "cc800100cd0835030101",
            m.spirit_1410().hex())
-        ck("卸槽3 后 947 无原包 -> 回 98B 空妖灵态",
-           len(p.pack_947(m.spirit_strap())) == 98,
+        ck("卸槽2 后 947 = 103B(还剩2只)",
+           len(p.pack_947(m.spirit_strap())) == 103,
            "len=%d" % len(p.pack_947(m.spirit_strap())))
 
         m.spirit_unequip(1)
         ck("再卸槽1 1410 = 17B(1101+2101)",
-           m.spirit_1410().hex() == "cc800200cd044d01010102cd0835030101",
+           m.spirit_1410().hex() == "cc800200cd044d01010101cd0835030101",
            m.spirit_1410().hex())
 
-        m.SPIRIT_SLOT.clear()
+        # ★ 2026-11-27：妖灵归属已改成按角色（Player.spirit_slot），旧的全局
+        #   SPIRIT_SLOT 只剩 MAX_SPIRIT_SLOT 常量，这里改清当前角色。
+        m.cur().spirit_slot.clear()
         ck("全卸 1410 = 真服 24B 原包",
            m.spirit_1410().hex() == "cc800300cd044d01010101cd100502010102cd0835030101",
            m.spirit_1410().hex())
@@ -71,20 +76,22 @@ def main():
         ck("部位 2101=3", p.nature_of(2101) == 3, str(p.nature_of(2101)))
         ck("槽1 选到血·共工", m.spirit_pick_for_slot(1) == 1101,
            str(m.spirit_pick_for_slot(1)))
-        ck("槽3 选到攻·白光虎", m.spirit_pick_for_slot(3) == 2101,
-           str(m.spirit_pick_for_slot(3)))
+        ck("槽2 选到攻·白光虎", m.spirit_pick_for_slot(2) == 2101,
+           str(m.spirit_pick_for_slot(2)))
         ck("1412 = [槽][id][00][00]",
            p.pack_1412(2, 4101).hex() == "02cd10050000",
            p.pack_1412(2, 4101).hex())
 
         # 上阵/顶替
-        m.SPIRIT_SLOT.clear()
+        # ★ 2026-11-27：妖灵归属已改成按角色（Player.spirit_slot），旧的全局
+        #   SPIRIT_SLOT 只剩 MAX_SPIRIT_SLOT 常量，这里改清当前角色。
+        m.cur().spirit_slot.clear()
         old, put = m.spirit_equip(1, 1101)
         ck("上阵 1101 到槽1", put == 1101 and old is None, str((old, put)))
         old, put = m.spirit_equip(1, 4101)
         ck("命系 4101 不能进槽1", put is None, str((old, put)))
-        m.spirit_equip(2, 4101)
-        old, put = m.spirit_equip(2, 4101)
+        m.spirit_equip(4, 4101)
+        old, put = m.spirit_equip(4, 4101)
         ck("同只重复上阵不报错", put == 4101, str((old, put)))
 
         # 名字检索
