@@ -21,13 +21,24 @@ KD163 战斗内核 v2 —— 服务端权威的属性制战斗
    怪物：Monster.xml  hp_max / level / monster_type
    技能：Skill.xml    damage_percent
 
-   怪物没有攻击字段，按等级给基准线：mob_atk = 12 + 1.3 * mob_lv（与客户端一致）
-   等级压制：gap = clamp(1 + 0.035 * (mob_lv - lv), 0.55, 1.8)
+   怪物没有攻击字段，按 **玩家最大生命的百分比** 建模（真服抓包反推，见下）
+   等级压制：gap = clamp(1 + 0.020 * (mob_lv - lv), 0.60, 1.60)
 
-   pdmg = atk_avg * skill% * (1 + 0.10 * lv) * crit_mult     （服务端真实输出）
-   mdmg = mob_atk * gap * (1 - 减伤)                          （服务端真实承伤）
+   pdmg = atk_avg * ATK_SCALE * crit_mult               （服务端真实输出）
+   mdmg = player_hp * MOB_TAKE_PCT * gap * type_mult    （服务端真实承伤，整组合计）
    kill = ceil(mob_hp / pdmg)     die = ceil(player_hp / mdmg)
    kill <= die 才能赢；否则被怪打死。
+
+   ★ 2026-11-27 20:0x：`mdmg` 以前是 `mob_atk = 4 + 1.2*lv` 再按 `def/(def+120)` 减伤，
+     Lv25 的怪对 Lv39 玩家只剩 **7 点**（用户：「世界BOSS打我伤害为什么那么低」）。
+     现在按真服 148 反推（logs/relay.log 2026-11-27 17:3x~17:5x，Lv39 御剑 vs
+     Lv25 九尾狐/玄蜂，monster_type=4）：
+       29 面板 生命 7415 / 攻 1385-1503 / 防 1816
+       148 主怪打玩家 -636 ~ -1513（随机），侍从恒定 -145
+     即一组三只合计 ≈ 1240 = **16.7% 最大生命/回合**，主怪占 76.6%、侍从各 11.7%。
+     同一批抓包里玩家打怪 -1220 ~ -3075，而本地面板只有 434 → 真实装备/强化
+     把攻击抬了约 3.7 倍（面板 1444 vs 本地 385），所以加 ATK_SCALE 让两边同量级，
+     否则「怪血量用真值、玩家伤害用低配值」必然打十几回合还打不死还被磨死。
 
 三、为什么服务端伤害不再等于 16
 ------------------------------
@@ -47,6 +58,11 @@ CFG_DIR = os.path.join(HERE, "res_cfg")
 
 # 客户端固定的每回合输出（打怪），见文件头第 1 条
 CLIENT_PDMG = 16
+# 宠物每回合那一下（148 宠物条目 `04 01 07 ce000f69b5 … d1fea6`）。
+# d1 前缀 = 有符号 16 位（真服 2026-11-27 抓包：d1feae=-338 / d1fd7e=-642 会浮动），
+# 本地模板写死 d1fea6 = -346，客户端就按这个数扣怪血 —— 所以 151 的怪血
+# 必须把它算进每回合总量，否则第一回合血条就被打空。
+PET_DMG = 338
 
 # ★ 2026-11-24 18:2x：151 的血量重新走「回合数折算」，恢复文件头第 37 行的原设计。
 # 16:2x 因为「打心魔闪退」把 max_hp 改成了 Monster.xml 真值，但真凶其实是
@@ -56,7 +72,52 @@ CLIENT_PDMG = 16
 #   而服务端 5 回合就结算 → 血条只掉 5% 就弹「战斗胜利」= 用户说的「莫名其妙胜利」。
 # 现在：怪血 = CLIENT_PDMG × 服务端回合数，玩家血 = CLIENT_MDMG × 可扛回合数，
 # 双方血条都恰好在结算那一回合归零。BATTLE_HP_TRUE=1 可整体回退到配置真值。
-HP_TRUE = os.environ.get("BATTLE_HP_TRUE", "0") not in ("0", "", "false", "False")
+HP_TRUE = os.environ.get("BATTLE_HP_TRUE", "1") not in ("0", "", "false", "False")
+# ★ 2026-11-27 18:4x：真值模式下的回合上限。折算模式是 20（血条刚好见底），
+#   真值模式下怪血是 Monster.xml 真数（11228），低等级号可能要打几十回合，
+#   不能再用 20 —— 20 回合就判「力竭」等于把「打得慢」误判成「打不过」。
+MAX_ROUNDS_TRUE = max(5, int(os.environ.get("BATTLE_MAX_ROUNDS", "60")))
+
+# ---- 一组多只（真服 2026-11-27 17:40 抓包）----
+# 151 数量字节=03，units 7/8/9：主怪 = 900001(11228 血)，
+# 两只「侍从」血 = ceil(11228/3)=3743（= Monster.xml 的 90000101.hp_max），
+# 151 里它们的 4 字节不是怪物 id，而是**实例 oid**（ce055d4ae5 / ce055d4b49，
+# 113 刷怪包里根本没有这两个 id，是战斗包自己带的分身 oid）。
+MOB_UNITS = {900001: 3, 900002: 3}
+CLONE_OID = {900001: 0x055D4AE5, 900002: 0x055D4B49}
+CLONE_OID_DEFAULT = 0x055D4AE5
+# 强制所有怪都按 N 只生成（测试用，0=按 MOB_UNITS 表）
+MOB_UNITS_FORCE = int(os.environ.get("BATTLE_MOB_UNITS", "0") or 0)
+# ★ 2026-11-27 19:2x：出手顺序按敏捷。Monster.xml 没有敏捷字段，
+#   怪物敏捷按「同级玩家」（Levelup.xml 的 agile）估算；BATTLE_MOB_AGI=0 关掉，
+#   关掉后退回老的「玩家 → 宠物 → 怪」固定顺序。
+AGI_MOB_BY_LEVEL = os.environ.get("BATTLE_MOB_AGI", "1") not in ("0", "", "false", "False")
+# 怪物敏捷估算：Levelup.xml 的 agile 是**恒定 40**（1~60 级都一样），不能直接拿来用，
+# 所以按「基础 40 + 每级 4 点」估：lv1 = 40（与玩家持平，玩家先手），
+# lv25 九尾狐 = 136（远高于 5 级玩家面板的 40 → 怪先出手，符合用户预期）。
+# 主怪用这个值，侍从取 80%。
+AGI_MOB_BASE = float(os.environ.get("BATTLE_MOB_AGI_BASE", "40"))
+AGI_MOB_PER_LV = float(os.environ.get("BATTLE_MOB_AGI_PER_LV", "4"))
+AGI_MOB_CLONE = float(os.environ.get("BATTLE_MOB_AGI_CLONE", "0.8"))
+# 三只一组时「怪打玩家」的伤害分配：主怪 76.6%，两只侍从各 11.7%。
+# 真服 148 多回合样本：主怪 -636/-954/-1223…（有随机浮动），侍从恒定 -145；
+# 取 -954 那一档＝76.6% / 11.7% / 11.7%。主怪随机浮动到 -636 时就是 64%。
+# BATTLE_MOB_HIT_MAIN 可改。
+MOB_HIT_MAIN = float(os.environ.get("BATTLE_MOB_HIT_MAIN", "0.766"))
+
+# ★ 2026-11-27 19:2x：单只怪默认也走「按条目构造」（与三只同一套编码），
+#   不再用 50B/71B 模板。模板里伤害字段的宽度是写死的（1~3 字节），
+#   真实伤害是 d1+u16 可变长，硬塞会顶掉后面的字段；而且模板顺序固定，
+#   没法按敏捷把怪排到玩家前面。BATTLE_TPL=1 可回退到模板老路。
+TPL_ROUND = os.environ.get("BATTLE_TPL", "0") in ("1", "true", "True", "yes")
+# 有宠回合包开关（2026-11-27）：1=按真服 71B 骨架带宠物出手，0=回到无宠 50B 模板。
+# 出现异常（画面卡住/闪退）时置 0 即可整段回退，不影响其它逻辑。
+PET_ACT = os.environ.get("BATTLE_PET_ACT", "1") not in ("0", "", "false", "False")
+# ★ 2026-11-27 17:0x 已判定并删除「BATTLE_PET_HP 强制 151 宠物气血」实验开关：
+#   实测把它压到 122 后，怪每回合仍只掉 16（玩家那一下）、玩家仍只挨 13，
+#   宠物出手记录照旧 —— 说明 151 宠物段里的气血**不参与伤害/承伤计算**，
+#   客户端只是拿它画宠物血条。宠物每回合伤害是客户端按自身数据算的，
+#   协议里没有可写的字段，别再往这里加环境变量开关。
 
 
 # 客户端每回合承伤（固定 13，与怪物等级无关）
@@ -73,12 +134,28 @@ def client_take(mob_lv):
 
 
 def mob_atk(mob_lv):
-    """服务端用的怪物攻击基准线。
+    """【已废弃，仅保留给离线探针】旧版怪物攻击基准线。
 
-    怪物表里没有攻击字段，用等级拟合一条低等级更平缓的曲线：
-    lv1 的怪只有 5 点伤害（1 级号 48 血也能打），lv25 约 34，lv55 约 70。
-    再乘等级压制系数 —— 越级打才真的会被打死。"""
+    ★ 2026-11-27 20:0x 起怪物伤害改走 `MOB_TAKE_PCT`（玩家最大生命百分比），
+    这条曲线（lv25→34）配上 def/(def+120) 减伤后只剩个位数，正是
+    「世界BOSS打我伤害太低」的根因。别再拿它算承伤。
+    """
     return 4.0 + 1.2 * float(mob_lv)
+
+
+# ---- 怪物承伤模型（真服 148 反推，见模块说明）----
+# 一组三只合计占玩家最大生命的比例；单只时整份都给它。
+MOB_TAKE_PCT = float(os.environ.get("BATTLE_MOB_TAKE_PCT", "0.13"))
+# 单次伤害随机浮动（真服 148 里主怪 -636/-954/-1223，侍从恒定 → 只有主怪抖）
+MOB_DMG_JITTER = (float(os.environ.get("BATTLE_MOB_JITTER_MIN", "0.88")),
+                  float(os.environ.get("BATTLE_MOB_JITTER_MAX", "1.12")))
+# monster_type：1~3 是普通/精英，4 起是世界BOSS/首领。真服样本只有 type=4。
+MOB_TAKE_TYPE = {1: 0.55, 2: 0.72, 3: 0.85, 4: 1.0, 5: 1.15, 6: 1.3}
+# 玩家打怪的伤害倍率：真服 29 面板攻 1385-1503（Lv39 全装备）vs 本地同号 385，
+# 光面板就差 3.7 倍，再加上真服还有技能%/暴击等口径差。取 5.5 是为了复现真服
+# 那场的节奏：Lv25 世界BOSS ≈ 5 回合打死、自己掉 60% 血（AOE 全中）。
+# 不补这一截，「怪血用真值、玩家用低配值」就是十几回合打不死还被磨死的假仗。
+ATK_SCALE = float(os.environ.get("BATTLE_ATK_SCALE", "5.5"))
 
 
 MAX_ROUNDS = 20          # 力竭：20 回合还没分出胜负判负（纯防御磨到这儿结束）
@@ -88,6 +165,12 @@ MAX_ROUNDS = 20          # 力竭：20 回合还没分出胜负判负（纯防�
 # 玩家受伤减半。所以纯防御永远打不死怪，只会在 MAX_ROUNDS 力竭判负 ——
 # 想赢必须出手攻击。宠物挥爪的动画由客户端按 148 自己演，不需要服务端给伤害。
 PET_ATK_SHARE = 0.0      # 防御时怪掉血权重（0 = 只表演不掉血）
+PET_DMG_FROM_ATTR = int(os.environ.get("BATTLE_PET_ATTR", "1"))
+# ★ 2026-11-27 20:4x：PET_DMG=338 是 **Lv12 宠物** 的真服实测值
+#   （947 模板第 14 字节 = 0x0c = 12）。基准点写错会成倍放大，
+#   真机 20:37 就因为按 Lv1 锚定把宠物伤害推到 784。
+PET_DMG_REF_LV = int(os.environ.get("BATTLE_PET_REF_LV", "12"))
+PET_DMG_GROWTH = float(os.environ.get("BATTLE_PET_GROWTH", "0.12"))
 DEF_TAKE_SHARE = 0.50    # 防御时玩家受伤比例（减伤一半）
 DMG_LEVEL_GAIN = 0.14    # 每级输出增益（装备/宠物/境界的综合折算）
 GAP_SLOPE = 0.035        # 每级等级压制的伤害差
@@ -98,6 +181,18 @@ OPEN_TMPL = bytes.fromhex(
 ROUND_TMPL = bytes.fromhex(
     "000002010107cdeac50100020705000701f000000000070101ce00a986d5"
     "0100020105000101f30000000002010d01070d02")
+# ★ 2026-11-27 17:0x：**有宠物在场**的回合包（真服 relay.log 23:39:51 原包，71B，首字节 00）。
+#   ⚠️ 别照抄 15:42:25/15:42:53/15:43:09 那三份 56B：它们首字节是 01，
+#   而 **01 = 结算位**（END_TMPL 也是 010001…）。抄过去客户端第一回合就
+#   当成战斗结束、直接发 149，服务端只能按「未分出胜负」结 150 失败 ——
+#   本机实测「打一下就失败」就是这么来的。
+#   只有 [0]=00 的这份才是「回合中间」的有宠包，里面那条
+#   `04 01 07 ce000f69b5` 就是宠物出手记录（宠物单位 id，同一账号固定）。
+ROUND_TMPL_PET = bytes.fromhex(
+    "000003010107cd27d90000010102d0b500000000"
+    "040107ce000f69b50100020705000701d1fea600000000"
+    "070101ce00c859d90100020105000101f700000000"
+    "02010d01070d02")
 END_TMPL = bytes.fromhex(
     "010001010107cdeac50100030705000701f8070c000000000002010d01070d00")
 
@@ -130,13 +225,21 @@ def enc_val(v):
 #   真服 23:45:03 锁妖塔样本（功夫熊猫 Lv15）：
 #     01 ac e58a9fe5a4abe7868ae78cab 0f cd0a34 cd0a34 cd2710 01
 #   本地以前整段写死成「无宠物」，所以地图上熊猫跟着跑、进战斗就消失。
-PET_SEG_EMPTY = bytes.fromhex("00a00000000001")
+PET_SEG_EMPTY = bytes.fromhex("00a000000000")
 PET_HP_LV15 = 2612          # 真服样本：Lv15 熊猫血 2612
-PET_ATK_FIXED = 10000       # 真服样本里的 cd2710，四个样本一致
+# ★ 2026-11-27 16:5x：这一段最后那个变长整数**不是攻击力，是形象 id**。
+#   真服 151（relay.log 15:42:22）宠物段：
+#     01 ac(0xA0|12) e58a9fe5a4abe7868ae78cab(功夫熊猫) 02 cd080a cd080a cd2710 01
+#   `cd2710` = 10000 = Pet.xml 的功夫熊猫，与 947 off48 同一个字段。
+#   以前写死成 10000（还注释成"攻击力"），所以玩家换了美人鱼形象卡后，
+#   地图上/面板是美人鱼，一进战斗又变回功夫熊猫 —— 用户实测「战斗里形象还是旧的」。
+PET_SKIN_DEFAULT = 10000
+# 战斗里宠物单位的实例 oid（真服 148 每条宠物记录都是 ce000f69b5 = 1010101）
+PET_OID = 1010101
 
 
 def build_pet_seg(pet=None):
-    """pet = {"name","level","hp","atk"}；None/空 = 不带宠物上场。"""
+    """pet = {"name","level","hp","skin"}；None/空 = 不带宠物上场。"""
     if not pet:
         return PET_SEG_EMPTY
     name = (pet.get("name") or "").encode("utf-8")
@@ -144,18 +247,28 @@ def build_pet_seg(pet=None):
         return PET_SEG_EMPTY
     lv = max(1, int(pet.get("level") or 1))
     hp = int(pet.get("hp") or 0) or int(round(PET_HP_LV15 * lv / 15.0))
-    atk = int(pet.get("atk") or PET_ATK_FIXED)
+    try:
+        skin = int(pet.get("skin") or PET_SKIN_DEFAULT)
+    except (TypeError, ValueError):
+        skin = PET_SKIN_DEFAULT
     return (b"\x01" + bytes([0xA0 | len(name)]) + name
             + bytes([lv & 0xFF])
-            + enc_val(hp) + enc_val(hp) + enc_val(atk) + b"\x01")
+            + enc_val(hp) + enc_val(hp) + enc_val(skin))
 
 
 def build_open(mob_id, hp=None, player_hp=None, player_mp=None, cls=1,
-               pet=None, name=None, sex=1):
+               pet=None, name=None, sex=1, units=None):
     """151 开战包（结构对齐真服 39B 样本）。
 
     [12:14] 玩家当前/最大血、[14:16] 当前/最大蓝、[22] 怪物数、
     [24:28] 怪物 ID、[28:..] 怪物当前/最大血 都是变长整数。
+
+    ★ units = [(uid, oid, hp), ...]，多只一组时按真服 89B 结构逐只写：
+        [数量][每只: ce+oid4 + 当前血 + 最大血][00 00 数量(含玩家) 各 unit id]
+      真服 九尾狐 89B：
+        ... 03 ce000dbba1 cd2bdc cd2bdc  ce055d4ae5 cd0e9f cd0e9f  ce055d4ae5 cd0e9f cd0e9f
+            00 00 04 07 01 09 08
+      主怪 oid = 怪物 id，侍从 oid 是战斗包自带的实例号（0x055D4AE5）。
 
     ★ [2] 是我方职业/形象 ID（2026-11-23 真服转职样本实证）：
       未转职抓包 = 06，转职御剑（cmd=35 payload=01）之后 = 01。
@@ -196,16 +309,71 @@ def build_open(mob_id, hp=None, player_hp=None, player_mp=None, cls=1,
         head = bytearray(b"\x01\x0c"
                          + bytes([int(cls) & 0xFF, 0xA0 | len(nm)]) + nm
                          + bytes([_sx, OPEN_TMPL[11]]))   # [10]=性别 [11]=固定 00
+    if units:
+        seg = bytearray(bytes([len(units) & 0xFF]))
+        for _uid, _oid, _hpv in units:
+            _hpv = max(1, int(_hpv))
+            seg += b"\xce" + int(_oid).to_bytes(4, "big")
+            seg += enc_val(_hpv) + enc_val(_hpv)
+        _ids = [int(u[0]) for u in units]
+        if len(units) == 1:
+            tail = b"\x00\x00\x02" + bytes([1, 7])
+        else:
+            # 真服顺序：7 1 9 8（主怪、玩家、第三只、第二只）
+            _order = [7, 1] + _ids[:0:-1] if len(_ids) >= 3 else [1] + _ids
+            tail = b"\x00\x00" + bytes([1 + len(_ids)]) + bytes(_order)
+        return (bytes(head)
+                + enc_val(player_hp) + enc_val(player_hp)
+                + enc_val(player_mp) + enc_val(player_mp)
+                + build_pet_seg(pet)
+                + bytes(seg) + tail)
     return (bytes(head)
             + enc_val(player_hp) + enc_val(player_hp)
             + enc_val(player_mp) + enc_val(player_mp)
             + build_pet_seg(pet)
+            + b"\x01"      # 怪物数量（单只）
             + b"\xce" + mid.to_bytes(4, "big")
             + enc_val(hp) + enc_val(hp)
             + OPEN_TMPL[30:])
 
 
-def build_round(action_payload, end=False, cls=None):
+# 148 里的伤害字段（**按回合重写，不再抄模板**）
+#   ROUND_TMPL_PET(71B) 三个伤害字段的固定偏移：
+#     [14:16] 玩家打怪 d0b5 = -75
+#     [36:39] 宠物打怪 d1fea6 = -346
+#     [59:60] 怪打玩家 f7 = -9
+#   ROUND_TMPL(50B) 无宠版是 f0 = -16 / f3 = -13。
+# 真服 2026-11-27 抓包同构（172B 一场）：
+#   `07 01 01 ce055d4ae6 … d1fc46` 怪(7)→玩家(1) -620
+#   `01 01 07 cd2775 … d1f3fd` 玩家(1)→怪(7) -3075
+#   `04 01 07 ce000f69b5 … d1feae` 宠物(4)→怪(7) -338
+#   `09 01 01 ce055d4ae5 … d1ff6f` 分身(9)→玩家(1) -145
+# 所以 [攻击者][01][目标][攻击者oid][…][伤害] 是固定形状，伤害值必须按回合算。
+PDMG_TMPL = 75           # ROUND_TMPL_PET 里玩家那一下
+MDMG_TMPL = 9            # ROUND_TMPL_PET 里怪打玩家那一下
+
+
+def enc_signed(v):
+    """有符号变长整数：d0+1B（-128~127）/ d1+u16 补码（其余）。
+
+    ★ 2026-11-27 19:2x 修正（用户反馈「怪打我怎么还加血」的根因）：
+      旧实现是 `n = -int(v)`，而调用方传的是 `enc_signed(-dmg)`，
+      两次取负把伤害写成了**正数**：-338 变成 d10152(+338)、-145 变成 d10091，
+      客户端把正数当回血 → 怪打玩家反而涨血、怪自己也在回血。
+      真服是 d1feae(-338) / d1ff6f(-145) / d0b5(-75)，即标准补码。
+    """
+    v = int(v)
+    # 真服小伤害是**单字节短码**：0xF0~0xFF = -16~-1（148 样本 f7=-9 / f3=-13 / f8=-8 / f0=-16）
+    if -16 <= v <= -1:
+        return bytes([0xF0 | (16 + v)])
+    if -0x80 <= v <= 0x7F:
+        return b"\xd0" + (v & 0xFF).to_bytes(1, "big")
+    if v < 0:
+        return b"\xd1" + (max(0, 0x10000 + v)).to_bytes(2, "big")
+    return b"\xd1" + min(v, 0xFFFF).to_bytes(2, "big")
+
+
+def build_round(action_payload, end=False, cls=None, pet=False, dmg=None):
     """148 回合结算：回显 146 的动作；end=True 用结束模板。
 
     结束模板第 2 字节恒为 00（真服 4 份样本一致）。改成 01 想让客户端走
@@ -225,6 +393,11 @@ def build_round(action_payload, end=False, cls=None):
     t = bytearray(END_TMPL if end else ROUND_TMPL)
     act = bytes(action_payload)
     has_skill = False
+    # 有宠物在场且本回合是「攻击」→ 用真服的有宠 71B 骨架，
+    # 客户端才会演宠物挥爪。防御/结束仍用原模板（真服那两种样本没抓到有宠版）。
+    _pet_tpl = bool(pet and not end and PET_ACT and act and act[0] == 1)
+    if _pet_tpl:
+        t = bytearray(ROUND_TMPL_PET)
     if act:
         act = (act + b"\x00" * 5)[:5]
         t[4:9] = act
@@ -234,7 +407,143 @@ def build_round(action_payload, end=False, cls=None):
         sk = int(cls) * 10000 + 101
         if 0 < sk <= 0xFFFF:
             t[6:9] = b"\xcd" + sk.to_bytes(2, "big")
+    # ★ 2026-11-27 18:3x：伤害按回合重写（真服就是 d0/d1 负数逐回合变）。
+    #   dmg = (玩家打怪, 宠物打怪, 怪打玩家)，单位「点」，这里翻成 -n 写进去。
+    #   从后往前替换，前面字段的偏移才不会被长度变化顶掉。
+    if dmg and not end:
+        p, petd, m = [max(0, int(x)) for x in dmg]
+        if _pet_tpl:
+            marks = [(59, 60, m), (36, 39, petd), (14, 16, p)]
+        else:
+            marks = [(38, 39, m), (17, 18, p)]
+        out = bytes(t)
+        for s, e, v in marks:
+            out = out[:s] + enc_signed(-v) + out[e:]
+        return out
     return bytes(t)
+
+
+def _skill3(action_payload, cls=None):
+    """148 里要回显的技能号（字节形式），与 build_round 同一口径。"""
+    act = bytes(action_payload or b"")
+    if act:
+        act = (act + b"\x00" * 5)[:5]
+        if act[2] in (0xCC, 0xCD, 0xCE):
+            return act[2:5]
+    if cls:
+        sk = int(cls) * 10000 + 101
+        if 0 < sk <= 0xFFFF:
+            return b"\xcd" + sk.to_bytes(2, "big")
+    return b"\xcd\x27\xd9"
+
+
+def _ent_player(target, skill3, dmg):
+    """玩家那一下（真服 23B 形状）：
+    `01 01 <目标> <技能3> 01 00 02 <目标> 05 00 <目标> 01 <伤害> 00 00 00 00`"""
+    t = bytes([int(target) & 0xFF])
+    return (b"\x01\x01" + t + bytes(skill3)
+            + b"\x01\x00\x02" + t + b"\x05\x00" + t + b"\x01"
+            + enc_signed(-int(dmg)) + b"\x00\x00\x00\x00")
+
+
+def _ent_pet(target, oid, dmg):
+    """宠物那一下：`04 01 <目标> ce+oid4 01 00 02 <目标> 05 00 <目标> 01 <伤害> 00000000`"""
+    t = bytes([int(target) & 0xFF])
+    return (b"\x04\x01" + t + b"\xce" + int(oid).to_bytes(4, "big")
+            + b"\x01\x00\x02" + t + b"\x05\x00" + t + b"\x01"
+            + enc_signed(-int(dmg)) + b"\x00\x00\x00\x00")
+
+
+def _ent_mob(uid, oid, target, dmg):
+    """怪打玩家：`<uid> 01 <目标> ce+oid4 01 00 02 <目标> 05 00 <目标> 01 <伤害> 00000000`"""
+    t = bytes([int(target) & 0xFF])
+    return (bytes([int(uid) & 0xFF]) + b"\x01" + t
+            + b"\xce" + int(oid).to_bytes(4, "big")
+            + b"\x01\x00\x02" + t + b"\x05\x00" + t + b"\x01"
+            + enc_signed(-int(dmg)) + b"\x00\x00\x00\x00")
+
+
+def build_round_units(action_payload, units, pet_oid, p_hits, pet_dmg, m_dmg,
+                      end=False, cls=None, order=None, pet_target=None):
+    """一组怪的 148 回合包（按真服 175B 样本的条目录拼）。
+
+    units   = [(uid, oid, hp), ...]（开战时那份）
+    p_hits  = {uid: 玩家对这只造成的伤害}
+    pet_dmg = 宠物对主怪造成的伤害（0=本回合宠物没出手）
+    m_dmg   = {uid: 这只怪对玩家的伤害}；数字表示每只都一样
+    order   = [("mob", uid) / ("player",) / ("pet",), ...] 出手顺序（按敏捷排好）
+              ★ 2026-11-27 19:2x：真服 148 的条目顺序**就是实际出手顺序**
+              （样本里怪 7 的条目排在三只玩家 AOE 条目之前），
+              客户端照着逐条演，所以敏捷低的必须排在后面。
+    """
+    if isinstance(m_dmg, dict):
+        m_hits = {int(k): int(v) for k, v in m_dmg.items()}
+    else:
+        m_hits = {u[0]: int(m_dmg) for u in units}
+    skill3 = _skill3(action_payload, cls)
+    acts = []
+    if order:
+        for it in order:
+            acts.append((it[0], it[1] if len(it) > 1 else None))
+    else:
+        # 没给顺序：老的「玩家 → 宠物 → 怪」
+        acts = [("player", uid) for uid, _o, _h in units if int(p_hits.get(uid, 0)) > 0]
+        if pet_dmg > 0 and units:
+            acts.append(("pet", None))
+        acts += [("mob", uid) for uid, _o, _h in units if m_hits.get(uid, 0) > 0]
+
+    entries = bytearray()
+    n = 0
+    # 真服样本里「怪打玩家」条目的 actor oid 都是侍从的实例号（ce055d4ae5），
+    # 连主怪 7 也用它，不是 151 里主怪的怪物 id。
+    _moid = units[1][1] if len(units) > 1 else units[0][1]
+    for kind, uid in acts:
+        if kind == "player":
+            # ★ 玩家是 AOE：一次出手对每只活着的怪各写一条（真服三只样本如此）。
+            #   order 里的 ("player", None) 只是占位，uid 为空表示「对所有目标」。
+            _tgt = [uid] if uid is not None else [u[0] for u in units]
+            for _u in _tgt:
+                d = int(p_hits.get(_u, 0))
+                if d > 0:
+                    entries += _ent_player(_u, skill3, d)
+                    n += 1
+        elif kind == "pet":
+            if pet_dmg > 0 and units:
+                _pt = int(pet_target) if pet_target else units[0][0]
+                entries += _ent_pet(_pt, pet_oid, pet_dmg)
+                n += 1
+        elif kind == "mob":
+            d = int(m_hits.get(uid, 0))
+            if d > 0:
+                entries += _ent_mob(uid, _moid, 1, d)
+                n += 1
+    body = bytearray()
+    body.append(1 if end else 0)
+    body.append(0)
+    body.append(n & 0xFF)
+    body += entries
+    # 尾部：[数量(含玩家)] + 每单位 (id, 0d, 状态)
+    vals = []
+    if end:
+        vals.append((1, 0x0D, 0x01))
+        for uid, _oid, _hp in units:
+            vals.append((uid, 0x0D, 0x00))
+    else:
+        # 单只（真服 50B/71B 模板尾）：玩家 01 / 怪 02
+        # 三只（真服 172B）：玩家 02 / 7→01 / 8→04 / 9→03
+        if len(units) <= 1:
+            vals.append((1, 0x0D, 0x01))
+            for uid, _oid, _hp in units:
+                vals.append((uid, 0x0D, 0x02))
+        else:
+            _mid = {0: 0x02, 1: 0x01, 2: 0x04, 3: 0x03}
+            vals.append((1, 0x0D, _mid[0]))
+            for i, (uid, _oid, _hp) in enumerate(units):
+                vals.append((uid, 0x0D, _mid.get(i + 1, 0x01)))
+    body.append(len(vals) & 0xFF)
+    for uid, k, v in vals:
+        body += bytes([int(uid) & 0xFF, int(k) & 0xFF, int(v) & 0xFF])
+    return bytes(body)
 
 
 def target_from_request(payload):
@@ -242,6 +551,18 @@ def target_from_request(payload):
     if len(payload) >= 5:
         return int.from_bytes(payload[1:5], "big"), True
     return 0, False
+
+
+def skill_id_of(payload):
+    """146 payload `[动作][目标][CC/CD/CE + 技能号]` → 技能 id（取不到返回 0）。"""
+    act = bytes(payload or b"")
+    if len(act) < 4 or act[2] not in (0xCC, 0xCD, 0xCE):
+        return 0
+    n = {0xCC: 1, 0xCD: 2, 0xCE: 4}[act[2]]
+    raw = act[3:3 + n]
+    if len(raw) < n:
+        return 0
+    return int.from_bytes(raw, "big")
 
 
 class BattleTables(object):
@@ -299,6 +620,9 @@ class BattleTables(object):
                 "atk_max": self._num(body, "attack_max", 17),
                 "defense": self._num(body, "defense", 0),
                 "crit": self._num(body, "crit", 0),
+                # ★ 2026-11-27 19:2x：出手顺序要用敏捷（Levelup.xml 的 agile 字段）。
+                #   Monster.xml 没有敏捷字段，怪物按「同级玩家的敏捷」估算。
+                "agile": self._num(body, "agile", 0),
             }
 
     def _load_skill(self):
@@ -307,6 +631,12 @@ class BattleTables(object):
             self.skill[sid] = {
                 "name": self._attr(body, "name"),
                 "damage_percent": self._num(body, "damage_percent", 1.0) or 1.0,
+                # ★ 2026-11-27 19:3x：`target_type=5` 是**群体**技能（九天剑阵 10201、
+                #   万剑归宗 10211、流星火雨 40201…）。单体=1/2/4，其它是辅助/封印。
+                "target_type": int(self._num(body, "target_type", 1)),
+                "class": int(self._num(body, "class", 0)),
+                "level": int(self._num(body, "level", 1)),
+                "mp": int(self._num(body, "consume_mp", 0)),
             }
 
     # ---- 查询 ----
@@ -416,6 +746,12 @@ class BattleSession(object):
         self.cfg_hp = max(1, info["hp_max"])
         self.cls, self.lv = int(cls), int(lv)
 
+        # ---- 一只还是多只（真服 151 数量字节）----
+        # uid 7 = 主怪（oid = 怪物 id），uid 8/9 = 侍从（oid 是战斗包自带的实例号）。
+        self.unit_count = max(1, int(MOB_UNITS_FORCE or MOB_UNITS.get(self.mob_id, 1)))
+        self.units = self._mk_units()
+        self.mob_hp = {u[0]: u[2] for u in self.units}
+
         st = tables.player(cls, lv)
         # ★ 2026-11-24 17:5x：伤害必须用**面板真值**（含装备/强化/妖灵），
         # 不能用 Levelup 裸值再乘等级系数。用户反馈「莫名其妙胜利」——
@@ -431,7 +767,10 @@ class BattleSession(object):
         atk_max = at.get("attack_max") or st["atk_max"]
         dfn = at.get("defense") or st["defense"]
         crit = at.get("crit") or st["crit"]
-        self.panel_based = bool(at)
+        # ★ 2026-11-27 22:5x：panel_based 以前是 bool(at)，只要传了 hp_max 也算
+        #   「面板口径」，于是攻击回落到 Levelup 裸值却仍乘 ATK_SCALE=5.5，
+        #   伤害被凭空放大 5 倍。现在必须真的拿到面板攻击上下限才算面板口径。
+        self.panel_based = bool(at.get("attack_min") or at.get("attack_max"))
         self.player_hp_max = max(1, int(hp_base * max(0.05, hp_ratio)))
         self.player_mp_max = max(0, int(at.get("mp_max") or st["mp_max"]))
         self.player_mp = self.player_mp_max
@@ -439,31 +778,67 @@ class BattleSession(object):
         # ---- 服务端真实数值 ----
         atk_avg = (atk_min + atk_max) / 2.0
         self.crit_mult = 1.0 + min(0.30, crit / 400.0)
-        _gain = 1.0 if self.panel_based else (1.0 + DMG_LEVEL_GAIN * self.lv)
+        # 面板口径（29 同一套）要乘 ATK_SCALE：真服面板攻约是本地的 3.7 倍
+        # （装备/强化/套装全在里面），不补这截就跟 Monster.xml 的真值血量对不上。
+        _gain = ATK_SCALE if self.panel_based else (1.0 + DMG_LEVEL_GAIN * self.lv)
         # dmg_mult：GM「伤害」倍率（测试用，只影响服务端折算的回合数，
         # 不动面板 29、不动 151 的血量公式）。倍率越大 → rounds_to_kill 越小。
         self.dmg_mult = max(0.01, float(dmg_mult or 1.0))
         self.base_deal = max(1.0, atk_avg * _gain * self.crit_mult * self.dmg_mult)
-        self.gap = max(GAP_MIN, min(GAP_MAX,
-                                    1.0 + GAP_SLOPE * (self.mob_lv - self.lv)))
-        self.mit = dfn / (dfn + 120.0) if dfn else 0.0
-        self.raw_take = mob_atk(self.mob_lv) * self.gap
-        self.take = max(1.0, self.raw_take * (1.0 - self.mit))
+        # ---- 承伤（玩家最大生命百分比，真服 148 反推）----
+        # 等级压制用 (怪等级/玩家等级)^2：同级 1.0，Lv3 小怪打 Lv39 只剩 0.5%
+        # 量级（挠痒），Lv25 打 Lv39 约 41%。
+        # ★ 但 **BOSS（type>=4）不吃等级压制**：真服 Lv39 打 Lv25 九尾狐照样
+        #   挨 16.7%/回合，说明首领是按玩家血量走的。
+        self.type_mult = MOB_TAKE_TYPE.get(int(self.mob_type or 1), 1.0)
+        _ratio = float(self.mob_lv) / max(1.0, float(self.lv))
+        self.gap = max(0.05, min(1.50, _ratio * _ratio))
+        self.mit = dfn / (dfn + 120.0) if dfn else 0.0    # 仅日志展示，不再参与承伤
+        _gap_take = 1.0 if int(self.mob_type or 1) >= 4 else self.gap
+        self.raw_take = self.player_hp_max * MOB_TAKE_PCT * self.type_mult * _gap_take
+        self.take = max(1.0, self.raw_take)
+
+        # ---- 出手顺序（敏捷）----
+        # 玩家敏捷取 29 面板（含装备/妖灵）；怪物没有配置项，按同级玩家估。
+        # 用户反馈「我敏捷比他低应该他先出手」—— 148 的条目顺序就是演出顺序，
+        # 所以这里算出来的顺序会直接决定客户端先演谁。
+        self.agile = int(at.get("agile") or st.get("agile") or 0)
+        self.mob_agile = self.agile
+        self.unit_agile = {u[0]: self.agile for u in self.units}
+        if AGI_MOB_BY_LEVEL:
+            self.mob_agile = int(AGI_MOB_BASE + AGI_MOB_PER_LV * max(0, self.mob_lv - 1))
+            for i, (uid, _o, _h) in enumerate(self.units):
+                self.unit_agile[uid] = (self.mob_agile if i == 0
+                                        else max(1, int(self.mob_agile * AGI_MOB_CLONE)))
+        self.pet_agile = self.agile
+        # 三只一组时怪打玩家的分配（主怪重、侍从轻），合计仍等于 self.take
+        self.mob_hit = self._split_take()
 
         # ---- 回合账 ----
+        # ★ 2026-11-27 18:4x：真值模式（默认）。怪血 = Monster.xml 真值，
+        #   148 里每回合写真实伤害（d0/d1 负数），血条就按真数一条条掉。
+        #   主怪最大，一只组三只时以主怪为准算回合数（侍从血只有 1/3）。
         self.deal = int(round(self.base_deal))
-        self.rounds_to_kill = max(1, int(math.ceil(self.cfg_hp / self.base_deal)))
+        self.skill_pct = 1.0        # on_action 里按 Skill.xml 的 damage_percent 覆盖
+        self.pet_dmg = self._pet_damage()
+        if HP_TRUE:
+            _per = max(1.0, self.base_deal + self.pet_dmg)
+            self.rounds_to_kill = max(1, int(math.ceil(self.cfg_hp / _per)))
+        else:
+            self.rounds_to_kill = max(1, int(math.ceil(self.cfg_hp / self.base_deal)))
         self.rounds_to_die = max(1, int(math.ceil(self.player_hp_max / self.take)))
-        # ★ 2026-11-25 00:4x：真正打的回合数 = min(算术回合, MAX_ROUNDS)。
-        #   以前直接拿 rounds_to_kill 当胜利条件，29884 血的 Lv46 翼魔要 74 回合，
-        #   而 20 回合就判「力竭」→ 怪永远死不了，用户看到的就是「打死了怪物还在」
-        #   （其实是每场都力竭判负）。客户端血条 16/回合，最多也只能表达 20 回合左右，
-        #   所以把战斗压进 MAX_ROUNDS：只要这 20 回合内玩家不会先倒下，就按胜利结算，
-        #   血条同一回合见底。纯防御仍然是 0 进度 → 照样力竭判负。
-        self.fight_rounds = max(1, min(self.rounds_to_kill, MAX_ROUNDS))
-        self.can_win = self.rounds_to_die >= self.fight_rounds
+        # ★ 2026-11-27 22:5x：真值模式的回合上限放宽到 MAX_ROUNDS_TRUE（默认 60），
+        #   折算模式仍是 20（客户端血条 16/回合只能表达 20 回合）。
+        _cap = MAX_ROUNDS_TRUE if HP_TRUE else MAX_ROUNDS
+        self.fight_rounds = max(1, min(self.rounds_to_kill, _cap))
+        # ★ can_win 以前写 rounds_to_die >= fight_rounds：需 100 回合、能扛 70 回合、
+        #   上限 60 时也算「可胜」，实际只能力竭。赢的前提必须是「打得完」。
+        self.can_win = (self.rounds_to_kill <= _cap
+                        and self.rounds_to_die >= self.rounds_to_kill)
 
-        # ---- 两本账都是「回合数」，血量只是显示用的折算 ----
+        # ---- 血量账 ----
+        self.player_hp_left = self.player_hp_max
+        self.target = self.units[0][0]   # 当前目标（146 里的目标 uid）
         self.atk_rounds = 0         # 我方出手次数（= 对怪造成伤害的次数）
         self.hit_rounds = 0         # 我方挨打次数
 
@@ -471,6 +846,75 @@ class BattleSession(object):
         self.over = False
         self.result = None          # "win" / "lose" / "draw"
         self.detail = []            # 每回合明细，便于复盘
+
+    def _pet_damage(self):
+        """宠物每回合伤害。
+
+        ★ 2026-11-27 20:4x：以前固定 PET_DMG=338，所有宠物一律 338。
+          真服 148 样本里同一只宠物打出 -338 / -346 / -642 不等。
+          **关键校正**：947 模板里那只宠物是 Lv12，而 -338 正是它打出来的，
+          所以 338 对应的是 **Lv12**，不是 Lv1。上一版按 Lv1 锚定，
+          Lv12 被放大成 784（真机 20:37 玄蜂实测：主怪每回合多吃 446）。
+          现在以 Lv12 为基准、每级 ±12%：Lv12=338（与真服一致），
+          Lv18≈581、Lv20≈662（贴近真服那条 -642）。
+          BATTLE_PET_ATTR=0 可退回纯固定值。
+        """
+        if not self.pet:
+            return 0
+        if not PET_DMG_FROM_ATTR:
+            return PET_DMG
+        _plv = 1
+        try:
+            if isinstance(self.pet, dict):
+                _plv = int(self.pet.get("level") or self.pet.get("lv") or 1)
+        except Exception:
+            _plv = 1
+        _plv = max(1, _plv)
+        _v = PET_DMG * max(0.35, 1.0 + PET_DMG_GROWTH * (_plv - PET_DMG_REF_LV))
+        return max(1, int(round(_v)))
+
+    def _split_take(self, mult=1.0):
+        """每只怪这回合打玩家多少：主怪 MOB_HIT_MAIN(76.6%)，侍从平分其余
+        （真服 175B 样本：主怪 509 + 侍从 145 + 145，合计约等于 take）。"""
+        n = len(self.units)
+        if n <= 1:
+            return {self.units[0][0]: max(0, int(round(self.take * mult)))}
+        main = max(1.0, self.take * MOB_HIT_MAIN) * mult
+        each = max(1.0, self.take * max(0.0, 1.0 - MOB_HIT_MAIN) / (n - 1)) * mult
+        out = {}
+        for i, (uid, _o, _h) in enumerate(self.units):
+            out[uid] = max(0, int(round(main if i == 0 else each)))
+        return out
+
+    def turn_order(self, only_alive=True):
+        """按敏捷从高到低排出手顺序：[(kind, uid), ...]。
+
+        同敏捷时按 玩家(0) → 宠物(1) → 主怪(2+) 的老顺序，避免数值相等时抖动。
+        返回的顺序会被 build_round_units 直接当成 148 的条目顺序（= 客户端演出顺序）。
+        """
+        acts = []
+        for i, (uid, _o, _h) in enumerate(self.units):
+            if only_alive and self.mob_hp.get(uid, 0) <= 0:
+                continue
+            acts.append((self.unit_agile.get(uid, self.mob_agile), 2 + i, "mob", uid))
+        if self.player_hp_left > 0:
+            acts.append((self.agile, 0, "player", None))
+            if self.pet:
+                acts.append((self.pet_agile, 1, "pet", None))
+        acts.sort(key=lambda x: (-int(x[0]), int(x[1])))
+        return [(a[2], a[3]) for a in acts]
+
+    def _mk_units(self):
+        """(uid, oid, hp_max) 列表。uid 7=主怪，8/9=侍从（血 = 主怪/3，真服同）。"""
+        n = max(1, int(self.unit_count))
+        if n <= 1:
+            return [(7, self.mob_id, self.cfg_hp)]
+        _oid = CLONE_OID.get(self.mob_id, CLONE_OID_DEFAULT)
+        _chp = int(math.ceil(self.cfg_hp / float(n)))
+        out = [(7, self.mob_id, self.cfg_hp)]
+        for i in range(2, n + 1):
+            out.append((6 + i, _oid, _chp))
+        return out
 
     # ---- 显示血量 ----
     # ★ 2026-11-24 16:2x 曾因为「打心魔闪退」把这里改成发 Monster.xml 真值，
@@ -487,21 +931,29 @@ class BattleSession(object):
         客户端血条只掉 5% 就弹胜利，正是「莫名其妙胜利」的观感来源。
         """
         if HP_TRUE:
+            # ★ 2026-11-27 18:3x：真值模式（默认）。真服 151 就是 Monster.xml 的
+            #   hp_max（900001=11228 / 900002=13280 / 900003=18896），客户端血条按
+            #   148 里 d0/d1 的伤害一条条掉，两边一致。
             return max(1, int(self.cfg_hp))
-        return max(1, int(CLIENT_PDMG * self.fight_rounds))
+        # 折算模式（BATTLE_HP_TRUE=0 回退用）：怪物血 = 每回合真实伤害 × 回合数。
+        # ★ 这里以前写 CLIENT_PDMG(16)，但**有宠模板 148 里玩家那一下是 -75**
+        #   （d0b5），宠物 -346，合计 421/回合。用 16+346=362 去折算，
+        #   血条每回合掉 421 却只有 362 的总量 → 第 17 回合就见底，
+        #   而服务端还要打到第 20 回合（"血条空了怪还活着"）。
+        per = (PDMG_TMPL + (PET_DMG if self.pet else 0))
+        return max(1, int(per * self.fight_rounds))
 
     @property
     def hp(self):
-        """剩余血量：按回合进度等比缩放（基数必须跟 max_hp 同一个，否则当前值会超过上限）。"""
+        """剩余血量：真值模式取各只剩余之和；折算模式按回合进度等比缩放。"""
+        if HP_TRUE:
+            return int(sum(max(0, v) for v in self.mob_hp.values()))
         left = max(0.0, self.fight_rounds - self.atk_rounds)
         return int(round(self.max_hp * left / float(self.fight_rounds)))
 
     @property
     def disp_player_hp_max(self):
-        """151 里的玩家血量：同理折算成 CLIENT_MDMG × 可扛回合数。
-
-        直接发面板血（2132）时，客户端按 13/回合扣，撑到血条空要 164 回合，
-        而服务端 60 多回合就结束了 —— 玩家血条看着几乎没动。
+        """151 里的玩家血量：真值模式发面板血；折算模式按 CLIENT_MDMG×可扛回合。
         """
         if HP_TRUE:
             return max(1, int(self.player_hp_max))
@@ -509,7 +961,9 @@ class BattleSession(object):
 
     @property
     def disp_player_hp(self):
-        """显示用剩余血量：同样按回合进度等比缩放到 151 的血量上限。"""
+        """显示用剩余血量。"""
+        if HP_TRUE:
+            return max(0, int(self.player_hp_left))
         left = max(0, self.rounds_to_die - self.hit_rounds)
         if self.rounds_to_die <= 0:
             return 0
@@ -517,6 +971,12 @@ class BattleSession(object):
 
     # ---------- 对外 ----------
     def open_packet(self):
+        if len(self.units) > 1:
+            return build_open(self.mob_id, self.max_hp,
+                              self.disp_player_hp_max, self.player_mp_max,
+                              cls=self.cls, pet=self.pet,
+                              name=self.player_name, sex=self.sex,
+                              units=[(u[0], u[1], self.mob_hp[u[0]]) for u in self.units])
         return build_open(self.mob_id, self.max_hp,
                           self.disp_player_hp_max, self.player_mp_max,
                           cls=self.cls, pet=self.pet,
@@ -525,42 +985,127 @@ class BattleSession(object):
     def on_action(self, payload):
         """处理一次 146，返回 (148 bytes, is_end, result)。
 
-        action=1 攻击：双方各扣一次血；action=4 防御：本回合双方都不掉血
-        （客户端表现一致，不影响血条同步）。
+        ★ 2026-11-27 22:5x：改成 **按敏捷逐行动者结算**（ChatGPT 指出的 P0 问题：
+          旧版先把玩家/宠物伤害全部结算，再补算怪物，敏捷高的怪先手打死玩家时
+          仍会被玩家「先扣的血」反杀，出现死后反杀）。
+          现在按 turn_order() 排序逐个出手，每次出手前先确认行动者还活着、
+          目标还活着；一旦玩家死亡立即中断，后面的条目不再产生，
+          所以 148 的条目顺序与实际结算完全一致。
+
+        每次 146 都是一回合：普通攻击每回合的 payload 字节完全相同（01 07 cd27d9），
+        所以不能用 payload 去重，只能按调用次数推进。
         """
         if self.over:
-            return build_round(payload, end=True, cls=self.cls), True, self.result
+            if len(self.units) == 1 and TPL_ROUND:
+                b = build_round(payload, end=True, cls=self.cls, pet=bool(self.pet))
+            else:
+                b = build_round_units(payload, self.units, PET_OID, {}, 0, {},
+                                      end=True, cls=self.cls)
+            return b, True, self.result
 
         self.round += 1
         action = payload[0] if payload else 1
+        p_hits, pet_d = {}, 0
+        mob_hits = {}
+
+        # 目标：146 = [动作][目标uid][技能…]。目标已死/没带目标就跟第一只活着的。
+        _tgt = int(payload[1]) if len(payload) > 1 else 0
+        if _tgt not in self.mob_hp or self.mob_hp.get(_tgt, 0) <= 0:
+            _tgt = next((u[0] for u in self.units if self.mob_hp.get(u[0], 0) > 0), 0)
+        self.target = _tgt
+
+        # ---- 本回合要做什么（不结算，只记参数）----
+        aoe = False
         if action == 1:
-            # 不吃技能倍率：151 的血量是按「恒定每回合伤害」折算的，
-            # 某回合打得更疼，血条就会在怪死之前先空（或反过来），
-            # 所以技能只做表现，节奏保持恒定。
-            self.atk_rounds += 1
+            # ★ 单体/群体按 Skill.xml 的 target_type=5 判断（九天剑阵 10201 是群攻）。
+            self.skill_id = skill_id_of(payload)
+            _sk = self.tables.skill.get(str(self.skill_id)) or {}
+            aoe = (_sk.get("target_type") == 5)
+            self.aoe = aoe
+            # 技能倍率真正接进伤害（以前只识别单体/群攻，伤害仍是基础值）
+            self.skill_pct = max(0.05, float(_sk.get("damage_percent") or 1.0))
+        _hit_tab = self._split_take(DEF_TAKE_SHARE if action == 4 else 1.0)
+
+        # ---- 按敏捷逐个结算 ----
+        order = self.turn_order()
+        done = []
+        for kind, uid in order:
+            if self.over:
+                break
+            if kind == "player":
+                if self.player_hp_left <= 0 or action != 1:
+                    continue
+                _targets = ([u[0] for u in self.units if self.mob_hp.get(u[0], 0) > 0]
+                            if aoe else ([self.target] if self.target else []))
+                for _u in _targets:
+                    left = max(0, self.mob_hp.get(_u, 0))
+                    if left <= 0:
+                        continue
+                    d = min(max(1, int(round(self.deal * self.skill_pct))), left)
+                    p_hits[_u] = d
+                    self.mob_hp[_u] = left - d
+                self.atk_rounds += 1
+                done.append(("player", None))
+                if all(v <= 0 for v in self.mob_hp.values()):
+                    self.over, self.result = True, "win"
+                    break
+            elif kind == "pet":
+                if action != 1 or not self.pet or self.player_hp_left <= 0:
+                    continue
+                _pt = self.target or (self.units[0][0] if self.units else 0)
+                left2 = max(0, self.mob_hp.get(_pt, 0))
+                if _pt and left2 > 0:
+                    pet_d = min(self.pet_dmg, left2)
+                    self.mob_hp[_pt] = left2 - pet_d
+                    done.append(("pet", None))
+                if all(v <= 0 for v in self.mob_hp.values()):
+                    self.over, self.result = True, "win"
+                    break
+            else:  # mob
+                if self.player_hp_left <= 0 or self.mob_hp.get(uid, 0) <= 0:
+                    continue
+                _v = random.uniform(*MOB_DMG_JITTER)
+                d = min(int(round(_hit_tab.get(uid, 0) * _v)), self.player_hp_left)
+                if d <= 0:
+                    continue
+                mob_hits[uid] = d
+                self.player_hp_left -= d
+                done.append(("mob", uid))
+                if self.player_hp_left <= 0:
+                    self.over, self.result = True, "lose"
+                    break
+
+        if action == 1:
             self.hit_rounds += 1
-            self.detail.append((self.round, int(round(self.base_deal)),
-                                int(round(self.take))))
         elif action == 4:
-            # ★ 2026-11-24 19:2x：防御以前把「宠物出手」按**满回合**计
-            # （atk_rounds += 1），等于防御一次也算玩家全力输出 → 一直点防御
-            # 照样能在 rounds_to_kill 内把怪打死，用户实测「防御也能赢，离谱」。
-            # 真服防御是「玩家不出手、受伤减半」，宠物那点输出远小于本体：
-            #   怪物掉血速度 = 宠物占比 PET_ATK_SHARE（约三成）
-            #   玩家掉血速度 = 减伤后 DEF_TAKE_SHARE（约五成）
-            # 于是纯防御几乎打不死同级的怪，只会被慢慢磨死或打到回合上限。
+            # 防御：玩家不出手，受伤减半；宠物只做表演不结算（PET_ATK_SHARE=0）。
             if self.pet:
                 self.atk_rounds += PET_ATK_SHARE
             self.hit_rounds += DEF_TAKE_SHARE
-            self.detail.append((self.round, 0, int(round(self.take * DEF_TAKE_SHARE))))
+        m_d = sum(mob_hits.values())
+        self.detail.append((self.round, sum(p_hits.values()) + pet_d, m_d))
 
-        if self.atk_rounds >= self.fight_rounds:
-            self.over, self.result = True, "win"
-        elif self.hit_rounds >= self.rounds_to_die:
-            self.over, self.result = True, "lose"
-        elif self.round >= MAX_ROUNDS:
-            self.over, self.result = True, "draw"
-        return build_round(payload, end=self.over, cls=self.cls), self.over, self.result
+        # ---- 判定 ----
+        if not self.over:
+            if all(v <= 0 for v in self.mob_hp.values()):
+                self.over, self.result = True, "win"
+            elif self.player_hp_left <= 0:
+                self.over, self.result = True, "lose"
+            elif self.round >= (MAX_ROUNDS_TRUE if HP_TRUE else MAX_ROUNDS):
+                self.over, self.result = True, "draw"
+
+        # ★ 已有胜者时（例如玩家先手把怪清完），148 只写实际发生的条目，
+        #   不再补「怪打玩家」的死后条目。done 就是真实出手序列。
+        if len(self.units) == 1 and TPL_ROUND:
+            _p = p_hits.get(self.units[0][0], 0)
+            body = build_round(payload, end=self.over, cls=self.cls,
+                               pet=bool(self.pet), dmg=(_p, pet_d, m_d))
+        else:
+            body = build_round_units(payload, self.units, PET_OID,
+                                     p_hits, pet_d, mob_hits,
+                                     end=self.over, cls=self.cls, order=done,
+                                     pet_target=self.target)
+        return body, self.over, self.result
 
     # ---------- 结算 ----------
     def settle(self):
