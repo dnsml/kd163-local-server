@@ -13,7 +13,8 @@
 | 一次性排查过程、抓包清单、对某服评估 | 放 `docs/history/`，并登记进 `docs/INDEX.md` | ❌ 放根目录 |
 | 给接手人的入口 | 只维护 `README.md` + `docs/交接说明.md` 两份 | ❌ 再建第三份"总览/索引/入口" |
 
-**根目录只允许出现**：`README.md`、`AGENTS.md`、`run.py`、以及主程序与协议模块（`local_server3.py`、`battle.py`、`*_proto.py` 等）。
+**根目录只允许出现**：`README.md`、`AGENTS.md`、启动脚本（`start_all.bat` / `restart_srv.sh` 等），
+以及主程序与协议模块（`local_server3.py`、`battle.py`、`*_proto.py`、`state_store.py` 等）。
 **根目录新增任何 `.md` 都需要在 PR/提交说明里写理由。**
 
 `docs/` 的现行结构（动手前先按这个放，不要再平铺）：
@@ -58,7 +59,8 @@ docs/
   并在提交说明里写"怎么跑的、看到什么"。
 - 未验证的改动写 `未执行`，不要写成"已修复"。
 - 不要在 `local_server3.py` 里新增超过 100 行的函数；要加逻辑就加到对应模块（`battle.py`、`bag_proto.py` 等）。
-  （现状 `handle_game` 1,450 行是历史债，不再扩大。）
+  （现状 `handle_game` 1,829 行、`apply_gm` 543 行、`builtin_resp` 468 行，是历史债，只减不增。
+  2026-11-26 记的是 1,450 行，这两天又涨了 379 行——新功能请务必落到模块里。）
 
 ## 5. 提交说明
 
