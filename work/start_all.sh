@@ -78,7 +78,12 @@ start_srv() {
     fi
 }
 
-start_srv 9000 local_server3.py 9000 patch/exact.pem patch/exact.key
+# 证书：本地开发版客户端只认 patch/local/，公网/部署版才是 patch/（KD_CERT_DIR 可强制指定）
+CERT_DIR="${KD_CERT_DIR:-}"
+if [ -z "$CERT_DIR" ]; then
+    if [ -f patch/local/exact.pem ] && [ -f patch/local/exact.key ]; then CERT_DIR=patch/local; else CERT_DIR=patch; fi
+fi
+start_srv 9000 local_server3.py 9000 "$CERT_DIR/exact.pem" "$CERT_DIR/exact.key"
 start_srv 80   local_http.py    80 "$HOSTIP"
 
 case " $MODE " in

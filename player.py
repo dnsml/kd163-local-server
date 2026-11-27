@@ -25,6 +25,13 @@ class Player(object):
         "vip_level", "vip_until",
         "bag", "equip", "enhance", "wing", "wardrobe",
         "pets",
+        # 当前展示宠物的形象 id（Pet.xml 的 item id，默认 10000 功夫熊猫）。
+        # 用「宠物形象卡」会改这里，947 的 off48 直接写这个值。
+        "pet_skin",
+        # 当前坐骑形象 id（Horse.xml 的 item id）。0 = 没坐骑（30 尾部的坐骑块整块不写）。
+        "mount",
+        # 坐骑穿的形象卡（item id），0 = 没换过形象。
+        "mount_skin",
         "spirit_bag", "spirit_slot",
         "quest_active", "quest_ready", "done_quests",
         "title",                 # 当前佩戴的称号 id（0=没有）；只有用掉称号卡才会有
@@ -83,6 +90,11 @@ class Player(object):
         # 以前登录回放无条件给所有人塞一只 82B 的 957「功夫熊猫」，
         # 结果新建的 Lv1 号身边也跟着熊猫跑图 —— 真服新号没有宠物，这里必须是空表。
         self.pets = []
+        # 当前宠物形象（Pet.xml id）。10000 = 功夫熊猫，形象卡会改成别的 id。
+        self.pet_skin = [10000]
+        # 当前坐骑形象（Horse.xml id）与它穿的形象卡。0 = 没坐骑 / 没换过。
+        self.mount = [0]
+        self.mount_skin = [0]
         self.spirit_bag = {}
         self.spirit_slot = {}
         self.quest_active = 0

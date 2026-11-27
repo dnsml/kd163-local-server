@@ -28,6 +28,7 @@ import item_rules     # 按 Item.xml 描述推断道具效果 / 商城单价
 import wing_proto     # 翅膀形象卡（1922/1931/1932 三个穿戴结果包）
 import equip_attr     # Equip.xml/StrengthenAddOn/Suite/Formula/Mall 全配置驱动
 import pet_proto      # 宠物 / 妖灵（961/962、946/947、1410~1413）
+import pet_skin       # 形象卡 -> Pet.xml / Horse.xml 形象 id（线上服抓包实证）
 import player as player_mod   # 每个连接一份角色状态（threading.local）
 import state_store    # 角色存档后端（SQLite，KD_STATE_BACKEND=json 可回退旧文件）
 import account_policy # 账号白名单（accounts.json / KD_ALLOW_ACCOUNTS）
@@ -114,7 +115,20 @@ next_id = [13]
 # 否则自组包可以跳过 /auth 直接发 17（白名单只认账号名）。
 # KD_REQUIRE_AUTH_TICKET=0 可关掉这条（排障用）。
 AUTH_TICKETS = {}
-AUTH_TICKET_TTL = 6 * 3600
+# ★ 2026-11-27：票据以前只在内存里，服务端一重启就全没了 → 客户端还拿着旧
+#   /auth 令牌发 cmd=17（它不会自己重走登录），被「登录已过期」拒掉，连接却
+#   继续用默认空角色跑业务：面板 Lv0、职业 6（新手）、技能栏变新手技能、
+#   宠物也像没领过。所以票据/令牌必须落盘，重启后照样认得。
+#
+#   三层放行（依次）：
+#     ① IP 票据（/auth 通过后记一张，重启后从 disk 读回）
+#     ② 17 包里回带的令牌前缀命中 /auth 发过的令牌
+#     ③ KD_AUTH_LENIENT=1（默认）：本机私服，账号有存档就直接放行（记 warning）
+AUTH_TOKEN_TTL = 30 * 86400                        # 与 /auth 应答的 expires_at 一致
+AUTH_TICKET_TTL = int(os.environ.get("KD_AUTH_TICKET_TTL", str(AUTH_TOKEN_TTL)))
+AUTH_TOKENS = {}                                   # 账号 -> {令牌前缀: 过期时间}
+AUTH_STORE = os.path.join(HERE, "logs", "auth_tickets.json")
+_auth_store_lock = threading.Lock()
 
 
 def peer_ip(conn):
@@ -122,6 +136,52 @@ def peer_ip(conn):
         return conn.getpeername()[0]
     except Exception:
         return ""
+
+
+def _auth_store_load():
+    try:
+        with open(AUTH_STORE, encoding="utf-8") as f:
+            d = json.load(f)
+    except Exception:
+        return
+    now = time.time()
+    for k, v in (d.get("tickets") or {}).items():
+        try:
+            exp = float(v)
+        except Exception:
+            continue
+        if exp > now:
+            acct, _, ip = str(k).partition("|")
+            AUTH_TICKETS[(acct, ip)] = exp
+    for acct, m in (d.get("tokens") or {}).items():
+        try:
+            mm = {str(t): float(e) for t, e in m.items() if float(e) > now}
+        except Exception:
+            continue
+        if mm:
+            AUTH_TOKENS[str(acct)] = mm
+    if AUTH_TICKETS or AUTH_TOKENS:
+        log("[auth] 读回票据 %d 张 / 令牌 %d 个账号（重启后仍可登录）"
+            % (len(AUTH_TICKETS), len(AUTH_TOKENS)))
+
+
+def _auth_store_save():
+    now = time.time()
+    d = {
+        "tickets": {"%s|%s" % k: v for k, v in AUTH_TICKETS.items() if v > now},
+        "tokens": {a: {t: e for t, e in m.items() if e > now}
+                   for a, m in AUTH_TOKENS.items() if m},
+    }
+    try:
+        with _auth_store_lock:
+            tmp = AUTH_STORE + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(d, f, ensure_ascii=False, sort_keys=True)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp, AUTH_STORE)
+    except Exception as e:
+        log("[auth] 票据落盘失败：%s" % e)
 
 
 def auth_ticket_ok(acct, ip, touch=False):
@@ -135,8 +195,45 @@ def auth_ticket_ok(acct, ip, touch=False):
     return True
 
 
-def auth_ticket_grant(acct, ip):
-    AUTH_TICKETS[(str(acct or ""), ip or "")] = time.time() + AUTH_TICKET_TTL
+def auth_ticket_grant(acct, ip, tok=""):
+    acct = str(acct or "")
+    AUTH_TICKETS[(acct, ip or "")] = time.time() + AUTH_TICKET_TTL
+    tok = str(tok or "")
+    if acct and tok:
+        AUTH_TOKENS.setdefault(acct, {})[tok[:8]] = time.time() + AUTH_TOKEN_TTL
+    _auth_store_save()
+
+
+def auth_token_ok(acct, payload):
+    """17 包里回带的令牌（客户端只带前 9~10 字符）是否是我们发过的。"""
+    m = AUTH_TOKENS.get(str(acct or ""))
+    if not m or not payload:
+        return False
+    now = time.time()
+    raw = bytes(payload or b"")
+    for pref, exp in list(m.items()):
+        if exp <= now:
+            m.pop(pref, None)
+            continue
+        if pref and pref.encode("ascii", "ignore") in raw:
+            return True
+    return False
+
+
+def auth_lenient(acct):
+    """KD_AUTH_LENIENT（默认开）：本机私服里账号有存档就直接放行。
+
+    代价只是「跳过 /auth 的自组包也能进」，本机开发服可以接受；
+    要严格校验时 `KD_AUTH_LENIENT=0 KD_REQUIRE_AUTH_TICKET=1` 一起开。
+    """
+    if os.environ.get("KD_AUTH_LENIENT", "1") in ("0", "", "false", "False"):
+        return False
+    probe = player_mod.Player()
+    probe.acct = str(acct or "")
+    try:
+        return state_exists(probe)
+    except Exception:
+        return False
 
 # 任务链：Quest.xml 的 next_quest 映射（交完任务后推下一环状态，真服 15:37:08 实证）
 QUEST_NEXT = {}
@@ -630,17 +727,20 @@ def send_push(conn, cid, cmd):
         push_spirit(conn, cid)
         return
     if cmd == 947:
-        body = pet_proto.pack_947(spirit_strap())
+        body = pet_proto.pack_947(spirit_strap(), pet_skin_id())
         if body:
             conn.sendall(pack(947, 0, body))
-            log("c%03d .. push cmd=947    len=%d [宠物详情 妖灵%s]"
-                % (cid, len(body), pet_proto.strap_key(spirit_strap())))
+            log("c%03d .. push cmd=947    len=%d [宠物详情 妖灵%s 形象%d]"
+                % (cid, len(body), pet_proto.strap_key(spirit_strap()), pet_skin_id()))
         return
     if cmd == 957:
         # 宠物列表（获得宠物 / 956 的应答）。没有它客户端只有占位熊猫。
-        conn.sendall(pack(957, 0, PET_957))
-        log("c%03d .. push cmd=957    len=%d [宠物列表 功夫熊猫10000]"
-            % (cid, len(PET_957)))
+        # ★ 用动态包：形象 id 跟 947 同源，否则换过形象卡的号主城还是熊猫。
+        _b957 = pack_957(pet_skin_id())
+        conn.sendall(pack(957, 0, _b957))
+        log("c%03d .. push cmd=957    len=%d [宠物列表 形象%d %s]"
+            % (cid, len(_b957), pet_skin_id(),
+               pet_skin.pet_skin_name(pet_skin_id())))
         return
     ph = TPL_PUSH.get(cmd)
     if not ph:
@@ -709,6 +809,17 @@ PET_957 = bytes.fromhex(
     "000000000000000000000000000000000000000000000000"
     "0000000000000000")
 
+# 957 里那个 `cd2710 08` 跟 947 是**同一个字段**（宠物形象 id），
+# ★ 2026-11-27 17:5x：以前 957 一律发模板原包 = 写死 10000 功夫熊猫，
+#   于是「换过形象卡的号登录后主城跟随宠物是熊猫，只有进 Boss（151 带形象）
+#   才被强制刷成美人鱼」。947 早就是动态的，957 漏了 —— 这里按当前形象重编码。
+#   换形象只换模型，名字仍是「功夫熊猫」（真服 16:05 抓包实证），所以名字段不动。
+def pack_957(skin=10000):
+    i = PET_957.find(b"\xcd\x27\x10\x08")
+    if i < 0:
+        return PET_957
+    return PET_957[:i] + pet_proto._num(int(skin)) + b"\x08" + PET_957[i + 4:]
+
 
 def grant_pet(pid=10000):
     """给当前角色一只宠物（默认 10000 功夫熊猫），返回是否新获得。
@@ -746,6 +857,35 @@ def spirit_strap():
     return {s: i for s, i in cur().spirit_slot.items() if i in cur().spirit_bag}
 
 
+def pet_skin_id():
+    """当前宠物的形象 id（947 off48 用的那个）。老存档没有这条字段时回落 10000。"""
+    v = getattr(cur(), "pet_skin", None)
+    try:
+        return int(v[0]) if v else 10000
+    except (TypeError, ValueError, IndexError):
+        return 10000
+
+
+def battle_pet():
+    """151 的宠物段，必须与 947 是同一只（名字/等级/形象 id 同源）。
+
+    ★ 2026-11-27 16:5x：以前两处都直接 `pet_proto.active_pet(cur().pets)`，
+      名字/等级是从 947 的**回放模板**里读的（永远是功夫熊猫），形象 id 又在
+      battle.build_pet_seg 里写死 10000 —— 于是换了美人鱼形象卡后，
+      跑图和面板是美人鱼，一进战斗就变回熊猫。用户实测「战斗里形象还是旧的」。
+    """
+    base = pet_proto.active_pet(cur().pets)
+    if not base:
+        return None
+    p = dict(base)
+    skin = pet_skin_id()
+    p["skin"] = skin
+    nm = pet_skin.pet_skin_name(skin)
+    if nm and not nm.startswith("?"):
+        p["name"] = nm
+    return p
+
+
 def spirit_bag_view():
     """喂给 pet_proto.pack_1410 的视图：{id: {"idx": 获得次序}}"""
     return {iid: {"idx": int(info.get("idx") or 1)}
@@ -777,6 +917,21 @@ def push_spirit(conn, cid):
            spirit_strap() or "无", body.hex()))
 
 
+def push_spirit_chain(conn, cid, why=""):
+    """妖灵上阵/卸下后的整条刷新链，逐包照抄真服 2026-11-27 17:39 抓包：
+
+        947 -> 178 -> 29 -> 28 -> 30 -> 1410
+
+    ★ 以前本地只发 `947 -> 1410 -> 29`（装备）/ `947 -> 1410`（卸下），
+      少了 178/28/30，于是装完妖灵后：背包里那只妖灵还在（178 没刷新）、
+      战力/属性没变（28 缺）、装备面板不重画（30 缺），要重开界面才对。
+    """
+    for c in (947, 178, 29, 28, 30):
+        send_push(conn, cid, c)
+    push_spirit(conn, cid)
+    log("c%03d .. 妖灵刷新链 947/178/29/28/30/1410 [%s]" % (cid, why))
+
+
 def spirit_add(iid):
     """获得一只妖灵。已拥有返回 False。序号 = 已有最大序号 + 1。"""
     iid = int(iid)
@@ -795,7 +950,9 @@ def spirit_equip(slot, iid):
     slot, iid = int(slot), int(iid)
     if iid not in cur().spirit_bag:
         return cur().spirit_slot.get(slot), None
-    if pet_proto.nature_of(iid) and pet_proto.nature_of(iid) != slot:
+    # ★ 2026-11-27 18:2x：这里比的是**格子位置**（slot_of），不是属性码。
+    _want = pet_proto.slot_of(iid)
+    if _want and _want != slot:
         return cur().spirit_slot.get(slot), None
     for s in [s for s, v in cur().spirit_slot.items() if v == iid]:
         cur().spirit_slot.pop(s, None)
@@ -805,7 +962,25 @@ def spirit_equip(slot, iid):
 
 
 def spirit_unequip(slot):
-    return cur().spirit_slot.pop(int(slot), None)
+    """卸下某个格子。返回被卸下的妖灵 id（没有就是 None）。
+
+    ★ 2026-11-27 18:2x：兼容两种编号。正常情况客户端发的是**格子位置**
+      （1血 2攻 3防 4命 5闪 6坚 7绝 8暴），与存档 key 一致。但如果哪天
+      客户端改发属性码（1/2/3/4/5/7/8/9），位置直接查是空的 →
+      玩家点了「卸下」却纹丝不动（用户实测「装上去了脱不下来」）。
+      所以这里退一步：按属性码反查一格，找到就卸它，并打日志说明走了兜底。
+    """
+    slot = int(slot)
+    hit = cur().spirit_slot.pop(slot, None)
+    if hit:
+        return hit
+    for s, iid in list(cur().spirit_slot.items()):
+        if pet_proto.nature_of(iid) == slot:
+            cur().spirit_slot.pop(s, None)
+            log("[spirit] 1414 槽%d 空，按属性码兜底卸下格%d 的 %s"
+                % (slot, s, pet_proto.name_of(iid)))
+            return iid
+    return None
 
 
 def spirit_pick_for_slot(slot):
@@ -815,10 +990,10 @@ def spirit_pick_for_slot(slot):
     if old:
         return old
     for iid, _idx in spirit_free_list():
-        if pet_proto.nature_of(iid) == slot:
+        if pet_proto.slot_of(iid) == slot:
             return iid
     for iid, _idx in spirit_free_list():
-        if pet_proto.nature_of(iid) == 0:
+        if pet_proto.slot_of(iid) == 0:
             return iid
     return 0
 
@@ -1047,10 +1222,10 @@ def apply_gm(line):
         for cid, conn in items:
             _ba = {k: panel_attr(k) for k in
                    ("hp_max", "mp_max", "attack_min", "attack_max",
-                    "defense", "crit")}
+                    "defense", "crit", "agile")}
             s = battle.BattleSession(
                 mob_id, BT, cur().cls, cur().level,
-                pet=pet_proto.active_pet(cur().pets), name=cur().name,
+                pet=battle_pet(), name=cur().name,
                 attrs=_ba, dmg_mult=DMG_MULT, sex=cur().sex)
             s.player_mp_max = max(0, panel_attr("mp_max"))
             s.player_mp = s.player_mp_max
@@ -1130,7 +1305,7 @@ def apply_gm(line):
             return False, "用法：卸妖灵 <槽位1-3>"
         old = spirit_unequip(int(arg[1]))
         save_state()
-        push_all([947, 1410, 29])
+        push_all([947, 178, 29, 28, 30, 1410])
         return True, ("槽%s 卸下 %s" % (arg[1].strip(),
                                        pet_proto.name_of(old) if old else "空"))
 
@@ -1158,6 +1333,19 @@ def apply_gm(line):
     if line.startswith("备份") or line.startswith("statebackup"):
         backup_current(cur(), force=True)
         return True, "已强制备份当前角色（backups/）"
+
+    if line.startswith("宠物形象") or line.startswith("petskin"):
+        # GM：直接改当前展示宠物形象（测试用）。宠物形象卡 182 是正式路径，
+        # 这条只是省掉「背包里要有卡 + 点 UI」——抓包/复现战斗表现时用。
+        arg = line.split(None, 1)
+        arg = arg[1].strip() if len(arg) > 1 else ""
+        if not arg.isdigit():
+            return True, ("用法：宠物形象 <Pet.xml id>；当前 %d（%s）"
+                          % (pet_skin_id(), pet_skin.pet_skin_name(pet_skin_id())))
+        cur().pet_skin[0] = int(arg)
+        push_all([957, 947, 178, 29, 28, 30])
+        return True, ("宠物形象 -> %d（%s）"
+                      % (int(arg), pet_skin.pet_skin_name(int(arg))))
 
     if line.startswith("领宠") or line.startswith("givepet"):
         arg = line.split(None, 1)
@@ -1188,7 +1376,7 @@ def apply_gm(line):
                     spirit_add(iid)
                 spirit_equip(s, iid)
             save_state()
-            push_all([947, 1410, 29])
+            push_all([947, 178, 29, 28, 30, 1410])
             return True, ("已发真服那三只：槽1 血·共工 / 槽2 命·魍魉 / 槽3 攻·白光虎"
                           "（947 会走真服原包 105B）")
         parts = arg.split()
@@ -1203,7 +1391,7 @@ def apply_gm(line):
         iid = ids[0]
         if not slot:
             # 优先放它自己的部位；该槽被占或没部位时再找空槽
-            nat = pet_proto.nature_of(iid)
+            nat = pet_proto.slot_of(iid)
             used = set(spirit_strap())
             if nat and nat not in used:
                 slot = nat
@@ -1223,8 +1411,8 @@ def apply_gm(line):
             push_all([1410])
             return False, ("%s(%d) 部位=%d 与槽%d 不匹配，没上阵（已进背包）"
                            % (pet_proto.name_of(iid), iid,
-                              pet_proto.nature_of(iid), slot))
-        push_all([947, 1410, 29])
+                              pet_proto.slot_of(iid), slot))
+        push_all([947, 178, 29, 28, 30, 1410])
         return True, ("%s %s(%d) → 槽%d（947模板 %s）"
                       % ("获得并上阵" if added else "已拥有，重新上阵",
                          pet_proto.name_of(iid), iid, slot,
@@ -1801,7 +1989,7 @@ def item_name(iid):
 # 否则客户端按「有坐骑」去取不存在的数据，登录直接闪退（2026-11-24 00:00 实测）。
 MOUNT_UNLOCKED = False
 # [player] 状态已移入 player.Player：SPIRIT_SLOT
-MAX_SPIRIT_SLOT = 3
+MAX_SPIRIT_SLOT = 8
 
 # 任务状态：以前只放在 handle_game 的局部变量 active_qid 里，服务端一重启 /
 # 客户端一重连就丢，导致打完怪不再推 210「可交」，客户端就卡在
@@ -1843,7 +2031,6 @@ NEWBIE_GIFT = ((20190, 10), (20432, 1), (21001, 1))
 # 这些子系统的协议还没抓到正样本，服务端【不消耗】道具 —— 免得像天使羽翼那样
 # 点一下就没了、也没有任何效果。提示要说清楚卡在哪，别让玩家以为是服务器坏了。
 WHY_BY_KIND2 = {
-    34: "宠物形象系统尚未实现，道具已保留",
     36: "妖灵系统尚未实现，道具已保留",
     61: "坐骑系统尚未实现，道具已保留",
     68: "妖灵礼包需要妖灵系统，道具已保留",
@@ -2351,9 +2538,38 @@ def load_state(pl=None):
         for k, v in ss.items():
             if int(v):
                 pl.spirit_slot[int(k)] = int(v)
+        # ★ 2026-11-27 18:2x：老存档是按「属性码」存的（1/2/3/4/5/7/8/9），
+        #   现在 key 统一成「格子位置」（1血 2攻 3防 4命 5闪 6坚 7绝 8暴）。
+        #   直接把妖灵搬到自己该在的格子，否则老号一登录就是「魍魉在攻格」
+        #   那套错位，而且点自己的格子卸不下来。搬不动（格子被占）就退回背包。
+        _fixed = {}
+        for _s, _iid in sorted(pl.spirit_slot.items()):
+            _want = pet_proto.slot_of(_iid)
+            if not _want:
+                continue
+            if _want in _fixed or _want == _s:
+                if _want in _fixed:      # 两只抢同一格：后来那只回背包
+                    continue
+                _fixed[_want] = _iid
+            else:
+                _fixed[_want] = _iid
+        if _fixed != pl.spirit_slot:
+            log("[spirit] 存档槽位归一：%s → %s"
+                % (pl.spirit_slot, _fixed))
+            pl.spirit_slot.clear()
+            pl.spirit_slot.update(_fixed)
     # 宠物：新号必须一只都没有（真服新号身边不跟熊猫）。
     # 缺 pets 的旧档只能根据已完成的 400702 恢复任务宠物。
     # 账号是主号不代表拿过宠物，不能再补入抓包账号的三只形象。
+    # 宠物形象：老存档没有这条 = 10000（功夫熊猫），与改动前表现一致。
+    try:
+        pl.pet_skin[0] = int(d.get("pet_skin") or 10000)
+    except (TypeError, ValueError):
+        pl.pet_skin[0] = 10000
+    try:
+        pl.mount_skin[0] = int(d.get("mount_skin") or 0)
+    except (TypeError, ValueError):
+        pl.mount_skin[0] = 0
     pt = d.get("pets")
     if isinstance(pt, list):
         pl.pets = [int(x) for x in pt]
@@ -2482,6 +2698,10 @@ def state_dict():
             "enhance": {str(k): v for k, v in cur().enhance.items()},
             "bag": {str(k): v for k, v in cur().bag.items()},
             "pets": list(cur().pets),
+            # 宠物当前形象（Pet.xml id）与坐骑形象。形象卡用掉后要能跨登录保留，
+            # 否则重登 947 又变回 10000，玩家会以为「形象卡白买了」。
+            "pet_skin": int(cur().pet_skin[0]) if cur().pet_skin else 10000,
+            "mount_skin": int(cur().mount_skin[0]) if cur().mount_skin else 0,
             "spirit_bag": {str(k): v for k, v in cur().spirit_bag.items()},
             "spirit_slot": {str(k): v for k, v in cur().spirit_slot.items()},
             # ★ 存档版本：ver>=2 表示「首饰四格是四件独立物品」的新格式，
@@ -3695,6 +3915,36 @@ def builtin_resp(cmd, payload):
             follow = [88, 178]
             log("[title] 格%02x %s x%d -> 佩戴称号 %d（存档 title=%d）"
                 % (pos, bag_proto.item(iid)["name"], use, _tid, cur().title))
+        elif bag_proto.item(iid)["kind2"] == 34 and pet_skin.pet_skin_of(iid):
+            # 宠物形象卡（item_kind1=11 kind2=34）。
+            # 线上服 2026-11-27 16:05:51 完整时序（用掉背包 49 格的美人鱼形象卡 20962）：
+            #   182 3101 -> 182 空ACK -> 29 -> 28 -> 30 -> 947 -> 178 -> 306
+            # 947 的 off48 由 cd2710(10000) 变 cd2721(10017)，宠物气血 2617→3619、
+            # 宠物战力 855→875，名字「功夫熊猫」不变（换形象只换模型）。
+            # ★ 没有 962/957/963：形象卡只改「当前展示宠物的形象」，不新增宠物位；
+            #   所以绝不能顺手推 957，否则宠物栏会多出一只。
+            _skin = int(pet_skin.pet_skin_of(iid))
+            if not cur().pets:
+                log("[pet] 格%02x %s 使用失败：当前角色没有宠物（不消耗）"
+                    % (pos, bag_proto.item(iid)["name"]))
+                return 1, err_text("还没有宠物，无法使用形象卡"), []
+            cur().pet_skin[0] = _skin
+            follow = [29, 28, 30, 947, 178, 306]
+            log("[pet] 格%02x %s x%d -> 宠物形象 %d(%s)"
+                % (pos, bag_proto.item(iid)["name"], use, _skin,
+                   pet_skin.pet_skin_name(_skin)))
+        elif bag_proto.item(iid)["kind2"] == 61 and pet_skin.mount_skin_of(iid):
+            # 坐骑形象卡（item_kind1=4 kind2=61，例 31624 年年有鱼形象 -> Horse.xml 10054）。
+            # 线上服 2026-11-27 16:14 抓到的完整时序（那个号本来骑着 10035 筋斗云）：
+            #   182 3101 -> 182 -> 29(53B) -> 28(战力+158) -> 30(尾部坐骑块 10035->10054)
+            #   -> 1346(49B) -> 1362(37B) -> 1363(12B) -> 1369(2B) -> 178 -> 306
+            # 本地没有坐骑数据（MOUNT_UNLOCKED=False，34B「未解锁」），
+            # 强行按「有坐骑」回 40B/49B 会让客户端取不到坐骑数据直接闪退
+            # （2026-11-24 00:00 实测）。所以这里【不消耗】，提示等坐骑系统落地。
+            log("[mount] 格%02x %s 需要坐骑系统（映射 %d/%s），道具保留"
+                % (pos, bag_proto.item(iid)["name"], pet_skin.mount_skin_of(iid),
+                   pet_skin.mount_name(pet_skin.mount_skin_of(iid))))
+            return 1, err_text("坐骑系统尚未实现，形象卡已保留"), []
         elif eff:
             key, per = eff
             amount = per * use
@@ -3983,7 +4233,7 @@ def handle_tls(raw_sock, cid):
                 tok = new_token()
                 # 记一张「这个 IP 刚过 /auth」的票据：有密码的账号登录 17 时要查，
                 # 防止自组包跳过 /auth 直接进游戏。
-                auth_ticket_grant(user, peer_ip(conn))
+                auth_ticket_grant(user, peer_ip(conn), tok)
                 # 字段与真服完全一致：account_id 是数字，uid 字符串，token 43 字符
                 resp = json.dumps({
                     "account_id": int(ACCOUNTS.get(user, 13)),
@@ -4134,11 +4384,30 @@ def handle_game(conn, cid):
                     if (_acct and account_policy.needs_password(_acct)
                             and os.environ.get("KD_REQUIRE_AUTH_TICKET", "1") != "0"
                             and not auth_ticket_ok(_acct, peer_ip(conn), touch=True)):
-                        log("c%03d [acct] ！！账号 %s 没有 /auth 票据（或已过期），拒绝登录"
-                            % (cid, _acct))
-                        conn.sendall(pack(1, seq, struct.pack(">H", 1211)
-                                          + "登录已过期，请重新登录".encode("utf-8")))
-                        continue
+                        # ① 客户端把 /auth 发过的令牌带回来了（重启后票据表虽空，
+                        #    令牌落盘还在）→ 认。
+                        if auth_token_ok(_acct, payload):
+                            auth_ticket_grant(_acct, peer_ip(conn))
+                            log("c%03d [acct] 账号 %s 票据失效，但 17 里带回的令牌"
+                                "与 /auth 发放的一致 → 放行" % (cid, _acct))
+                        # ② 本机私服宽松模式：账号有存档就放行（避免重启后
+                        #    客户端卡在「登录已过期」，连接退化成 Lv0 空角色）。
+                        elif auth_lenient(_acct):
+                            auth_ticket_grant(_acct, peer_ip(conn))
+                            log("c%03d [acct] ！账号 %s 无票据，宽松模式放行"
+                                "（KD_AUTH_LENIENT=1，账号有存档）" % (cid, _acct))
+                        else:
+                            log("c%03d [acct] ！！账号 %s 没有 /auth 票据（或已过期），拒绝登录"
+                                % (cid, _acct))
+                            # ★ 拒绝后这条连接绝不能继续用默认空角色跑业务：
+                            #   以前这里只 continue，后面 145/146 照打，玩家看到
+                            #   Lv0 / 职业 6（新手）/ 新手技能栏，存档还可能被写坏。
+                            pl.authed = False
+                            pl.loaded = False
+                            pl.has_char = False
+                            conn.sendall(pack(1, seq, struct.pack(">H", 1211)
+                                              + "登录已过期，请重新登录".encode("utf-8")))
+                            continue
                     if _acct:
                         log("c%03d [acct] 登录账号 %s" % (cid, _acct))
                         switch_account(_acct)
@@ -4185,6 +4454,14 @@ def handle_game(conn, cid):
                                 % (cid, _acct))
                             continue
 
+
+                # ★ 2026-11-27：未登录的连接不许跑业务。cmd=17 被拒后客户端不会
+                #   自己重走 /auth，仍继续发 145/146/305 —— 以前这些包照常处理，
+                #   于是用默认空角色开战（面板 Lv0、职业 6 新手、新手技能栏），
+                #   还会把默认态写进存档。这里直接丢弃，逼它重新登录。
+                if not pl.authed and cmd not in (4, 20, 90, 115, 116):
+                    log("c%03d !! 未登录连接 cmd=%d 丢弃（需要重新登录）" % (cid, cmd))
+                    continue
 
                 # ---- 建角（cmd=20）：真服原样流程，回 20 应答 + 推 113/117 ----
                 if cmd == 20:
@@ -4260,10 +4537,10 @@ def handle_game(conn, cid):
                     if _ids:
                         _ba = {k: panel_attr(k) for k in
                                ("hp_max", "mp_max", "attack_min", "attack_max",
-                                "defense", "crit")}
+                                "defense", "crit", "agile")}
                         battle_sess = battle.BattleSession(
                             _ids[0], BT, cur().cls, cur().level,
-                            pet=pet_proto.active_pet(cur().pets), name=cur().name,
+                            pet=battle_pet(), name=cur().name,
                             attrs=_ba, sex=cur().sex)
                         battle_sess.player_mp_max = max(0, panel_attr("mp_max"))
                         battle_sess.player_mp = battle_sess.player_mp_max
@@ -4288,10 +4565,10 @@ def handle_game(conn, cid):
                         # 用户看到「莫名其妙胜利」，脱了武器也一样赢。
                         _ba = {k: panel_attr(k) for k in
                                ("hp_max", "mp_max", "attack_min", "attack_max",
-                                "defense", "crit")}
+                                "defense", "crit", "agile")}
                         battle_sess = battle.BattleSession(
                             mob_id, BT, cur().cls, cur().level,
-                            pet=pet_proto.active_pet(cur().pets), name=cur().name,
+                            pet=battle_pet(), name=cur().name,
                             attrs=_ba, dmg_mult=DMG_MULT, sex=cur().sex)
                         # 151 里的蓝必须与 29 面板同源：客户端是拿「当前法力」跟
                         # Skill.xml 的 consume_mp 比，面板/战斗蓝不一致会出现
@@ -4327,11 +4604,20 @@ def handle_game(conn, cid):
                     if battle_sess is not None:
                         body, is_end, result = battle_sess.on_action(payload)
                         conn.sendall(pack(148, 0, body))
-                        log("c%03d -> cmd=148 [回合%d 怪剩血%d 玩家剩血%d%s%s] echo=%s"
+                        # 逐只血量写进日志：验证群攻是否真打了 3 只（用户要点对账）
+                        _hpx = " ".join(
+                            "%06x:%d" % (int(u[0]) & 0xFFFFFF,
+                                         battle_sess.mob_hp.get(u[0], 0))
+                            for u in battle_sess.units)
+                        log("c%03d -> cmd=148 [回合%d 怪剩血%d 玩家剩血%d%s%s] "
+                            "技能%d aoe=%s 各怪血[%s] echo=%s"
                             % (cid, battle_sess.round, battle_sess.hp,
                                battle_sess.disp_player_hp,
                                " 结束" if is_end else "",
-                               " " + result if result else "", payload.hex()))
+                               " " + result if result else "",
+                               getattr(battle_sess, "skill_id", 0),
+                               getattr(battle_sess, "aoe", None), _hpx,
+                               payload.hex()))
                     else:
                         h = BATTLE_ROUNDS[min(battle_idx, len(BATTLE_ROUNDS) - 1)]
                         body = bytearray(bytes.fromhex(h))
@@ -4868,13 +5154,7 @@ def handle_game(conn, cid):
                     if qid_int == 400702 and not cur().pets:
                         cur().pets.append(10000)      # Pet.xml 10000 = 功夫熊猫
                         save_state()
-                        conn.sendall(pack(957, 0, bytes.fromhex(
-                            # 前 80B 与真服 15:41:14 原包逐字节一致；
-                            # relay.log 的 hex 只留 80 字节，尾部 2B 按 0 补齐到 len=82。
-                            "01ace58a9fe5a4abe7868ae78cab010001ccdeccfc33cd0806"
-                            "cd0322ccb633663300cd02b1010101010119191919cd271008"
-                            "00000000000000000000000000000000000000000000000000"
-                            "00000000000000")))
+                        conn.sendall(pack(957, 0, pack_957(pet_skin_id())))
                         log("[pet] ★ 交任务 400702「前世仙宠」-> 957 获得功夫熊猫(10000)")
                     send_push(conn, cid, 29)
                     _b28 = build_28()
@@ -5529,7 +5809,7 @@ def handle_game(conn, cid):
                         log("c%03d -> cmd=947 seq=%-4d len=%d [无宠档 实验 hex=%s]"
                             % (cid, seq, len(_eb), _eb.hex()))
                         continue
-                    _b = pet_proto.pack_947(spirit_strap())
+                    _b = pet_proto.pack_947(spirit_strap(), pet_skin_id())
                     conn.sendall(pack(947, seq, _b))
                     log("c%03d -> cmd=947 seq=%-4d len=%d [宠物详情 妖灵%s%s]"
                         % (cid, seq, len(_b), spirit_strap() or "无",
@@ -5622,9 +5902,18 @@ def handle_game(conn, cid):
                     # 此时 spirit_slot_sel 还是 0 → 部位校验永远不过，
                     # 客户端却已经弹了「装备成功」（用户实测）。
                     # 每只妖灵的合法槽位本来就唯一，直接从 iid 反推最稳。
-                    _slot_use = pet_proto.nature_of(iid) or spirit_slot_sel
-                    if iid and _slot_use and \
-                            pet_proto.nature_of(iid) in (0, _slot_use):
+                    # ★ 2026-11-27 17:4x：去掉 `or spirit_slot_sel` 兜底。
+                    #   以前 nature_of() 只认 3 个系，6xxx/7xxx/8xxx 全返回 0，
+                    #   于是拿「上次点开的槽位」顶替 → 妖灵装进了错误的槽
+                    #   （用户实测反馈）。现在八系全部实证；真出现未知千位就
+                    #   留在背包并打日志，绝不再猜一个槽塞进去。
+                    _slot_use = pet_proto.slot_of(iid)
+                    if iid and not _slot_use:
+                        log("c%03d -> cmd=1413 seq=%-4d [%s 部位未知，留在背包]"
+                            % (cid, seq, pet_proto.name_of(iid)))
+                        push_spirit(conn, cid)
+                        continue
+                    if iid and _slot_use:
                         _old, _put = spirit_equip(_slot_use, iid)
                         if _put:
                             log("c%03d -> cmd=1413 seq=%-4d [%s 上阵槽%d，原 %s]"
@@ -5632,12 +5921,9 @@ def handle_game(conn, cid):
                                    _slot_use,
                                    pet_proto.name_of(_old) if _old else "空"))
                             save_state()
-                            _b947 = pet_proto.pack_947(spirit_strap())
-                            conn.sendall(pack(947, 0, _b947))
-                            log("c%03d .. push cmd=947    len=%d [上阵 %s]"
-                                % (cid, len(_b947), pet_proto.strap_key(spirit_strap())))
-                            push_spirit(conn, cid)
-                            send_push(conn, cid, 29)
+                            push_spirit_chain(
+                                conn, cid,
+                                "上阵 %s → 槽%d" % (pet_proto.name_of(iid), _slot_use))
                             continue
                     log("c%03d -> cmd=1413 seq=%-4d [第%d只/槽%d 无法上阵，只刷列表]"
                         % (cid, seq, _idx, _slot_use))
@@ -5658,12 +5944,9 @@ def handle_game(conn, cid):
                            pet_proto.name_of(_uold) if _uold else "空"))
                     if _uold:
                         save_state()
-                        _b947u = pet_proto.pack_947(spirit_strap())
-                        conn.sendall(pack(947, 0, _b947u))
-                        log("c%03d .. push cmd=947    len=%d [卸下后 %s]"
-                            % (cid, len(_b947u),
-                               pet_proto.strap_key(spirit_strap())))
-                        push_spirit(conn, cid)
+                        push_spirit_chain(
+                            conn, cid,
+                            "卸下槽%d 原 %s" % (_uslot, pet_proto.name_of(_uold)))
                     continue
 
                 # ★ 2026-11-26 12:2x：登录「转圈」的真正原因 —— 客户端给每个外发请求
@@ -5718,7 +6001,9 @@ def handle_game(conn, cid):
                             % cid)
                         continue
                     _rc, _rh = LOGIN_EXTRA[cmd]
-                    _rb = PET_957 if _rh is None else bytes.fromhex(_rh)
+                    # 956 -> 957 走 pack_957（统一 82B「刚获得、无妖灵」档，
+                    # 形象 id 跟当前角色走，不再写死功夫熊猫）。
+                    _rb = pack_957(pet_skin_id()) if _rh is None else bytes.fromhex(_rh)
                     conn.sendall(pack(_rc, seq, _rb))
                     sent_cmds.add(_rc)
                     log("c%03d -> cmd=%-6d seq=%-4d len=%d [登录初始化补包]"
@@ -5842,6 +6127,7 @@ def handle(conn, addr, cid):
 
 def main():
     log("回放序列 %d 包（推送 %d）" % (len(SEQ), sum(1 for _, s, _ in SEQ if s == 0)))
+    _auth_store_load()      # 票据/令牌落盘：重启后客户端不用重走 /auth 也能登录
     _ep = _load_equip_str()
     pet_proto.load()
     log("宠物配置：妖灵 %d 种 / 宠物 %d 种 / 947 真服原包 %s"
