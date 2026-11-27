@@ -2086,6 +2086,22 @@ STATE_FILE = os.path.join(HERE, "player_state.json")
 # 账号现在记在 Player.acct 上（每个连接一份），不再共用进程级 ACCOUNT_STATE。
 PRIMARY_ACCOUNT = "1784366"
 
+# 升级需求曲线（到下一级要多少经验）。
+# 线上服 2026-11-27 抓包实测三处：
+#   Lv1  17 idx40 = 760
+#   Lv10 17 idx40 = 8550        (760×1.31^9 ≈ 8660，早期按指数长)
+#   Lv35 17 = 538474/747067、Lv36 28 idx40 = 803144、Lv39 28 idx40 = 1290042
+# 高等级用幂函数拟合：need ≈ 2.1×Lv^3.6（Lv10→8360、36→840k、39→1.12M，误差 <15%）。
+# 以前固定 200×1.18^(lv-1)，Lv39 只有 10.8 万，比真服低一个数量级，
+# 经验条分母也不下发 → 客户端拿模板的 8550 去除，直接显示 766.49%。
+def exp_need_of(level):
+    lv = max(1, int(level or 1))
+    if os.environ.get("KD_EXP_CURVE", "").lower() == "fast":
+        return max(200, int(200 * (1.18 ** (lv - 1))))
+    if lv <= 10:
+        return int(round(760 * (1.31 ** (lv - 1))))
+    return int(round(2.1 * (lv ** 3.6)))
+
 
 def state_path(pl=None):
     """某个角色的**旧 JSON 存档**路径。不传就用当前线程的角色。
@@ -2423,11 +2439,10 @@ def load_state(pl=None):
     pl.level = int(d.get("level", pl.level))
     pl.cls = int(d.get("class", pl.cls))
     pl.coin_bound[0] = int(d.get("coin", pl.coin_bound[0]))
-    pl.exp_need = int(d.get("need", pl.exp_need) or 0)
-    # 存档里有 level 就说明这是真角色；缺 need 的老档按等级补一个非 0 值，
-    # 避免 exp_need=0 让升级循环永远不成立（0 现在专指「还没有角色的空连接」）。
-    if not pl.exp_need:
-        pl.exp_need = max(200, int(200 * (1.18 ** max(0, pl.level - 1))))
+    # ★ 2026-11-27 23:5x：需求一律按等级重算，不再信存档里的 need。
+    #   老存档的 need 是 200*1.18^(lv-1) 生成的（Lv39=10.8 万，真服 129 万），
+    #   而且从来没写进 17/28 的需求字段，经验条就被模板的 8550 除爆了。
+    pl.exp_need = exp_need_of(pl.level)
     pl.bind_yuanbao[0] = int(d.get("bind_yuanbao", pl.bind_yuanbao[0]))
     pl.tongqian[0] = int(d.get("tongqian", pl.tongqian[0]))
     pl.yuanbao[0] = int(d.get("yuanbao", pl.yuanbao[0]))
@@ -2803,8 +2818,7 @@ def quest_210_doing(qid_int):
 
 
 def add_reward(exp, coin):
-    """交任务奖励入账 + 按 cur().exp_need 升级（升级需求 11 级以上按 1.18 倍近似，
-    真服只实证到 8549=10->11）。"""
+    """交任务奖励入账 + 升级。需求走 exp_need_of(level)（真服拟合曲线）。"""
     pass  # [player] 状态走 cur()，无需 global
     cur().exp += exp
     # ★ exp_need=0 是「还没有角色」的空连接（Player() 默认值）。
@@ -2812,7 +2826,7 @@ def add_reward(exp, coin):
     while cur().exp_need > 0 and cur().exp >= cur().exp_need and cur().level < 80:
         cur().exp -= cur().exp_need
         cur().level += 1
-        cur().exp_need = int(cur().exp_need * 1.18)
+        cur().exp_need = exp_need_of(cur().level)
         log("[player] 升级 -> Lv%d (exp=%d need=%d)"
             % (cur().level, cur().exp, cur().exp_need))
     cur().coin_bound[0] += coin
@@ -3018,6 +3032,28 @@ def build_20_ack(acct, name, sex=1, cls=6):
             + bytes([_sx, int(cls) & 0xFF]) + CREATE_ACK_TAIL)
 
 
+def exp_display():
+    """经验条那对值：(本级经验, 升级需求)。
+
+    客户端经验条是**直接相除**：`经验 / 需求`。
+      - 28 包里 经验=idx8、需求=idx40（token，可重编码）
+      - 17 包里 经验=off22(cd+u16)、需求=off72(cd+u16)（定长槽）
+    以前只写经验，需求永远留模板值 8550，于是 Lv39 号 89402 经验被 u16
+    截成 65535 后显示 `65535/8550 = 766.49%`（用户截图）。
+    线上服 2026-11-27 抓包对照：Lv35 17 是 `538474/747067`(72%)、
+    Lv39 28 是 `83084/1290042`(6%)——真服两个字段永远同级自洽。
+
+    这里统一给一对自洽值。28 写真值（varint 自适应），17 是定长 u16 槽：
+    需求 ≤ 65535 时原样写，超过就按比例缩到 u16（百分比不变）。
+    """
+    lv = max(1, int(cur().level or 1))
+    need = exp_need_of(lv)
+    exp = max(0, int(cur().exp or 0))
+    if exp >= need:      # 只影响显示，不动等级（升级走 add_reward 的循环）
+        exp %= need
+    return exp, need
+
+
 def build_17(scene=None):
     """登录应答 17：在真服 197B 原包上等长替换装备 id 与外观 ID。
     物品 id 一律用 3 字节定长 varint（0xCD + u16），空槽写 0，
@@ -3076,8 +3112,16 @@ def build_17(scene=None):
     b[at(16)] = _sex_b
     b[at(17)] = cur().cls & 0xFF
     b[at(18)] = cur().level & 0xFF
+    _e17, _n17 = exp_display()
+    if _n17 > 0xFFFF:                       # 17 两个槽都是定长 u16，等比缩
+        _e17 = min(0xFFFF, int(_e17 * 0xFFFF / _n17))
+        _n17 = 0xFFFF
     b[at(22)] = 0xCD
-    b[at(23):at(25)] = min(cur().exp, 0xFFFF).to_bytes(2, "big")
+    b[at(23):at(25)] = _e17.to_bytes(2, "big")
+    # ★ off72 = 升级需求（经验条分母）。真服 Lv35 17 = cd0b666b(747067)，
+    #   本地以前一直留模板的 cd2166(8550)，于是 Lv39 号经验条爆到 766.49%。
+    b[at(72)] = 0xCD
+    b[at(73):at(75)] = _n17.to_bytes(2, "big")
     # 战力 off107..109：真服 29.field25 与 17 这个字段恒等（948 / 1020 同号实测），
     # 模板里写死的 cd03fc=1020 会让战力永远停在 1020。定长 CD+u16，长度不变。
     b[at(107)] = 0xCD
@@ -3461,6 +3505,13 @@ def build_28():
     b[at(25):at(27)] = min(cur().exp, 65535).to_bytes(2, "big")
     try:
         tk = grant.tokenize(bytes(b))
+        # ★ idx8 = 本级经验、idx40 = 升级需求：经验条是这两者相除。
+        #   以前只写经验（还被 u16 截断），需求留着模板的 8550，
+        #   Lv39 号直接显示 766.49%。真服 28 的 Lv39 样本是 83084/1290042。
+        _e28, _n28 = exp_display()
+        tk[8]["value"] = _e28
+        if len(tk) > 40:
+            tk[40]["value"] = _n28
         # 之前的 b[41:43] 写法只覆盖了 u32 的低 16 位，
         # 真实值 = 0x0023xxxx + 低16位，会出现 2305802 这种鬼数字，别再用了。
         tk[18]["value"] = cur().coin_bound[0]
