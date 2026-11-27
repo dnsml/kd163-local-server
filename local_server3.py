@@ -692,10 +692,10 @@ def send_push(conn, cid, cmd):
         body = build_29()
         if body:
             conn.sendall(pack(29, 0, body))
-            log("c%03d .. push cmd=29     len=%d [面板 Lv%d 生命%d 攻%d-%d 防%d]"
+            log("c%03d .. push cmd=29     len=%d [面板 Lv%d 生命%d 攻%d-%d 防%d 战力%d]"
                 % (cid, len(body), cur().level, power_now(),
                    panel_attr("attack_min"), panel_attr("attack_max"),
-                   panel_attr("defense")))
+                   panel_attr("defense"), power_total()))
         return
     if cmd == 30:
         if cur().wing[0]:
@@ -1371,14 +1371,20 @@ def apply_gm(line):
                              spirit_strap() or "无",
                              "有" if pet_proto.has_tpl(spirit_strap()) else "无"))
         if arg in ("三只", "三", "all"):
-            for s, iid in ((1, 1101), (2, 4101), (3, 2101)):
+            # ★ 2026-11-27：格子号是**面板位置**（1血 2攻 3防 4命 5闪 6坚 7绝 8暴），
+            #   不是属性码。以前这里按旧号写 (2,4101)/(3,2101)，slot_of 对不上
+            #   就被 spirit_equip 拒掉 → GM 说「发了三只」实际只装上 1 只。
+            #   入包顺序保持真服那三只的序号（1101/4101/2101），这样全卸时
+            #   1410 的 24B 与真服原包逐字节相同。
+            for iid in (1101, 4101, 2101):
                 if iid not in cur().spirit_bag:
                     spirit_add(iid)
+            for s, iid in ((1, 1101), (2, 2101), (4, 4101)):
                 spirit_equip(s, iid)
             save_state()
             push_all([947, 178, 29, 28, 30, 1410])
-            return True, ("已发真服那三只：槽1 血·共工 / 槽2 命·魍魉 / 槽3 攻·白光虎"
-                          "（947 会走真服原包 105B）")
+            return True, ("已发真服那三只：槽1 血·共工 / 槽2 攻·白光虎 / 槽4 命·魍魉"
+                          "（947 = 105B 真服原包）")
         parts = arg.split()
         ids = pet_proto.find(parts[0])
         if not ids:
@@ -3074,7 +3080,7 @@ def build_17(scene=None):
     # 战力 off107..109：真服 29.field25 与 17 这个字段恒等（948 / 1020 同号实测），
     # 模板里写死的 cd03fc=1020 会让战力永远停在 1020。定长 CD+u16，长度不变。
     b[at(107)] = 0xCD
-    b[at(108):at(110)] = (equip_attr.power_of(panel_attr("hp_max")) & 0xFFFF).to_bytes(2, "big")
+    b[at(108):at(110)] = (power_total() & 0xFFFF).to_bytes(2, "big")
     # ★ 场景 id（off25，定长 CD+u16）：模板恒为 1021 天音谷底。
     #   客户端收到 17 会**先按这个场景把地图和怪物建出来**，之后 113 到了
     #   再把对象叠上去 —— 于是 101 的「仙界守卫 Lv.1」(111101) 和
@@ -3466,7 +3472,9 @@ def build_28():
         # idx31 = 战力：真服 28 这个字段与 29[25] 恒等
         # （relay.log 17:19:53 Lv1 = 71、18:06:38 Lv2 = 82，两份 28/29 成对样本）。
         # 以前这里透传模板的 1005，新号面板战力会一直停在抓包号的数值。
-        tk[31]["value"] = equip_attr.power_of(panel_attr("hp_max")) & 0xFFFFFFFF
+        # ★ 2026-11-27：走 power_total()，把上阵妖灵的战力一起算进来
+        #   （真服 21:03 三只妖灵让 28[31] 与 29[25] 同步 1246->1305）。
+        tk[31]["value"] = power_total() & 0xFFFFFFFF
         # ！！千万别把 YUELI 写进 idx12 ！！
         # 2026-11-23 01:00 踩过：模板里 idx12 原本是 700，我按「idx12 可能是阅历」
         # 的猜测把它写成 0，结果客户端【一进战斗就闪退】——
@@ -3560,6 +3568,7 @@ def _tpl_tokens(cmd):
 FIELD_INDEX = {
     "hp_max": 0, "mp_max": 1, "attack_min": 2, "attack_max": 3, "defense": 4,
     "dodge": 5, "hit": 6, "crit": 7, "tenacity": 8, "spirit": 9, "agile": 10,
+    "power": 25,
 }
 
 
@@ -3575,10 +3584,27 @@ def min_enh_lv():
 
 
 def panel_now():
-    """按当前等级 + 装备算出的 26 字段面板（和 build_29 同一份数据）。"""
+    """按当前等级 + 装备算出的 26 字段面板（和 build_29 同一份数据）。
+
+    ★ 2026-11-27：29[25] 战力要叠上「已上阵妖灵」的战力。
+      真服 relay.log 21:03 连装三只时 29[25] = 1246 -> 1257 -> 1293 -> 1305，
+      增量 11/36/12 与 947 里宠物战力增量逐项一致（basic 折战力见
+      pet_proto.ATTR_POWER_W）。只加最后一格 —— 真服同一次上阵
+      29 的生命/攻击/防御全都没动，妖灵属性只进宠物自己的面板。
+    """
     toks = _tpl_tokens(29) or []
-    return equip_attr.compose29(toks, cur().level, all_attrs(),
-                                cur().cls, min_enh_lv(), cur().mp_add[0]) or []
+    out = equip_attr.compose29(toks, cur().level, all_attrs(),
+                               cur().cls, min_enh_lv(), cur().mp_add[0]) or []
+    if len(out) > FIELD_INDEX["power"]:
+        _sp = pet_proto.spirit_power(cur().spirit_slot)
+        if _sp:
+            out[FIELD_INDEX["power"]] = int(out[FIELD_INDEX["power"]]) + _sp
+    return out
+
+
+def power_total():
+    """战力（29[25] == 28[31] == 17 off107，三处必须同源）。"""
+    return panel_attr("power")
 
 
 def panel_attr(key):
@@ -3610,9 +3636,7 @@ def build_29():
     toks = _tpl_tokens(29)
     if not toks:
         return TPL_PUSH.get(29)
-    agg = all_attrs()
-    out = equip_attr.compose29(toks, cur().level, agg, cur().cls,
-                               min_enh_lv(), cur().mp_add[0])
+    out = panel_now()          # 与 panel_attr 同一份数据（含妖灵战力）
     if not out:
         return TPL_PUSH.get(29)
     try:
@@ -4198,6 +4222,10 @@ def handle_tls(raw_sock, cid):
             body += chunk  # noqa
 
         path = line.split(" ")[1] if " " in line else "/"
+        # 直连开发包把补位斜杠写在 host 后面（http://192.168.0.111//auth），
+        # dex 字符串只能等长替换，所以补位在 URL 里、服务端折叠。
+        while "//" in path:
+            path = path.replace("//", "/")
         status = "200 OK"
         if path.startswith("/auth"):
             user = ""

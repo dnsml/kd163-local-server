@@ -55,23 +55,68 @@ def uleb_write(n):
     return bytes(out)
 
 
-def patch_dex(dex, new_host, new_pem):
-    """原地等长替换字符串（dex 的字符串区必须连续，长度一变就得整体重排，
-    所以这里强制要求新长度 == 旧长度）。"""
+def pad_host(src, old, new_host, pad=b"/"):
+    """把 src 里的 old 换掉；新 host 更短时用 pad 补到原长度。
+
+    为什么必须补：dex 的 string_data_item 在 data 段里是**顺序排布**的，ART 校验
+    会按 map 顺序逐个往下走。原地缩短后槽尾剩下的字节会被当成下一条
+    string_data_item，校验直接失败（真机报 `String longer than indicated size 0`，
+    ClassNotFoundException → 闪退）。所以只能等长替换。
+
+    补的位置在 `host[:port]` 之后、path 之前：
+        http://192.168.0.111//assets.txt
+        https://192.168.0.111:9000//auth
+    服务端 local_http.py / local_server3.py 会把连续斜杠折叠成一条。
+    """
+    i = src.find(old)
+    if i < 0:
+        return None
+    out = src[:i] + new_host.encode() + src[i + len(old):]
+    if len(out) >= len(src):
+        return out
+    short = len(src) - len(out)
+    # 找 host:port 结束位置
+    h = out.find(b"://")
+    p = out.find(new_host.encode(), h + 3) if h >= 0 else -1
+    if p >= 0:
+        p += len(new_host)
+        if out[p:p + 1] == b":":
+            q = p + 1
+            while q < len(out) and 48 <= out[q] <= 57:
+                q += 1
+            p = q
+    else:
+        p = len(out)
+    return out[:p] + pad * short + out[p:]
+
+
+def patch_dex(dex, new_host, new_pem, allow_shrink=False, pad_slash=False):
+    """原地替换字符串。
+
+    默认**等长**替换（dex 的字符串区必须连续，长度一变就得整体重排）。
+    但换一个更短的 IP 是常事（124.223.56.189 → 192.168.0.111），
+    这时传 allow_shrink=True：改写 string_data_item 的 uleb128 长度前缀，
+    新串写进**原槽位**、补 0x00 结尾，槽尾多余字节留着不引用（ART 只按
+    长度前缀读，槽尾字节不可达）。string_ids 里的偏移是绝对的，不用动任何表。
+    """
     d = bytearray(dex)
     u32 = lambda buf, o: struct.unpack_from("<I", buf, o)[0]
     str_size = u32(d, 0x38)
     str_ids_off = u32(d, 0x3c)
 
     changed = 0
+    shrunk = 0
     for i in range(str_size):
         off = u32(d, str_ids_off + i * 4)
         ln, body = uleb_read(d, off)
+        pre_len = body - off
         cur = bytes(d[body:body + ln])
 
         new = None
         if OLD_HOST_B in cur:
-            cand = cur.replace(OLD_HOST_B, new_host.encode())
+            cand = pad_host(cur, OLD_HOST_B, new_host) if pad_slash else None
+            if cand is None:
+                cand = cur.replace(OLD_HOST_B, new_host.encode())
             if cand != cur:
                 new = cand
         elif b"BEGIN CERTIFICATE" in cur:
@@ -79,18 +124,33 @@ def patch_dex(dex, new_host, new_pem):
 
         if new is None:
             continue
-        if len(new) != ln:
-            raise SystemExit(
-                f"[!] idx={i} 新长度 {len(new)} != 旧长度 {ln}，等长替换做不到。\n"
-                f"    改目标 host 使其与原 host 等长（14 字符），或改用等长证书。")
-        d[body:body + ln] = new
-        changed += 1
         tag = "证书" if b"BEGIN CERTIFICATE" in cur else "地址"
-        print(f"  [{tag}] idx={i:<6} {ln:>5} 字节原地替换  {cur[:44].decode('utf-8','replace')}")
+        if len(new) == ln:
+            d[body:body + ln] = new
+        elif allow_shrink and len(new) < ln:
+            newpre = uleb_write(len(new))
+            if len(newpre) != pre_len:
+                raise SystemExit(
+                    f"[!] idx={i} 长度前缀字节数会从 {pre_len} 变成 {len(newpre)}，"
+                    "这种要整体重排，放弃。")
+            d[off:body] = newpre                     # 新长度前缀
+            d[body:body + len(new)] = new            # 新串
+            d[body + len(new)] = 0                   # 结尾 NUL
+            # 槽尾 (ln - len(new)) 字节不再被引用，保持原样
+            shrunk += 1
+        else:
+            raise SystemExit(
+                f"[!] idx={i} 新长度 {len(new)} > 旧长度 {ln}，等长/变短都做不到。\n"
+                f"    换更短的目标 host，或换一张更短的证书。")
+        changed += 1
+        print(f"  [{tag}] idx={i:<6} {ln:>5} → {len(new):>5} 字节"
+              f"{'（变短·槽尾留空）' if len(new) < ln else '（等长）'}"
+              f"  {cur[:44].decode('utf-8','replace')}")
 
     d[12:32] = hashlib.sha1(bytes(d[32:])).digest()
     struct.pack_into("<I", d, 8, zlib.adler32(bytes(d[12:])) & 0xFFFFFFFF)
-    print(f"  共替换 {changed} 个字符串（dex 长度不变：{len(d):,} 字节）")
+    print(f"  共替换 {changed} 个字符串（其中变短 {shrunk} 个；"
+          f"dex 长度不变：{len(d):,} 字节）")
     return bytes(d)
 
 
@@ -190,6 +250,12 @@ def main():
                     help="把 checkServerTrusted 补成直接 return-void")
     ap.add_argument("--no-strings", action="store_true",
                     help="不动字符串（只做其他补丁）")
+    ap.add_argument("--allow-shrink", action="store_true",
+                    help="允许把字符串换成更短的（改写 uleb128 长度前缀，槽尾留空）。"
+                         "★ Android 侧会整包验证失败（String longer than indicated size），别用")
+    ap.add_argument("--pad-slash", action="store_true",
+                    help="新 host 更短时用 '/' 补足等长（推荐）："
+                         "http://192.168.0.111//assets.txt，服务端折叠斜杠")
     a = ap.parse_args()
 
     pem = open(a.cert, "rb").read()
@@ -202,7 +268,8 @@ def main():
     newdex = dex
     if not a.no_strings:
         print(f"[2/4] 打补丁 dex（host={a.host}）")
-        newdex = patch_dex(dex, a.host, pem)
+        newdex = patch_dex(dex, a.host, pem,
+                           allow_shrink=a.allow_shrink, pad_slash=a.pad_slash)
     if a.patch_trust:
         print("[2/4] 补丁 checkServerTrusted -> return-void")
         newdex = patch_trust(newdex)

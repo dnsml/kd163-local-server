@@ -40,6 +40,18 @@ META_XML_CANDIDATES = [
 META_XML = next((p for p in META_XML_CANDIDATES if os.path.exists(p)),
                 META_XML_CANDIDATES[0])
 
+
+def norm_path(p):
+    """折叠连续斜杠。
+
+    直连包的内置地址要把 13 字符 IP 塞进 14 字符的老 host 槽位，dex 字符串又
+    只能等长替换（ART 会顺序校验 string_data_item，缩短必定失败），所以补的那
+    个字符写成 `http://192.168.0.111//assets.txt` 这种形式，由服务端还原。
+    """
+    while "//" in p:
+        p = p.replace("//", "/")
+    return p
+
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 80
 HOST_IP = sys.argv[2] if len(sys.argv) > 2 else "192.168.0.111"
 REAL_IP = "124.223.56.189"
@@ -105,7 +117,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_HEAD(self):
         """客户端更新前可能先探测大小；不实现会回 501 导致它放弃下载。"""
-        path = unquote(urlparse(self.path).path)
+        path = norm_path(unquote(urlparse(self.path).path))
         log("HEAD %s" % path)
         if path in ("/mhsj_res.zip", "/mhsj_res_2.zip") and os.path.exists(RESPKG):
             size = os.path.getsize(RESPKG)
@@ -120,7 +132,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        path = unquote(urlparse(self.path).path)
+        path = norm_path(unquote(urlparse(self.path).path))
         log("GET %s  UA=%s" % (path, (self.headers.get("User-Agent") or "")[:40]))
 
         if path in ("/server-list.xml", "/server_list.xml"):

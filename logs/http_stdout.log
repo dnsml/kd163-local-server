@@ -1,0 +1,6 @@
+[2026-11-27 23:15:45] meta.xml：D:\66666\kd163\srvres\meta.xml
+[2026-11-27 23:15:45] 本地 HTTP 监听 :80   host_ip=192.168.0.111
+[2026-11-27 23:16:03] GET /version.txt  UA=curl/7.58.0
+[2026-11-27 23:16:03] GET /server-list.xml  UA=curl/7.58.0
+[2026-11-27 23:16:11] GET /assets.txt  UA=Apache-HttpClient/UNAVAILABLE (java 1.4)
+[2026-11-27 23:16:11] GET /server-list.xml  UA=
