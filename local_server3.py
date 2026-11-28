@@ -1151,8 +1151,12 @@ def pet_skill_hit(iid):
     return False, None
 
 
-def pet_skill_draw(conn, cid, times):
-    """963：times=1 单抽 / 10 十连。返回 (ok, 提示语)。"""
+def pet_skill_draw(conn, cid, times, seq=0):
+    """963：times=1 单抽 / 10 十连。返回 (ok, 提示语)。
+
+    ★ 964 必须回显 963 的 seq（真服 `963 seq=288` → `964 seq=288`）。
+      用 seq=0 发的话客户端匹配不到应答，探秘界面一样会转圈 —— 与 954 同一个坑。
+    """
     pet_skill_tick()
     free = max(0, int(cur().pet_skill_free))
     use_free = min(free, times)
@@ -1180,10 +1184,10 @@ def pet_skill_draw(conn, cid, times):
         new, rec = pet_skill_hit(sid)
         if new and rec:
             ups.append(rec)
-    conn.sendall(pack(964, 0, pet_proto.pack_964(
+    conn.sendall(pack(964, seq, pet_proto.pack_964(
         new_ids, ups, pet_skill_bag(), pet_skill_slots(), cur().pet_skill_free)))
-    log("c%03d -> cmd=964 [探秘x%d 花费%d元宝 免费剩%d 抽到%s 升级%s]"
-        % (cid, times, cost, cur().pet_skill_free,
+    log("c%03d -> cmd=964 seq=%-4d [探秘x%d 花费%d元宝 免费剩%d 抽到%s 升级%s]"
+        % (cid, seq, times, cost, cur().pet_skill_free,
            [pet_proto.skill_name(i) for i in new_ids],
            [pet_proto.skill_name(r[0]) for r in ups]))
     save_state()
@@ -6468,7 +6472,7 @@ def handle_game(conn, cid):
                     #   应答 964 = [n_new 抽中id][n_up 升级(id,经验)][库][栏][剩余免费]，
                     #   然后按真服顺序补推 947/178/29/28/30/962。
                     _times = 10 if (payload[:1] == b"\x02") else 1
-                    _ok, _msg = pet_skill_draw(conn, cid, _times)
+                    _ok, _msg = pet_skill_draw(conn, cid, _times, seq)
                     if not _ok:
                         log("c%03d !! 963 探秘失败：%s" % (cid, _msg))
                         conn.sendall(pack(1, seq, err_text(_msg)))
