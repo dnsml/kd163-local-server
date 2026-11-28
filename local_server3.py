@@ -881,6 +881,12 @@ def send_push(conn, cid, cmd):
         log("c%03d .. push cmd=88     len=%d [称号 Lv%d %s]"
             % (cid, len(body), cur().level, "神界新丁" if cur().level >= 5 else "无"))
         return
+    if cmd == 838:
+        body = build_838()
+        conn.sendall(pack(838, 0, body))
+        log("c%03d .. push cmd=838    len=%d [衣柜 %d 件，当前时装 %d]"
+            % (cid, len(body), len(cur().wardrobe), int(cur().fashion[0] or 0)))
+        return
     if cmd == 29:
         body = build_29()
         if body:
@@ -2867,6 +2873,8 @@ def load_state(pl=None):
     pl.mp_add[0] = int(d.get("mp_add", 0) or 0)
     w = d.get("wing")
     pl.wing[0] = int(w) if w else None
+    fa = d.get("fashion")
+    pl.fashion[0] = int(fa) if fa else None
     wd = d.get("wardrobe")
     if isinstance(wd, list):
         pl.wardrobe.clear()
@@ -3148,6 +3156,7 @@ def state_dict():
             "vip_until": cur().vip_until[0],
             "mp_add": cur().mp_add[0],
             "wing": cur().wing[0],
+            "fashion": cur().fashion[0],
             "wardrobe": sorted(cur().wardrobe),
             "quest_active": cur().quest_active,
             "quest_ready": cur().quest_ready,
@@ -3917,11 +3926,18 @@ def build_838():
     即 [数量] + 每件 7 字节定长条目 + 末尾 1 字节 0。
     样本里的 90033(快乐圣诞 男) / 90053(白色浪漫 男) 就是 Item.xml 里的
     时装 item_id，所以直接放 item_id，不要再折算对象号。
+
+    ★ 2026-11-28 16:4x：条目第二字节是「是否正在穿」。真服样本 9 件全是 `00`
+      （那个号只收藏没穿），所以以前一直写死 0 —— 玩家用了时装卡进衣柜后
+      「怎么也不上身」。现在按 `cur().fashion[0]` 写 01/00，末字节仍是 00。
     """
     items = sorted(cur().wardrobe)
+    worn = int(cur().fashion[0] or 0)
     out = bytearray([len(items) & 0xFF])
     for iid in items:
-        out += b"\xce" + (iid & 0xFFFFFFFF).to_bytes(4, "big") + b"\x00\xff"
+        out += b"\xce" + (iid & 0xFFFFFFFF).to_bytes(4, "big")
+        out += b"\x01" if iid == worn else b"\x00"
+        out += b"\xff"
     out += b"\x00"
     return bytes(out)
 
@@ -4528,13 +4544,17 @@ def builtin_resp(cmd, payload):
                     % (pos, it["name"], model, wing_proto.wing_name(iid), use))
             elif it["kind2"] == 14:
                 # 时装（kind1=1 / kind2=14）。真服里点时装卡是「收进衣柜」，
-                # 不是直接穿上：837 -> 838 的衣柜列表里就是这些 item_id。
+                # 837 -> 838 的衣柜列表里就是这些 item_id。
                 # 以前这里被 `kind2 != 14` 排除，直接掉到最后的未实现兜底，
                 # 表现就是「背包里的时装点了没反应」。
+                # ★ 2026-11-28 16:4x：收进衣柜的同时直接**穿上**（cur().fashion），
+                #   838 条目第二字节写 01。以前只进衣柜不置位 → 玩家反馈
+                #   「买了时装用了怎么没穿上」。再推 838 让衣柜/时装面板立刻刷新。
                 cur().wardrobe.add(iid)
-                follow = [29, 28, 30, 178]
-                log("[wardrobe] 格%02x %s x%d 收进衣柜（现有 %d 件：%s）"
-                    % (pos, it["name"], use, len(cur().wardrobe), sorted(cur().wardrobe)))
+                cur().fashion[0] = iid
+                follow = [29, 28, 30, 178, 838]
+                log("[wardrobe] 格%02x %s x%d 收进衣柜并穿上（衣柜 %d 件，当前时装 %d）"
+                    % (pos, it["name"], use, len(cur().wardrobe), iid))
             elif iid == 20458:
                 # 经验丹：描述只写「根据使用者的等级获得一定的经验」，没有具体数字。
                 # 取值按当前升级需求的 10% 折算（need 本身随等级走，等价于按等级给经验），

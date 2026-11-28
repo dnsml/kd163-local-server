@@ -23,7 +23,7 @@ class Player(object):
         "cls", "level", "exp", "exp_need", "mp_add",
         "coin_bound", "bind_yuanbao", "tongqian", "yuanbao", "yueli",
         "vip_level", "vip_until",
-        "bag", "equip", "enhance", "wing", "wardrobe",
+        "bag", "equip", "enhance", "wing", "wardrobe", "fashion",
         "pets",
         # 当前展示宠物的形象 id（Pet.xml 的 item id，默认 10000 功夫熊猫）。
         # 用「宠物形象卡」会改这里，947 的 off48 直接写这个值。
@@ -105,6 +105,9 @@ class Player(object):
         self.equip = {}
         self.enhance = {}
         self.wing = [None]
+        # 当前穿着的时装（Item.xml 时装 item_id，kind1=1/kind2=14）。
+        # 838 每条的第二字节就是「是否在穿」：真服样本 9 件全是 00（没穿）。
+        self.fashion = [None]
         self.wardrobe = set()
         # 已拥有的宠物（Pet.xml 的 10000~10046 形象 id）。
         # 以前登录回放无条件给所有人塞一只 82B 的 957「功夫熊猫」，
@@ -226,6 +229,7 @@ def reset_newbie(p=None):
     p.equip = {}
     p.enhance = {}
     p.wing = [None]
+    p.fashion = [None]
     p.wardrobe = set()
     p.pets = []               # ★ 新号一只宠物都没有（真服实测：新号身边不跟熊猫）
     p.pet_skin = [10000]
