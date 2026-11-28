@@ -1190,10 +1190,14 @@ def pet_skill_draw(conn, cid, times):
     return True, ""
 
 
-def pet_wash(conn, cid):
+def pet_wash(conn, cid, seq=0):
     """953：洗髓 —— 扣 1 颗洗髓丹 + 5000，掷四条比例（合 100）存进预览，回 954。
 
     ★ 只改「以后升级时的分配比例」，**不重分已有 424 点**（真服 7.2.1 实证）。
+    ★ 2026-11-28 15:46：954 曾用 seq=0 发，客户端按 seq 匹配应答，
+      对不上就一直转圈（用户实测「洗髓还是转圈」）。真服 01:30:37 是
+      `C->S 953 seq=534` → `S->C 954 seq=534`，必须原样回显。
+      紧接着还要推 947/178/29/28/30（洗髓丹与铜钱被扣，背包和面板要刷新）。
     """
     import random
     pos = None
@@ -1222,9 +1226,12 @@ def pet_wash(conn, cid):
         if all(5 <= x <= 60 for x in q):
             break
     cur().pet_qual_preview = q
-    conn.sendall(pack(954, 0, bytes([max(0, min(255, x)) for x in q])))
-    log("c%03d -> cmd=954 [洗髓 格%02x 扣%s%d+洗髓丹1 新比例 体%d/力%d/防%d/巧%d]"
-        % (cid, pos, PURSE_NAME.get(purse, purse), PET_WASH_COST, q[0], q[1], q[2], q[3]))
+    conn.sendall(pack(954, seq, bytes([max(0, min(255, x)) for x in q])))
+    log("c%03d -> cmd=954 seq=%-4d [洗髓 格%02x 扣%s%d+洗髓丹1 新比例 体%d/力%d/防%d/巧%d]"
+        % (cid, seq, pos, PURSE_NAME.get(purse, purse), PET_WASH_COST, q[0], q[1], q[2], q[3]))
+    # 真服 01:30:37 紧跟 947/178/29/28/30（扣完丹和钱要刷新背包/面板）
+    for _c in (947, 178, 29, 28, 30):
+        send_push(conn, cid, _c)
     save_state()
     return True, ""
 
@@ -6514,7 +6521,7 @@ def handle_game(conn, cid):
 
                 if cmd == 953:
                     # 洗髓第一步：扣 1 颗洗髓丹 + 5000 → 回 954（4B 比例预览，不写 947）。
-                    _ok, _msg = pet_wash(conn, cid)
+                    _ok, _msg = pet_wash(conn, cid, seq)
                     if not _ok:
                         log("c%03d !! 953 洗髓失败：%s" % (cid, _msg))
                         conn.sendall(pack(1, seq, err_text(_msg)))
