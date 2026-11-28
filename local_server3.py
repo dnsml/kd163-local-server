@@ -2446,7 +2446,11 @@ GIFTS = {
 # ★ 称号不是「等级到了自动给」：以前 17 模板写死 1019，所有 Lv≥5 的号
 #   一上线就自带，玩家反馈「我都没用这个卡，怎么头上就有，一打怪又没了」。
 #   现在只有真的用掉这张卡，player.title 才会变成 1019。
-TITLE_CARD = {30059: 1019}
+TITLE_CARD = {30059: 1019, 30060: 1020}
+#   30060「仙法小成」item_kind2=83、level_limit=30，称号 id 1020（2026-11-28
+#   17:23 真服切回「神界新丁」/17:17 切到「仙法小成」时 28 idx24 的两组值：
+#   cd03fb=1019、cd03fc=1020）。这张卡的来源是 20719「30级紫精礼包」的首项掉落
+#   （17:28:39 落在 pos52）。
 # 新号三件套（玄女送的新人礼包）：真服新号 178 原包 23B 逐字节解出来的
 #   40 03 | 00 cd4ede 00 01 0a | 01 cd4fd0 00 01 01 | 02 cd5209 00 01 01
 #   cd 是两字节定长编码：0x4ede=20190 绑定铜钱卡×10、0x4fd0=20432 10绑定元宝×1、
@@ -3994,6 +3998,13 @@ def build_28():
             tk[40]["value"] = _n28
         # 之前的 b[41:43] 写法只覆盖了 u32 的低 16 位，
         # 真实值 = 0x0023xxxx + 低16位，会出现 2305802 这种鬼数字，别再用了。
+        # ★ idx6 / idx7 = **当前血 / 当前蓝**（不是上限！上限在 29[0]/29[1]）。
+        # 真服 2026-11-28 17:2x 实证：同一角色两次登录 17 的血分别是 1299 / 2983，
+        # 而 29[0]（=7542）与 30 逐字节没变 —— 上限没动，变的只是「当前血」。
+        # 本地以前这两格是模板残留（恒 1083 / 210），Lv1 号上限才 48/31，
+        # 客户端拿到 1083 血条直接爆表；现在按「登录/刷新即满血满蓝」写。
+        tk[6]["value"] = max(0, int(panel_attr("hp_max")))
+        tk[7]["value"] = max(0, int(panel_attr("mp_max")))
         tk[18]["value"] = cur().coin_bound[0]
         tk[19]["value"] = cur().bind_yuanbao[0]
         tk[20]["value"] = cur().tongqian[0]
@@ -4458,6 +4469,7 @@ def builtin_resp(cmd, payload):
                 return 182, b"", journey_follow()
         eff = USE_EFFECTS.get(iid)
         swap_pos, swap_iid = -1, 0      # 换装：旧装备要原地落回的那一格
+        pre_taken = False               # 礼包分支会「先扣格位再发掉落」
         follow = [29, 28, 30, 178, 306]  # 使用成功后要跟的推送；翅膀会换成带 1922/1931/1932
         # 306 是真服每次道具使用的固定收尾（技能列表刷新）。
         # 2026-11-28 17:03 用中级见闻录实证：182 空ACK -> 29 -> 28 -> 30 -> 178 -> 306；
@@ -4474,16 +4486,18 @@ def builtin_resp(cmd, payload):
                    cur().vip_level[0], vip_days10(),
                    time.strftime("%Y-%m-%d", time.localtime(cur().vip_until[0]))))
         elif iid in TITLE_CARD:
-            # 称号卡：消耗 1 张 → 佩戴该称号。必须 ≥ level_limit(5) 级，
-            # 否则不消耗、只提示（Item.xml 30059 level_limit=5）。
+            # 称号卡：消耗 1 张 → 佩戴该称号。等级门槛取 Item.xml 的 level_limit
+            # （30059=5 级、30060=30 级），别写死 5，否则 30 级的仙法小成 1 级号也能戴。
             _tid = TITLE_CARD[iid]
-            if int(cur().level) < 5:
-                log("[title] 格%02x %s 使用失败：Lv%d < 5"
-                    % (pos, bag_proto.item(iid)["name"], cur().level))
-                return 1, err_text("等级达到5级才能使用此称号"), []
+            _need = int(bag_proto.item(iid).get("level") or 0)
+            if int(cur().level) < _need:
+                log("[title] 格%02x %s 使用失败：Lv%d < %d"
+                    % (pos, bag_proto.item(iid)["name"], cur().level, _need))
+                return 1, err_text("等级达到%d级才能使用此称号" % _need), []
             cur().title = int(_tid)
-            # 88 = 称号表（客户端头顶/称号栏都吃这一个包），178 = 同步背包消耗。
-            follow = [88, 178]
+            # 88 = 称号表（已拥有/可切换列表）；29/28/30 = 头顶与面板快照
+            # （2026-11-28 17:17/17:20 的 885/886 实证：穿脱称号就是推这三条）；178 同步背包消耗。
+            follow = [88, 29, 28, 30, 178, 306]
             log("[title] 格%02x %s x%d -> 佩戴称号 %d（存档 title=%d）"
                 % (pos, bag_proto.item(iid)["name"], use, _tid, cur().title))
         elif bag_proto.item(iid)["kind2"] == 34 and pet_skin.pet_skin_of(iid):
@@ -4527,6 +4541,14 @@ def builtin_resp(cmd, payload):
                 % (pos, bag_proto.item(iid)["name"], use, key, amount,
                    cur().coin_bound[0], cur().bind_yuanbao[0], cur().tongqian[0], cur().yuanbao[0]))
         elif iid in GIFTS:
+            # ★ 顺序：真服是「先扣掉礼包、再发掉落」。2026-11-28 17:28:31 实证：
+            #   15级妖灵礼包在格5，当时空位只有 1/49/52。开出 十年妖丹/妖灵觉醒/经验丹/20级鲜花礼包，
+            #   经验丹落在格1（最小空位），20级鲜花礼包落在**格5**——就是刚空出来的那格。
+            #   如果先加掉落再加扣，鲜花礼包会跑到格49，和真服差一格。
+            cur().bag[pos][1] -= use
+            if cur().bag[pos][1] <= 0:
+                del cur().bag[pos]
+            pre_taken = True
             got = []
             for gid, gn in GIFTS[iid]:
                 for _ in range(use):
@@ -4611,6 +4633,11 @@ def builtin_resp(cmd, payload):
                 # 都能靠 desc 自动解析，不用再一个个手写 USE_EFFECTS/GIFTS。
                 r = item_rules.rule(iid)
                 if r["kind"] == "gift":
+                    # 同 GIFTS 分支：先扣格位，再发掉落（真服 17:28:31~17:28:41 五连开包实证）
+                    cur().bag[pos][1] -= use
+                    if cur().bag[pos][1] <= 0:
+                        del cur().bag[pos]
+                    pre_taken = True
                     got = []
                     for gid, gn in r["items"]:
                         for _ in range(use):
@@ -4662,9 +4689,10 @@ def builtin_resp(cmd, payload):
                         % (pos, it["name"], use, it["kind1"], it["kind2"], r["kind"]))
                     return 1, err_text(why), []
 
-        cur().bag[pos][1] -= use
-        if cur().bag[pos][1] <= 0:
-            del cur().bag[pos]
+        if not pre_taken:
+            cur().bag[pos][1] -= use
+            if cur().bag[pos][1] <= 0:
+                del cur().bag[pos]
         # ★ 换装语义：旧装备落回玩家刚点的那一格（真服 00:16:01 实证）。
         if swap_iid:
             if pos in cur().bag:
