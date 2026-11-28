@@ -6561,7 +6561,12 @@ def handle_game(conn, cid):
                         % (cid, seq, len(_b), spirit_slot_sel,
                            pet_proto.name_of(spirit_pick[0]) if spirit_pick[0] else "空",
                            _b.hex()))
-                    push_spirit(conn, cid)
+                    # ★ 2026-11-28 16:0x：真服 1411 阶段**只回 1412，不推 1410**。
+                    #   证据 relay.log 01:59:46：`1411 seq=895` ×2 → `1412 seq=895/896` ×2，
+                    #   后面直接是客户端心跳，没有任何 1410。
+                    #   以前这里多推一个 1410，等于玩家每点开一次槽位，选择列表就整体
+                    #   重画一次 —— 客户端表现为「妖灵装卸卡卡的 / 列表跳一下」。
+                    #   1410 该在**真正变更**之后推（1413/1414 的刷新链末尾）。
                     continue
 
                 if cmd == 1413:
@@ -6596,10 +6601,11 @@ def handle_game(conn, cid):
                                 % (cid, seq, pet_proto.name_of(iid),
                                    _slot_use,
                                    pet_proto.name_of(_old) if _old else "空"))
-                            save_state()
+                            # 先推送让界面立刻响应，再落盘（落盘有磁盘 IO，放前面会拖慢点击手感）
                             push_spirit_chain(
                                 conn, cid,
                                 "上阵 %s → 槽%d" % (pet_proto.name_of(iid), _slot_use))
+                            save_state()
                             continue
                     log("c%03d -> cmd=1413 seq=%-4d [第%d只/槽%d 无法上阵，只刷列表]"
                         % (cid, seq, _idx, _slot_use))
@@ -6619,10 +6625,10 @@ def handle_game(conn, cid):
                         % (cid, seq, _uslot,
                            pet_proto.name_of(_uold) if _uold else "空"))
                     if _uold:
-                        save_state()
                         push_spirit_chain(
                             conn, cid,
                             "卸下槽%d 原 %s" % (_uslot, pet_proto.name_of(_uold)))
+                        save_state()       # 同上：先刷界面，再落盘
                     continue
 
                 # ★ 2026-11-26 12:2x：登录「转圈」的真正原因 —— 客户端给每个外发请求
