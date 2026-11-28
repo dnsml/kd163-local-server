@@ -28,6 +28,10 @@ class Player(object):
         # 当前展示宠物的形象 id（Pet.xml 的 item id，默认 10000 功夫熊猫）。
         # 用「宠物形象卡」会改这里，947 的 off48 直接写这个值。
         "pet_skin",
+        # 已拥有/可切换的宠物形象 id 列表（默认 [10000]）。
+        # 958 面板要回 959 = [n][n×varint skin]，960 提交后按这张表校验；
+        # 用掉一张形象卡就往里追加，缺这条 958 只能回 1 个形象，客户端会转圈。
+        "pet_skin_own",
         # 当前坐骑形象 id（Horse.xml 的 item id）。0 = 没坐骑（30 尾部的坐骑块整块不写）。
         "mount",
         # 坐骑穿的形象卡（item id），0 = 没换过形象。
@@ -108,6 +112,8 @@ class Player(object):
         self.pets = []
         # 当前宠物形象（Pet.xml id）。10000 = 功夫熊猫，形象卡会改成别的 id。
         self.pet_skin = [10000]
+        # 已拥有的宠物形象（958/959/960 换形象面板的数据源）。新号只有默认熊猫。
+        self.pet_skin_own = [10000]
         # 当前坐骑形象（Horse.xml id）与它穿的形象卡。0 = 没坐骑 / 没换过。
         self.mount = [0]
         self.mount_skin = [0]
@@ -222,6 +228,8 @@ def reset_newbie(p=None):
     p.wing = [None]
     p.wardrobe = set()
     p.pets = []               # ★ 新号一只宠物都没有（真服实测：新号身边不跟熊猫）
+    p.pet_skin = [10000]
+    p.pet_skin_own = [10000]
     p.spirit_bag = {}
     p.spirit_slot = {}
     p.pet_skill_bag = [[804201, 0], [810101, 0], [812101, 0]]

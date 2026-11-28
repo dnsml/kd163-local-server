@@ -1025,6 +1025,36 @@ def pet_skin_id():
         return 10000
 
 
+# ---- 宠物「更换形象」面板（958 / 959 / 960）----
+# 真服 2026-11-28 01:56 抓包：
+#   C->S 958 len=0                → S->C 959 len=7  `02 cd2710 cd2721`
+#                                    = [n=2][10000 熊猫][10017 美人鱼]（当前 + 已拥有）
+#   C->S 960 len=3 `cd2710`       → S->C 960 len=0（空 ACK）+ S->C 947（off48 换成新形象）
+# 缺 958 分支时客户端发完就等 959，界面一直转圈（2026-11-28 用户实测）。
+def pet_skin_own():
+    """可切换的宠物形象列表：默认熊猫 + 用过形象卡的那些 + 当前形象。"""
+    _own = []
+    for x in (getattr(cur(), "pet_skin_own", None) or []):
+        try:
+            x = int(x)
+        except (TypeError, ValueError):
+            continue
+        if x and x not in _own:
+            _own.append(x)
+    if 10000 not in _own:
+        _own.insert(0, 10000)
+    _cur_skin = pet_skin_id()
+    if _cur_skin not in _own:
+        _own.append(_cur_skin)
+    return _own
+
+
+def pack_959(skins=None):
+    """959 = [n][n×varint 形象 id]（换形象面板的候选列表）。"""
+    _l = list(pet_skin_own() if skins is None else skins)
+    return bytes([len(_l)]) + b"".join(venc(int(x)) for x in _l)
+
+
 # ---- 仙府探秘 / 洗髓（962 / 963 / 964 / 965 / 966 / 953 / 954 / 955）----
 # 文档：docs/reference/宠物技能_仙府探秘_962_963_964.md
 PET_SKILL_DAILY_FREE = 3     # 每天 3 次免费探秘
@@ -2921,6 +2951,23 @@ def load_state(pl=None):
         pl.pet_skin[0] = int(d.get("pet_skin") or 10000)
     except (TypeError, ValueError):
         pl.pet_skin[0] = 10000
+    # 已拥有形象列表：老存档没有这条，就用 [10000, 当前形象]，
+    # 保证以前用过的形象卡（10017 等）不会被面板吞掉。
+    _pso = d.get("pet_skin_own")
+    if isinstance(_pso, list):
+        pl.pet_skin_own = []
+        for x in _pso:
+            try:
+                x = int(x)
+            except (TypeError, ValueError):
+                continue
+            if x and x not in pl.pet_skin_own:
+                pl.pet_skin_own.append(x)
+    else:
+        pl.pet_skin_own = [10000]
+    for _x in (10000, pl.pet_skin[0]):
+        if _x not in pl.pet_skin_own:
+            pl.pet_skin_own.append(_x)
     try:
         pl.mount_skin[0] = int(d.get("mount_skin") or 0)
     except (TypeError, ValueError):
@@ -3072,6 +3119,9 @@ def state_dict():
             # 宠物当前形象（Pet.xml id）与坐骑形象。形象卡用掉后要能跨登录保留，
             # 否则重登 947 又变回 10000，玩家会以为「形象卡白买了」。
             "pet_skin": int(cur().pet_skin[0]) if cur().pet_skin else 10000,
+            # ★ 已拥有的形象列表（958/959 换形象面板）。以前没存，
+            #   所以用过的形象卡重登后从面板里消失、也切不回去。
+            "pet_skin_own": [int(x) for x in pet_skin_own()],
             "mount_skin": int(cur().mount_skin[0]) if cur().mount_skin else 0,
             "spirit_bag": {str(k): v for k, v in cur().spirit_bag.items()},
             "spirit_slot": {str(k): v for k, v in cur().spirit_slot.items()},
@@ -4363,6 +4413,9 @@ def builtin_resp(cmd, payload):
                     % (pos, bag_proto.item(iid)["name"]))
                 return 1, err_text("还没有宠物，无法使用形象卡"), []
             cur().pet_skin[0] = _skin
+            # 记进「已拥有形象」，958 面板才列得出来、切得回来
+            if _skin not in cur().pet_skin_own:
+                cur().pet_skin_own.append(_skin)
             follow = [29, 28, 30, 947, 178, 306]
             log("[pet] 格%02x %s x%d -> 宠物形象 %d(%s)"
                 % (pos, bag_proto.item(iid)["name"], use, _skin,
@@ -6315,6 +6368,41 @@ def handle_game(conn, cid):
                         % (cid, seq, len(_b1410), len(spirit_free_list()),
                            spirit_strap() or "无", _b1410.hex()))
                     continue
+                if cmd == 958:
+                    # ★ 2026-11-28：换宠物形象面板的第一步。真服回 959 = 候选形象列表。
+                    #   以前 958 没分支 → 落进「无模板静默丢弃」，客户端发完一直转圈。
+                    _b959 = pack_959()
+                    conn.sendall(pack(959, seq, _b959))
+                    log("c%03d -> cmd=959 seq=%-4d len=%d [换形象候选 %s 当前%d] hex=%s"
+                        % (cid, seq, len(_b959), pet_skin_own(), pet_skin_id(), _b959.hex()))
+                    continue
+
+                if cmd == 960:
+                    # 960 = 提交选择：payload 是 varint 形象 id（真服 `cd2710` = 10000）。
+                    # 回空 ACK，再推 947（off48 换成新形象）；真服没有 957/178/29/28/30。
+                    try:
+                        _want, _ = vread(payload, 0)
+                        _want = int(_want)
+                    except Exception:
+                        _want = 0
+                    if not cur().pets:
+                        conn.sendall(pack(1, seq, err_text("还没有宠物，无法更换形象")))
+                        log("c%03d !! 960 换形象失败：没有宠物" % cid)
+                        continue
+                    if _want and _want not in pet_skin_own():
+                        # 没这张形象卡就不让切，避免绕过背包直接写皮肤
+                        conn.sendall(pack(1, seq, err_text("还没有这张宠物形象卡")))
+                        log("c%03d !! 960 换形象失败：形象 %d 未拥有（已有 %s）"
+                            % (cid, _want, pet_skin_own()))
+                        continue
+                    if _want:
+                        cur().pet_skin[0] = _want
+                    conn.sendall(pack(960, seq, b""))
+                    log("c%03d -> cmd=960 seq=%-4d len=0 [换形象 -> %d(%s)]"
+                        % (cid, seq, pet_skin_id(), pet_skin.pet_skin_name(pet_skin_id())))
+                    send_push(conn, cid, 947)
+                    continue
+
                 if cmd == 961:
                     # ★ 2026-11-28：962 是「仙府探秘」面板，
                     #   [n1 秘籍库×(id,经验)][n2 技能栏×(id,经验)][04 容量][剩余免费]，
