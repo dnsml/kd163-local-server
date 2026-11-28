@@ -8,3 +8,33 @@
 [2026-11-27 23:41:17] GET /server-list.xml  UA=
 [2026-11-28 00:32:35] GET /assets.txt  UA=Apache-HttpClient/UNAVAILABLE (java 1.4)
 [2026-11-28 00:32:36] GET /server-list.xml  UA=
+[2026-11-28 15:16:19] meta.xml：D:\66666\kd163\srvres\meta.xml
+[2026-11-28 15:16:19] 本地 HTTP 监听 :80   host_ip=192.168.0.111
+[2026-11-28 15:16:30] GET /server-list.xml  UA=curl/8.21.0
+[2026-11-28 15:17:18] GET   UA=Apache-HttpClient/UNAVAILABLE (java 1.4)
+[2026-11-28 15:17:18]   !! 未实现端点 
+[2026-11-28 15:17:19] GET   UA=Apache-HttpClient/UNAVAILABLE (java 1.4)
+[2026-11-28 15:17:19]   !! 未实现端点 
+[2026-11-28 15:17:19] GET   UA=Apache-HttpClient/UNAVAILABLE (java 1.4)
+[2026-11-28 15:17:19]   !! 未实现端点 
+[2026-11-28 15:17:20] GET   UA=Apache-HttpClient/UNAVAILABLE (java 1.4)
+[2026-11-28 15:17:20]   !! 未实现端点 
+[2026-11-28 15:17:21] GET   UA=Apache-HttpClient/UNAVAILABLE (java 1.4)
+[2026-11-28 15:17:21]   !! 未实现端点 
+[2026-11-28 15:17:21] GET   UA=Apache-HttpClient/UNAVAILABLE (java 1.4)
+[2026-11-28 15:17:21]   !! 未实现端点 
+[2026-11-28 15:17:22] GET   UA=Apache-HttpClient/UNAVAILABLE (java 1.4)
+[2026-11-28 15:17:22]   !! 未实现端点 
+[2026-11-28 15:17:22] GET   UA=Apache-HttpClient/UNAVAILABLE (java 1.4)
+[2026-11-28 15:17:22]   !! 未实现端点 
+[2026-11-28 15:17:41] GET   UA=
+[2026-11-28 15:17:41]   !! 未实现端点 
+[2026-11-28 15:19:08] meta.xml：D:\66666\kd163\srvres\meta.xml
+[2026-11-28 15:19:08] 本地 HTTP 监听 :80   host_ip=192.168.0.111
+[2026-11-28 15:19:10] GET /server-list.xml  UA=curl/8.21.0
+[2026-11-28 15:19:56] meta.xml：D:\66666\kd163\srvres\meta.xml
+[2026-11-28 15:19:56] 本地 HTTP 监听 :80   host_ip=192.168.0.111
+[2026-11-28 15:22:38] meta.xml：D:\66666\kd163\srvres\meta.xml
+[2026-11-28 15:22:38] 本地 HTTP 监听 :80   host_ip=192.168.0.111
+[2026-11-28 15:22:41] GET /server-list.xml  UA=curl/8.21.0
+[2026-11-28 15:22:41]   .. Host=192.168.0.111

@@ -52,6 +52,19 @@ def norm_path(p):
         p = p.replace("//", "/")
     return p
 
+def req_path(raw):
+    """把请求行里的目标还原成真正的路径。
+
+    ★ 2026-11-28 15:25：开发版客户端请求行是 `GET //assets.txt HTTP/1.1`。
+      `urlparse("//assets.txt")` 会按「协议相对 URL」解析成 netloc=assets.txt、path=""，
+      于是 assets.txt / version.txt / server-list.xml 全部变 404，客户端拉不到资源就崩。
+      这里只有带 scheme 的绝对 URL 才交给 urlparse，其余直接折叠 `//`。
+    """
+    if raw.startswith(("http://", "https://")):
+        return norm_path(unquote(urlparse(raw).path or "/"))
+    return norm_path(unquote(raw.split("?", 1)[0])) or "/"
+
+
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 80
 HOST_IP = sys.argv[2] if len(sys.argv) > 2 else "192.168.0.111"
 REAL_IP = "124.223.56.189"
@@ -117,7 +130,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_HEAD(self):
         """客户端更新前可能先探测大小；不实现会回 501 导致它放弃下载。"""
-        path = norm_path(unquote(urlparse(self.path).path))
+        path = req_path(self.path)
         log("HEAD %s" % path)
         if path in ("/mhsj_res.zip", "/mhsj_res_2.zip") and os.path.exists(RESPKG):
             size = os.path.getsize(RESPKG)
@@ -132,8 +145,22 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        path = norm_path(unquote(urlparse(self.path).path))
+        # ★ 2026-11-28 15:17：客户端打进来但 path 解析成空串（日志 `GET   UA=…`），
+        #   看不出是「绝对 URL 形式」还是「请求行本身缺目标」。先把原始请求行打出来，
+        #   再兜底：绝对形式取 path，空的按 "/" 处理，至少别再落到 404 空分支。
+        _raw = (getattr(self, "requestline", "") or "")[:160]
+        # ★ 2026-11-28 15:25 抓到真凶：开发版补位后请求行是 `GET //assets.txt HTTP/1.1`。
+        #   `urlparse("//assets.txt")` 会把它按「协议相对 URL」解析 —— netloc=assets.txt、
+        #   path=""，于是所有双斜杠端点（assets.txt/version.txt/server-list.xml）全变 404。
+        #   统一走 req_path()：只有真绝对 URL 才解析，其余按原路径折叠斜杠。
+        path = req_path(self.path)
         log("GET %s  UA=%s" % (path, (self.headers.get("User-Agent") or "")[:40]))
+        _host = self.headers.get("Host") or ""
+        if _host:
+            log("  .. Host=%s" % _host)
+        # 路径与原始请求行不一致时留证据（双斜杠/绝对形式都在这里现形）
+        if self.path not in (path, path + "/") and not self.path.startswith(("http://", "https://")):
+            log("  .. 原始请求行 %r  (self.path=%r)" % (_raw, self.path))
 
         if path in ("/server-list.xml", "/server_list.xml"):
             body = rewrite_server_list(read("server-list.xml"))
@@ -229,6 +256,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(404, b"not found")
 
         if path in ("/", "/index.html"):
+            # ★ 2026-11-28 15:17：开发版客户端启动时会**先要裸主机地址**
+            #   （请求路径为空，日志 `GET   UA=Apache-HttpClient/UNAVAILABLE`），
+            #   连打 8 次。以前这里回 404，它拿不到列表就直接崩（用户看到
+            #   「口袋修仙·开发版屡次停止运行」）。裸地址按服务器列表回。
+            if not path.strip("/"):
+                log("  .. 裸地址按 server-list.xml 回（启动探测）")
+                body = rewrite_server_list(read("server-list.xml"))
+                return self._send(200, body, "text/xml; charset=utf-8")
             return self._send(200, b"kd163 local http ok\n", "text/plain")
 
         log("  !! 未实现端点 %s" % path)
