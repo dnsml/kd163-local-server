@@ -6173,6 +6173,26 @@ def handle_game(conn, cid):
                         % (cid, len(body14), tab, body14.hex()))
                     continue
 
+                if cmd in (885, 886):
+                    # 885 = 穿上称号 / 886 = 脱下称号。payload = varint 称号 id
+                    # （真服两条都是 `cd03fc`=1020「仙法小成」）。
+                    # 真服实证：**两者都不回应答**，只推 29 -> 28 -> 30；
+                    # 28 里只有 idx24（称号）变化：
+                    #   885: 1019 -> 1020（86B）  886: 1020 -> 0（84B，称号变 1 字节 00）
+                    # 不推 178：称号不是背包物品，换来换去不占格子。
+                    # 以前没有这两个分支，落到「无模板静默丢」→ 点称号毫无反应。
+                    try:
+                        _tid = grant.dec_val(payload, 0)[0] if payload else 0
+                    except Exception:
+                        _tid = 0
+                    cur().title = (int(_tid) & 0xFFFF) if cmd == 885 else 0
+                    for _pc in (29, 28, 30):
+                        send_push(conn, cid, _pc)
+                    save_state()
+                    log("[title] %d -> %s称号 %d（不回 ACK，只推 29/28/30）"
+                        % (cmd, "穿上" if cmd == 885 else "脱下", cur().title))
+                    continue
+
                 if cmd == 211 and len(payload) >= 5:
                     active_qid = payload[:5]   # 记住接的是哪个任务，供 124/149 推 210
                     set_quest(qid_of(active_qid), False)   # 落盘，重连后还能推 210
