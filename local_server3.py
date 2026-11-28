@@ -2160,10 +2160,11 @@ def vip_grant(days, level=4):
     log("[vip] 开通/续期 %d 天 -> 等级%d 剩余%.1f天（idx22=%d idx23=%d）"
         % (days, cur().vip_level[0], (cur().vip_until[0] - time.time()) / 86400.0,
            cur().vip_level[0], vip_days10()))
-# 阅历到底落在 28 包的哪个字段：还没定死。
-# 曾猜是 idx12（真服样本只出现过 0/100/500/600/700，步长和见闻录对得上），
-# 但实测把它写 0 会让客户端【进战斗闪退】，所以现在只记账、不下发。
-YUELI_SLOT = None
+# 阅历落在 28/17 包的 idx12（token 序号），2026-11-28 17:03 用中级见闻录 20053
+# 实证：6743 -> 7043，正好 +300，其余 40 个 token 全等。
+# 之前「写 0 进战斗闪退」不是 0 有毒，是**按固定偏移塞字节**把 varint 流搞错位
+# （cd1a57 剩下 1a 57 变成两个新 token），后面等级/血量全乱才崩的。
+YUELI_SLOT = 12
 # ---- 背包模型 ----
 # 之前没有背包状态：181/182 全是「回放模板」，用掉的道具不会消失、效果也不生效。
 # 现在用 {格子: [item_id, 数量]} 维护真实背包，178/181 都由它动态生成。
@@ -3624,8 +3625,9 @@ def build_17(scene=None):
     #   值超出该宽度（绑元/元宝 >65535、铜钱 >255）时才退回 token 重编码。
     _coin, _by, _tq, _yb = (cur().coin_bound[0], cur().bind_yuanbao[0],
                             cur().tongqian[0], cur().yuanbao[0])
+    _yl = int(cur().yueli[0])
     if (_by <= 0xFFFF and _yb <= 0xFFFF and _tq <= 0xFF
-            and _coin <= 0xFFFFFFFF):
+            and _coin <= 0xFFFFFFFF and 0 <= _yl <= 0xFFFF):
         b[at(38)] = 0xCE
         b[at(39):at(43)] = _coin.to_bytes(4, "big")
         b[at(43)] = 0xCD
@@ -3638,6 +3640,11 @@ def build_17(scene=None):
         # 没有就写 cd 0000（保持 3B，长度不变）。
         b[at(52)] = 0xCD
         b[at(53):at(55)] = (int(cur().title or 0) & 0xFFFF).to_bytes(2, "big")
+        # ★ 阅历（off30，定宽 cd+u16，与模板 700=`cd02bc` 同宽 3B）：
+        #   真服 17 与 28 的 idx12 同源，2026-11-28 17:03 用中级见闻录实证
+        #   6743->7043（+300）。定宽覆盖不改变长度，后面的 6B 装备段不会前移。
+        b[at(30)] = 0xCD
+        b[at(31):at(33)] = _yl.to_bytes(2, "big")
     else:
         try:
             tk = grant.tokenize(bytes(b))
@@ -3647,6 +3654,7 @@ def build_17(scene=None):
             tk[21]["value"] = _yb
             tk[22]["value"] = cur().vip_level[0]
             tk[24]["value"] = int(cur().title or 0)
+            tk[12]["value"] = _yl
             b = bytearray(grant.render(tk))
         except Exception as e:
             log("[17] 货币/称号写入失败，保留模板值：%s" % e)
@@ -3999,13 +4007,14 @@ def build_28():
         # ★ 2026-11-27：走 power_total()，把上阵妖灵的战力一起算进来
         #   （真服 21:03 三只妖灵让 28[31] 与 29[25] 同步 1246->1305）。
         tk[31]["value"] = power_total() & 0xFFFFFFFF
-        # ！！千万别把 YUELI 写进 idx12 ！！
-        # 2026-11-23 01:00 踩过：模板里 idx12 原本是 700，我按「idx12 可能是阅历」
-        # 的猜测把它写成 0，结果客户端【一进战斗就闪退】——
-        #   01:02:05 call cmd=145 -> got 145 -> got 151 -> 进程直接没了
-        #   tombstone: SIGSEGV / null pointer dereference in GLThread
-        # 真服 96 个 28 包里 idx12 只取过 0/100/500/600/700，看着像阅历，
-        # 但它同时被战斗初始化用到，清零就崩。阅历先只在服务端记账，不下发。
+        # ★ idx12 = 阅历，2026-11-28 17:03 真服实证钉死：
+        #   用一本中级见闻录 20053 后，28 包 idx12 由 6743 变 7043，正好 +300，
+        #   其余 40 个 token 一字未动（只有 idx10 因走动 35->33），货币段全等。
+        # 2026-11-23 01:00 那次「把 idx12 写 0 → 进战斗闪退」的真正原因是
+        #   **按固定偏移直接塞字节**把 varint 流搞错位了：原值 cd1a57 被写掉首字节后
+        #   剩下的 1a 57 会被当成两个新 token，后面的等级/血量/货币全部串位。
+        #   这里走 tokenize -> 改值 -> 整包重编码，长度自动正确，不会错位。
+        tk[12]["value"] = int(cur().yueli[0]) & 0xFFFFFFFF
         return grant.render(tk)
     except Exception as e:                 # 兜底：宁可少改货币，也别把属性包搞坏
         log("[28] 货币写入失败，回退原模板：%s" % e)
@@ -4449,7 +4458,10 @@ def builtin_resp(cmd, payload):
                 return 182, b"", journey_follow()
         eff = USE_EFFECTS.get(iid)
         swap_pos, swap_iid = -1, 0      # 换装：旧装备要原地落回的那一格
-        follow = [29, 28, 30, 178]      # 使用成功后要跟的推送；翅膀会换成带 1922/1931/1932
+        follow = [29, 28, 30, 178, 306]  # 使用成功后要跟的推送；翅膀会换成带 1922/1931/1932
+        # 306 是真服每次道具使用的固定收尾（技能列表刷新）。
+        # 2026-11-28 17:03 用中级见闻录实证：182 空ACK -> 29 -> 28 -> 30 -> 178 -> 306；
+        # 11-27 16:05 用宠物形象卡、11-26 用练级丹也都是同一条尾巴。
         if iid in VIP_CARDS:
             # 真服 00:23:38 `182 1301` 使用 VIP半年卡 的完整时序：
             #   182 空ACK -> 29 -> 28(80B, idx22=4 idx23=1840) -> 30 -> 178 -> 306
