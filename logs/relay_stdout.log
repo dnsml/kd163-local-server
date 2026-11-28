@@ -776,3 +776,17 @@
 [2026-11-28 17:39:09] C->S cmd=4      seq=449   len=5 hex=ce6b0aa13b
 [2026-11-28 17:39:20] C->S cmd=4      seq=450   len=5 hex=ce6b0aa145
 [2026-11-28 17:39:30] C->S cmd=4      seq=451   len=5 hex=ce6b0aa14f
+[2026-11-28 17:39:40] C->S cmd=4      seq=452   len=5 hex=ce6b0aa159
+[2026-11-28 17:39:50] C->S cmd=4      seq=453   len=5 hex=ce6b0aa163
+[2026-11-28 17:40:00] C->S cmd=4      seq=454   len=5 hex=ce6b0aa16d
+[2026-11-28 17:40:09] C->S cmd=116    seq=455   len=1 hex=00
+[2026-11-28 17:40:09] S->C cmd=1      seq=455   len=29 hex=04bbe69cace69c8de5b09ae69caae681a2e5a48de6ada4e58a9fe883bd
+[2026-11-28 17:40:09] C->S cmd=115    seq=456   len=2 hex=1f06
+[2026-11-28 17:40:10] C->S cmd=4      seq=457   len=5 hex=ce6b0aa177
+[2026-11-28 17:40:10] C->S cmd=115    seq=458   len=2 hex=1d08
+[2026-11-28 17:40:10] C->S cmd=115    seq=459   len=2 hex=1b06
+[2026-11-28 17:40:10] C->S cmd=115    seq=460   len=2 hex=1904
+[2026-11-28 17:40:11] C->S cmd=115    seq=461   len=2 hex=1702
+[2026-11-28 17:40:17] C->S cmd=182    seq=462   len=2 hex=3401
+[2026-11-28 17:40:17] S->C cmd=1      seq=462   len=49 hex=04da002de5b7b2e68ba5e69c89e8afa5e7a7b0e58fb7efbc8ce69cace6aca1e4b88de6b688e88097e7a7b0e58fb7e58da1
+[2026-11-28 17:40:20] C->S cmd=4      seq=463   len=5 hex=ce6b0aa181
