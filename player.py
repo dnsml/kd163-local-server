@@ -55,6 +55,7 @@ class Player(object):
         "miji",
         "quest_active", "quest_ready", "done_quests",
         "title",                 # 当前佩戴的称号 id（0=没有）；只有用掉称号卡才会有
+        "title_own",             # 已拥有的称号 id 集合（真服会回「已拥有该称号」）
         "scene", "pos_x", "pos_y",
         "bag_sent",              # 上次推给客户端的背包快照，只用来算差异日志
         # 客户端 817 上报的「当前武器用的协议槽字节」（7 或 8）。
@@ -137,6 +138,7 @@ class Player(object):
         # 0 = 没有任何称号。称号不是「等级到了就有」，必须用称号卡激活。
         # 17 的 idx24 与 88 的末尾 varint 都读这一个值。
         self.title = 0
+        self.title_own = set()
         self.done_quests = set()
         self.scene = 101
         # 最后所在坐标（115 上报的 x/y，一格 1 字节）。
@@ -247,6 +249,7 @@ def reset_newbie(p=None):
     p.quest_active = 0
     p.quest_ready = False
     p.title = 0
+    p.title_own = set()
     p.done_quests = set()
     p.scene = 101              # ★ 新号只出生在蓬莱仙境，不看老号的存档场景
     p.pos_x, p.pos_y = 21, 7   # 与 17 模板默认落点一致

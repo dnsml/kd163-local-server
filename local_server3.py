@@ -2889,6 +2889,13 @@ def load_state(pl=None):
     # ★ 老存档没有 title 字段 = 没戴称号（0）。以前 17 模板里写死 1019，
     #   所有 Lv≥5 的号一上线就自带「神界新丁」，用没用卡都一样。
     pl.title = int(d.get("title", 0) or 0)
+    # 已拥有的称号集合。真服 2026-11-28 17:40:17 实证：用已经拥有的称号卡会回
+    # `已拥有该称号，本次不消耗称号卡`（cmd=1，49B）。老存档没这个字段就从
+    # 「当前戴着的那个」起步，至少不会把正在戴的称号再当成没拥有过。
+    _to = d.get("title_own")
+    pl.title_own = set(int(x) for x in _to) if isinstance(_to, list) else set()
+    if pl.title and pl.title not in pl.title_own:
+        pl.title_own.add(int(pl.title))
     # ★ 场景 + 坐标（老号回到最后一次下线的地点）。老存档没有 scene/pos_* 字段，
     #   走默认 101 / 21,7 —— 与这轮改动之前的表现完全一致，不会把老号扔到别处。
     #   场景 id 必须校验存在：配置表删过地图或者手改坏存档时，宁可回蓬莱也别进虚空。
@@ -3169,6 +3176,8 @@ def state_dict():
             # 当前佩戴的称号（0=没有）。称号只能靠「用称号卡」激活，
             # 不是等级到了自动给 —— 17/88 两个包都读这一个字段。
             "title": int(cur().title or 0),
+            # 已拥有称号（称号卡用过一次就不能再用；真服回「已拥有该称号」）
+            "title_own": sorted(int(x) for x in cur().title_own),
             # ★ 场景 + 坐标：老号登录要回到最后一次下线的地点（用户 2026-11-24 要求）。
             #   以前只存了 scene，坐标每次都是 17 模板里的 21,7，落点永远一样。
             "scene": int(cur().scene or DEFAULT_SCENE),
@@ -4494,7 +4503,15 @@ def builtin_resp(cmd, payload):
                 log("[title] 格%02x %s 使用失败：Lv%d < %d"
                     % (pos, bag_proto.item(iid)["name"], cur().level, _need))
                 return 1, err_text("等级达到%d级才能使用此称号" % _need), []
+            # 真服 2026-11-28 17:40:17 / 17:40:27 两发 182 实证：已经拥有的称号，
+            # 再点卡不回成功，而是 cmd=1「已拥有该称号，本次不消耗称号卡」（49B）。
+            # 以前本地不管有没有，一律"佩戴成功"，同一张卡能反复吃。
+            if int(_tid) in cur().title_own:
+                log("[title] 格%02x %s x%d 已拥有称号 %d → 回「已拥有该称号」，卡不消耗"
+                    % (pos, bag_proto.item(iid)["name"], use, _tid))
+                return 1, err_text("已拥有该称号，本次不消耗称号卡"), []
             cur().title = int(_tid)
+            cur().title_own.add(int(_tid))
             # 88 = 称号表（已拥有/可切换列表）；29/28/30 = 头顶与面板快照
             # （2026-11-28 17:17/17:20 的 885/886 实证：穿脱称号就是推这三条）；178 同步背包消耗。
             follow = [88, 29, 28, 30, 178, 306]
@@ -6214,6 +6231,9 @@ def handle_game(conn, cid):
                     except Exception:
                         _tid = 0
                     cur().title = (int(_tid) & 0xFFFF) if cmd == 885 else 0
+                    if cmd == 885 and cur().title:
+                        # 能穿说明客户端列表里有它 = 已拥有；记下来防止称号卡再被吃一次
+                        cur().title_own.add(int(cur().title))
                     for _pc in (29, 28, 30):
                         send_push(conn, cid, _pc)
                     save_state()
