@@ -39,6 +39,9 @@ ALIAS = {
     "坐骑进阶丹": "坐骑进阶灵丹",
     "坐骑洗髓丹": "坐骑洗髓灵丹",
     "妖灵觉醒": "妖灵觉醒丹",
+    # 21004「35级秘籍礼包」描述写「秘籍宝盒*5」，Item.xml 里实体叫
+    # 20749「秘籍碎片盒」。2026-11-28 17:28:41 真服掉落落在 pos55，就是 20749 x5。
+    "秘籍宝盒": "秘籍碎片盒",
 }
 
 # 「获得Nxxx」——顺序重要：先匹配带"绑定"的长词，否则会被短词吃掉
@@ -59,6 +62,11 @@ DROP_ITEM_PAT = re.compile(r"([\u4e00-\u9fa5A-Za-z0-9·]+?)\s*[*x×]\s*(\d+)")
 
 # 没写"使用后获得"但确实是礼包的（如「妖灵觉醒丹盒：妖灵觉醒丹×30,商城获得」）
 GIFT_BODY_PATS = [r"使用后获得(.+)$", r"打开(.+)$"]
+
+# 「称号卡：仙法小成/ 紫精魂*5」——称号卡用「称号卡：名字」的写法，名字后面
+# 还可能直接跟 / 再接下一件掉落，所以要单独认，不能靠 DROP_ITEM_PAT。
+# 20719「30级紫精礼包」就是这种：真服 2026-11-28 17:28:39 开出 30060 落 pos52。
+TITLE_CARD_SEG_PAT = re.compile(r"^称号卡?\s*[:：]\s*(.+?)\s*$")
 
 # 商城价格兜底表（界面实测：商城 → 绑定专区 / 促销特价）
 PRICE_TABLE = {
@@ -107,9 +115,20 @@ def _drops(desc: str) -> tuple[list[tuple[int, int]], list[str]]:
             body = m.group(1)
             break
     got, missing = [], []
-    for seg in re.split(r"[，,。；;、]", body):
+    # 「/」也要切开：「称号卡：仙法小成/ 紫精魂*5」是一段里塞了两件掉落，
+    # 不切的话 DROP_ITEM_PAT 只会抓到后面的「紫精魂*5」，称号卡被静默吞掉。
+    for seg in re.split(r"[，,。；;、/]", body):
         seg = seg.strip()
         if not seg:
+            continue
+        mc = TITLE_CARD_SEG_PAT.match(seg)
+        if mc:
+            nm = mc.group(1).strip()
+            iid = _resolve(nm)
+            if iid is None:
+                missing.append("称号卡" + nm)
+            else:
+                got.append((iid, 1))
             continue
         m = DROP_ITEM_PAT.search(seg)
         nm, num = (m.group(1), int(m.group(2))) if m else (seg, 1)
