@@ -698,6 +698,43 @@ def bag_view():
     return {p: {"pos": p, "id": v[0], "num": v[1]} for p, v in cur().bag.items()}
 
 
+def bag_kind_rank(kind1):
+    """整理时的「大类型」排序权重：装备(1)整体排最后，其余按 kind1 升序。
+
+    真服 52 件样本的顺序：3,6,7,9,10,11,12,13 …,1（11235/11322/11323/11324 在尾部）。
+    """
+    k = int(kind1)
+    return 999 if k == 1 else k
+
+
+def bag_sort():
+    """背包整理：按 大类型→子类→物品id 稳定升序重排，格位从 0 连续编号。
+
+    ★ 整理请求是 `181`（len 0），不是 `475`。`475` 是「排行榜」，服务端回 `476`
+      （5 个玩家名字 + 各自装备列表，真服 68 次 475 对应 68 次 476，1:1）。
+      以前把 475 当整理、回了 178 全量背包，属误判，已撤。
+    ★ 排序规则取自真服 178（52 件，00:42:56 全量）逐条解析：
+      大类型顺序是 3(消耗) → 6(材料) → 7 → 9(宝石) → 10(药品) → 11(宠物) →
+      12(强化) → 13(藏宝图) → 1(装备，排最后)；同一大类型内再按 kind2 升序、
+      物品 id 升序。**装备整体靠后**，这是最容易写错的一点。
+    ★ 幂等：真服 01:43:52~56 连点 4 次，背包内容与顺序完全一致（476 也一致），
+      说明是稳定排序后重编号，不是洗牌。
+    返回是否真的变了顺序。
+    """
+    if not cur().bag:
+        return False
+    rows = sorted(
+        cur().bag.items(),
+        key=lambda kv: (bag_kind_rank(bag_proto.item(kv[1][0])["kind1"]),
+                        bag_proto.item(kv[1][0])["kind2"],
+                        int(kv[1][0]), -int(kv[1][1])))
+    old_seq = [list(v) for _, v in sorted(cur().bag.items())]
+    new_seq = [list(v) for _, v in rows]
+    changed = old_seq != new_seq
+    cur().bag = {i: v for i, (_, v) in enumerate(rows)}
+    return changed
+
+
 def bag_one_desc(v):
     """给日志用：[id, num] -> 「名字×数量」，空槽写「空」。"""
     if not v:
@@ -4346,9 +4383,20 @@ def builtin_resp(cmd, payload):
         #   00:01:39 点整理   → 181 + 114B(16件，顺序重排)
         # 以前这里回的是 182 空包，客户端等 181 却拿到错号，本地排序函数
         # 拿不到列表直接 abort（signal 6）—— 「点整理闪退」的根因就在这。
+        # ★ 2026-11-28 16:3x：整理＝服务端重排背包再重编号，客户端只按收到的
+        #   181 顺序重画。以前这里直接 build_181(存档原序)，玩家点整理看到的就是
+        #   「一点反应都没有」。现在先 bag_sort() 再回包。
+        _chg = bag_sort()
         body = bag_proto.build_181(bag_view())
-        log("[bag] 181 全量 %d 件 len=%d" % (len(cur().bag), len(body)))
+        log("[bag] 181 全量 %d 件 len=%d %s"
+            % (len(cur().bag), len(body), "已重排" if _chg else "顺序未变"))
+        if _chg:
+            save_state()
         return 181, body, []
+    # 475 不在这里处理：它是「排行榜」请求，服务端应答 `476`
+    # （[05] + 5 个玩家名字 + 各自装备列表，590B，seq=0）。本地暂无 476 模板，
+    # 让它落到下面的「无模板静默丢弃」即可。★ 2026-11-28 16:3x 撤掉了以前
+    # 误判成「整理」的 475→178 分支：那样会在开排行榜时把整包背包塞过去。
     if cmd == 182:
         # 182 = 对该格物品执行默认动作：[格子 1B][数量 1B]，数量 0 = 全部使用。
         # 真服 15:38 实证：182 00 01 用掉 1 张卡、182 00 00 把剩 9 张一次用光。
